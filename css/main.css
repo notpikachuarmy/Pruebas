@@ -1,0 +1,54 @@
+:root {
+  --night: #17122b;
+  --dusk: #2e2552;
+  --mist: #c9bde6;
+  --headphone: #eb2f2d;
+  --paper: #e8e6dc;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--night);
+  overflow: hidden;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+#screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.boot-message {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: var(--paper);
+  background: var(--night);
+  font: 18px/1.5 "Pixelify Sans", "Trebuchet MS", sans-serif;
+  text-align: center;
+}
+
+.boot-message h1 { color: var(--headphone); font-size: 28px; margin: 0 0 0.5rem; }
+.boot-message pre {
+  margin: 0.5rem auto;
+  padding: 0.6rem 1rem;
+  background: var(--dusk);
+  color: var(--mist);
+  border-radius: 4px;
+}
+
+.boot-message[hidden] { display: none; }
