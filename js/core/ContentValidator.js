@@ -58,6 +58,25 @@ export function validateContent(c) {
     for (const e of it.effects ?? []) if (!ITEM_EFFECTS[e.effect]) out.push(`Objeto "${it.id}": efecto "${e.effect}" no existe`);
     for (const m of it.modifiers ?? []) if (!STATS.includes(m.stat)) out.push(`Objeto "${it.id}": estadística "${m.stat}" no existe`);
   }
+  // Progresión
+  const FRAG = /^(visit|miniboss|boss|secret|event:.+)$/;
+  for (const d of Object.values(c.dreams)) {
+    if (typeof d.tier !== 'number') out.push(`Sueño "${d.id}": falta "tier" (orden en la noche)`);
+    for (const f of d.fragments ?? []) {
+      if (!FRAG.test(f.unlock)) out.push(`Sueño "${d.id}": fragmento "${f.id}" con unlock "${f.unlock}" no válido`);
+      if (f.unlock.startsWith('event:') && !c.events[f.unlock.slice(6)]) out.push(`Sueño "${d.id}": fragmento "${f.id}" usa un evento que no existe`);
+    }
+  }
+  const rewards = { dream: new Set(), item: new Set() };
+  for (const a of c.achievements ?? []) {
+    if (a.reward?.dream) { rewards.dream.add(a.reward.dream); if (!c.dreams[a.reward.dream]) out.push(`Logro "${a.id}": sueño "${a.reward.dream}" no existe`); }
+    if (a.reward?.item) { rewards.item.add(a.reward.item); if (!c.items[a.reward.item]) out.push(`Logro "${a.id}": objeto "${a.reward.item}" no existe`); }
+    if (a.condition.type === 'bossDefeated' && !c.enemies[a.condition.boss]) out.push(`Logro "${a.id}": jefe "${a.condition.boss}" no existe`);
+  }
+  const fromEvents = new Set(Object.values(c.events).flatMap((e) => e.choices.filter((ch) => ch.effect === 'giveItem').map((ch) => ch.item)));
+  for (const it of Object.values(c.items)) if (it.locked && !rewards.item.has(it.id) && !fromEvents.has(it.id)) out.push(`Objeto "${it.id}": está bloqueado pero nada lo desbloquea`);
+  for (const d of Object.values(c.dreams)) if (d.locked && !rewards.dream.has(d.id)) out.push(`Sueño "${d.id}": está bloqueado pero ningún logro lo desbloquea`);
+
   for (const s of Object.values(c.synergies ?? {})) {
     for (const r of s.requires) if (!c.items[r]) out.push(`Sinergia "${s.id}": requiere "${r}", que no existe`);
   }

@@ -16,6 +16,7 @@ import { Interactables } from './Interactables.js';
 import { PlayerHistory } from './PlayerHistory.js';
 import { ItemManager } from '../items/ItemManager.js';
 import { RULES } from '../dreams/rules.js';
+import { Lighting } from '../dreams/lighting.js';
 
 const SECRET_HITS = 5;               // impactos para abrir una pared secreta
 const FADE_OUT = 0.14, FADE_IN = 0.2; // transición entre salas
@@ -57,10 +58,8 @@ export class World {
     this.onDeath = null;             // callbacks de GameScene
     this.onExit = null;
 
-    // Modificadores que las reglas del sueño y los enemigos pueden tocar
-    this.mods = { inkLife: 1, enemySpeed: 1, hideUnvisited: false };
-    this.rules = (run.dream.rules ?? []).map((id) => RULES[id]).filter(Boolean);
-    for (const r of this.rules) r.apply?.(this);
+    this.lighting = new Lighting();
+    this._applyDreamRules();
 
     this.playerHistory = new PlayerHistory(120);
     this._queuedBanners = [];
@@ -70,6 +69,27 @@ export class World {
     this.bossIntro = null;
     this.texts = [];                        // textos flotantes ("¡5 minutos!")
     this.examClock = null;
+  }
+
+  /** Modificadores y reglas del sueño actual. */
+  _applyDreamRules() {
+    // Modificadores que las reglas del sueño y los enemigos pueden tocar
+    this.mods = { inkLife: 1, enemySpeed: 1, hideUnvisited: false, light: 0, lightMult: 1 };
+    this.rules = (this.run.dream.rules ?? []).map((id) => RULES[id]).filter(Boolean);
+    for (const r of this.rules) r.apply?.(this);
+  }
+
+  /** Pasa al siguiente sueño de la noche: el jugador y sus objetos se conservan. */
+  changeDream() {
+    this.node = null;
+    this.rooms.clear();
+    this.examClock = null;
+    this.game.audio.setTempo(1);
+    this._applyDreamRules();
+    this.items.onDreamStart();
+    this.enterNode(this.run.floor.start);
+    const p = this.player;
+    p.invulnerable = 1;
   }
 
   // ---------- Avisos ----------
@@ -110,7 +130,10 @@ export class World {
 
   /** Entra en una sala. `fromDir` = dirección en la que se movía el jugador al cruzar la puerta. */
   enterNode(node, fromDir = null) {
-    if (this.node) this.node.state.pickups = this.pickups.serialize();
+    if (this.node) {
+      this.node.state.pickups = this.pickups.serialize();
+      for (const r of this.rules) r.onRoomExit?.(this, this.node);
+    }
     this.projectiles.clear(); this.effects.clear(); this.hazards.clear();
     this.items.clearScheduled();
     this.freezeTime = 0;
@@ -151,6 +174,7 @@ export class World {
     }
     this._configureDoors(node);
     ROOM_TYPES[node.type].onEnter(this, node, first);
+    for (const r of this.rules) r.onRoomEnter?.(this, node, first);
     this.room.setAllDoors(!this.encounter);
     if (!this.encounter) this._music('explore');
     this.game.events.emit('room:enter', { node, first });
@@ -200,8 +224,10 @@ export class World {
 
   onEncounterCleared() {
     const node = this.node;
+    const overtime = !!this.examClock?.overtime;
     node.state.cleared = true;
     this.room.setAllDoors(true);
+    this.items.onRoomClear();
     for (const r of this.rules) r.onEncounterEnd?.(this);
     this._music('explore');
     // Sala limpia = sala segura: fuera proyectiles enemigos y suelo que hace daño
@@ -210,7 +236,7 @@ export class World {
     ROOM_TYPES[node.type].onClear?.(this, node);
     this.game.audio.play('cleared');
     this.game.haptics.play('event');
-    this.game.events.emit('room:cleared', { node });
+    this.game.events.emit('room:cleared', { node, overtime });
   }
 
   /** Un disparo del jugador golpea una pared: ¿era una pared secreta? */
@@ -385,6 +411,7 @@ export class World {
 
     this.projectiles.render(g);
     this.effects.render(g);
+    this.lighting.render(g, this);
     if (this.game.debug) this._renderDebug(g);
     g.restore();
   }

@@ -187,9 +187,10 @@ export const ROOM_TYPES = {
     },
     // La pizarra del aula: el nombre del soñador y, al final, la nota
     renderUI(r, world, ox, oy) {
-      const owner = world.run.dream.owner.name;
+      const { owner, text } = world.run.dream;
       const cleared = world.node.state.cleared;
-      r.text(cleared ? 'Aprobado' : `Nombre: ${owner}. Asignatura pendiente.`, ox + 224, oy + 11,
+      const board = (cleared ? text.bossBoardCleared : text.bossBoard) ?? '';
+      r.text(board.replace('{owner}', owner.name), ox + 224, oy + 11,
         { size: cleared ? 10 : 8, weight: cleared ? 700 : 400, color: cleared ? '#7fd6a0' : '#e8e6dc', align: 'center', shadow: null, alpha: 0.9 });
     },
   },

@@ -106,11 +106,12 @@ export class EnemyManager {
     g.fillStyle = 'rgba(20,14,40,0.3)';
     g.fillRect(Math.round(e.x) - 5, Math.round(e.y) - 1, 10, 2);
     const sq = e.behavior.squash?.(e) ?? 1;
+    const sc = e.def.scale ?? 1;
     g.save();
     g.translate(Math.round(e.x + ox), Math.round(e.y));
-    g.scale(1 / sq, sq);
+    g.scale(sc / sq, sc * sq);
     const anim = e.behavior.anim?.(e) ?? 'idle';
-    sprite.draw(g, anim, e.animTime, 0, 0, { flip: e.def.noFlip ? false : e.facing < 0, flash: e.flash > 0 });
+    sprite.draw(g, anim, e.animTime, 0, 0, { flip: e.def.noFlip ? false : e.facing < 0, flash: e.flash > 0, alpha: e.behavior.alpha?.(e) ?? 1 });
     g.restore();
     if (e.haste > 0) {
       g.fillStyle = '#ffd65c';

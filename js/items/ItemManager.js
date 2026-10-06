@@ -61,6 +61,14 @@ export class ItemManager {
   onHitEnemy(enemy, proj) { for (const e of this._effects) e.fx.onHitEnemy?.(this, enemy, proj, e.params); }
   onHurt() { for (const e of this._effects) e.fx.onHurt?.(this, e.params); }
   onDash() { for (const e of this._effects) e.fx.onDash?.(this, e.params); }
+  onDreamStart() { for (const e of this._effects) e.fx.onDreamStart?.(this, e.params); }
+  onRoomClear() { for (const e of this._effects) e.fx.onRoomClear?.(this, e.params); }
+
+  lightMult() {
+    let m = 1;
+    for (const e of this._effects) if (e.fx.lightMult) m *= e.fx.lightMult(this, e.params);
+    return m;
+  }
 
   preventDeath() {
     for (const e of this._effects) if (e.fx.preventDeath?.(this, e.params)) return true;

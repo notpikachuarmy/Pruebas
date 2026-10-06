@@ -21,7 +21,7 @@ export class RunEndScene extends Scene {
     this.menu = new Menu(game, [
       { type: 'button', label: 'Volver a dormir', action: again },
       { type: 'button', label: 'Menú principal', action: menu },
-    ], { x: 240, y: 200, spacing: 16, width: 170 });
+    ], { x: 240, y: 236, spacing: 14, width: 170 });
   }
 
   enter() { if (this.run.result === 'death') this.game.audio.stopMusic(); }
@@ -36,11 +36,12 @@ export class RunEndScene extends Scene {
     const win = this.run.result === 'win';
     const title = win ? 'Te despiertas tranquilo' : 'El sueño te expulsa';
     const sub = win ? `${this.run.dream.owner.name} sigue durmiendo. Esta vez, mejor.` : `${this.run.dream.owner.name} se revuelve en la cama.`;
-    r.text(title, 240, 70, { size: 20, weight: 700, color: win ? '#ffd65c' : '#eb2f2d', align: 'center' });
-    r.text(sub, 240, 86, { size: 9, color: '#c9bde6', align: 'center' });
+    r.text(title, 240, 62, { size: 20, weight: 700, color: win ? '#ffd65c' : '#eb2f2d', align: 'center' });
+    r.text(sub, 240, 78, { size: 9, color: '#c9bde6', align: 'center' });
     const rows = [
       ['Tiempo', fmt(this.run.time)],
-      ['Salas exploradas', `${this.run.roomsVisited} / ${this.run.floor.nodes.size}`],
+      ['Sueños calmados', `${this.run.dreamsCleared + (this.run.result === 'win' ? 1 : 0)} / ${this.run.night.length}`],
+      ['Salas exploradas', this.run.roomsVisited],
       ['Enemigos disipados', this.run.kills],
       ['Precisión', this.run.shots ? `${Math.round(this.run.accuracy * 100)}%` : '—'],
       ['Lucidez', this.run.lucidity],
@@ -48,9 +49,14 @@ export class RunEndScene extends Scene {
       ['Semilla', this.run.seed],
     ];
     rows.forEach(([k, v], i) => {
-      r.text(k, 170, 112 + i * 14, { size: 9, color: '#9b8fc7' });
-      r.text(String(v), 310, 112 + i * 14, { size: 9, color: '#e8e6dc', align: 'right' });
+      r.text(k, 170, 104 + i * 12, { size: 9, color: '#9b8fc7' });
+      r.text(String(v), 310, 104 + i * 12, { size: 9, color: '#e8e6dc', align: 'right' });
     });
+    const un = this.run.unlockedThisRun;
+    if (un.length) {
+      r.text('Esta noche has desbloqueado:', 240, 190, { size: 8, color: '#ffd65c', align: 'center' });
+      un.slice(-3).forEach((l, i) => r.text(l, 240, 200 + i * 9, { size: 8, color: '#e8e6dc', align: 'center' }));
+    }
     if (this.time > 0.6) this.menu.render(r);
   }
 }

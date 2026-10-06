@@ -4,6 +4,7 @@ export default {
   name: 'Disco Rayado',
   rarity: 'rara',          // común | rara | legendaria
   pools: ['general'],
+  locked: true,          // se desbloquea con un logro (data/progression/unlocks.js)
   tags: ['reflejo', 'repeticion'],
   description: 'A veces una onda se raya: llega a la mitad, da media vuelta y vuelve atravesándolo todo.',
   modifiers: [],

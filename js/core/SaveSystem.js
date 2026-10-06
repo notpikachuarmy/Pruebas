@@ -20,7 +20,9 @@ export function defaultSave() {
         runs: 0, wins: 0, deaths: 0,
         kills: 0, shots: 0, hits: 0,
         damageTaken: 0, playTime: 0, lucidity: 0,
+        bossesDefeated: 0, nights: 0, shopSpent: 0, lampsLit: 0, itemsTaken: 0,
       },
+      dreamers: {},            // { idSueño: [idFragmento, ...] }
       unlocks: { dreams: ['examen'], items: [], characters: ['oyente'] },
       discovered: { enemies: [], bosses: [], items: [] },
       achievements: {},
@@ -45,7 +47,10 @@ function mergeDefaults(def, loaded) {
 }
 
 // Migraciones entre versiones de guardado: { [versionOrigen]: (data) => data }
-const MIGRATIONS = {};
+const MIGRATIONS = {
+  // v1 → v2 (Fase 6): los campos nuevos los rellena mergeDefaults; solo sube la versión.
+  1: (d) => ({ ...d, version: 2 }),
+};
 
 function refill(target, source) {
   if (target === source) return;

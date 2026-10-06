@@ -16,7 +16,7 @@ export default {
       for (const o of world.enemies.list) if (o !== e && !o.dead) o.haste = p.hasteTime;
       world.effects.burst(e.x, e.y - 8, 14, '#ffd65c', 80, 0.5);
       world.game.audio.play('waveStart', { pitch: 1.8, volume: 0.7 });
-      world.floatText(e.x, e.y - 22, '¡5 minutos!');
+      world.floatText(e.x, e.y - 22, p.text ?? '¡5 minutos!');
     }
   },
 

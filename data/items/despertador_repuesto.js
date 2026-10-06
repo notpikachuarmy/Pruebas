@@ -4,6 +4,7 @@ export default {
   name: 'Despertador de Repuesto',
   rarity: 'rara',          // común | rara | legendaria
   pools: ['examen', 'general', 'secret'],
+  locked: true,          // se desbloquea con un logro (data/progression/unlocks.js)
   tags: ['vida'],
   description: 'Una vez por run, si te expulsan, vuelves con un corazón. «Cinco minutos más».',
   modifiers: [],

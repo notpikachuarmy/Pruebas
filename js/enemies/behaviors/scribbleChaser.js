@@ -50,7 +50,7 @@ export default {
         e.vx = e.data.dirX * p.lungeSpeed;
         e.vy = e.data.dirY * p.lungeSpeed;
         e.data.inkTimer -= dt;
-        if (e.data.inkTimer <= 0) {
+        if (p.inkType !== null && e.data.inkTimer <= 0) {
           e.data.inkTimer = p.inkEvery;
           hazards.spawn(p.inkType ?? 'ink', e.x, e.y - 1, p.inkRadius, p.inkLife);
         }

@@ -6,6 +6,8 @@
  *  onEncounterEnd(world)           al terminarlo
  *  update(world, dt)               cada paso
  *  renderUI(r, world)              información en pantalla
+ *  onRoomEnter(world, node, first) al entrar en una sala
+ *  onRoomExit(world, node)         al salir de una sala
  */
 import { VIEW_W } from '../core/config.js';
 
@@ -59,6 +61,34 @@ export const RULES = {
       const left = Math.max(0, c.limit - c.t);
       const txt = c.overtime ? 'Tiempo extra' : `${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
       r.text(txt, VIEW_W / 2, 23, { size: 7, color: c.overtime || left < 5 ? '#eb2f2d' : '#9b8fc7', align: 'center' });
+    },
+  },
+
+  /** La casa está a oscuras: solo ves alrededor tuyo, y las lámparas encendidas iluminan la sala. */
+  penumbra: {
+    name: 'Penumbra',
+    apply(world) { world.mods.light = world.run.dream.ruleConfig.penumbra.radius; },
+    onRoomEnter(world, node, first) {
+      if (!first || node.type === 'boss') return;
+      const [a, b] = world.run.dream.ruleConfig.penumbra.lamps;
+      const n = world.rngLoot.int(a, b);
+      for (let i = 0; i < n; i++) {
+        const pt = world.room.randomFloorPoint(world.rngLoot, world.player.x, world.player.y, 70);
+        world.interactables.add({ kind: 'lamp', x: pt.x, y: pt.y, lit: false });
+      }
+    },
+  },
+
+  /** En esta casa nada te espera: lo que dejes en el suelo desaparece al salir de la sala. */
+  nadieEspera: {
+    name: 'Nadie espera',
+    onRoomExit(world, node) {
+      if (!node.state.pickups.length) return;
+      node.state.pickups = [];
+      if (!world.run.flags.nadieEsperaAviso) {
+        world.run.flags.nadieEsperaAviso = true;
+        world.toast('Lo que dejaste atrás se ha desvanecido');
+      }
     },
   },
 };

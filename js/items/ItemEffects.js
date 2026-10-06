@@ -9,6 +9,8 @@
  *   onHurt(ctx, p)                    al recibir daño
  *   preventDeath(ctx, p)              devuelve true si evita la expulsión
  *   onDash(ctx, p)                    al usar el Silencio
+ *   onRoomClear(ctx, p)               al limpiar una sala
+ *   lightMult(ctx, p)                 multiplicador del radio de luz (sueños oscuros)
  * ctx = ItemManager (ctx.world, ctx.has(id), ctx.hasSynergy(id), ctx.state(itemId)).
  * Las sinergias se resuelven dentro del efecto al que afectan (ctx.hasSynergy).
  */
@@ -71,6 +73,8 @@ export const ITEM_EFFECTS = {
       run.flags.mapRevealed = true;
       if (p.secret && run.floor.secret) run.floor.secret.state.discovered = true;
     },
+    // También en cada sueño nuevo de la noche
+    onDreamStart(ctx, p) { this.onAdd(ctx, p); },
   },
 
   randomDamage: {
@@ -145,6 +149,28 @@ export const ITEM_EFFECTS = {
   markOnHit: {
     onHitEnemy(ctx, enemy, proj, p) { enemy.marked = p.time; },
     damageMult(ctx, enemy, proj, p) { return enemy.marked > 0 ? p.mult : 1; },
+  },
+
+  light: {
+    lightMult(ctx, p) { return p.mult; },
+  },
+
+  fullHpDamage: {
+    damageMult(ctx, enemy, proj, p) {
+      const pl = ctx.world.player;
+      return pl.hp >= pl.stats.get('maxHp') ? p.mult : 1;
+    },
+  },
+
+  clearHeal: {
+    onRoomClear(ctx, p) {
+      const w = ctx.world;
+      if (!ctx.hasSynergy('hogar') && !ctx.rng.chance(p.chance)) return;
+      if (w.damage.healPlayer(p.amount)) {
+        w.game.audio.play('heal');
+        w.effects.burst(w.player.x, w.player.y - 10, 8, '#eb2f2d', 50, 0.4);
+      }
+    },
   },
 
   ring: {

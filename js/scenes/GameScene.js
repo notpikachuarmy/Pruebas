@@ -4,6 +4,7 @@ import { World } from '../world/World.js';
 import { HUD } from '../ui/HUD.js';
 import { PauseScene } from './PauseScene.js';
 import { RunEndScene } from './RunEndScene.js';
+import { DreamTransitionScene } from './DreamTransitionScene.js';
 import { ROOM_OFFSET_X, ROOM_OFFSET_Y } from '../core/config.js';
 
 /**
@@ -16,7 +17,7 @@ export class GameScene extends Scene {
     this.run = new Run(game, { seed: seed ?? urlSeed ?? undefined });
     this.world = new World(game, this.run);
     this.world.onDeath = () => { this.endTimer = 1.6; };
-    this.world.onExit = () => this.finish('win');
+    this.world.onExit = () => this._dreamCleared();
     this.world.enterNode(this.run.floor.start);
     this.hud = new HUD(game);
     this.introTime = 2.5;
@@ -26,6 +27,8 @@ export class GameScene extends Scene {
 
   enter() {
     const ev = this.game.events, run = this.run;
+    this.game.activeRun = run;
+    this.game.activeWorld = this.world;
     this._unsubs.push(
       ev.on('enemy:killed', () => run.kills++),
       ev.on('player:shot', () => run.shots++),
@@ -35,10 +38,29 @@ export class GameScene extends Scene {
     this._onBlur = () => { if (this.game.scene === this) this._pause(); };
     window.addEventListener('blur', this._onBlur);
     ev.emit('run:start', { run });
+    ev.emit('dream:start', { dream: run.dream });
     this.game.audio.playMusic(run.dream.music.explore);
   }
 
+  /** El jugador apaga el despertador: siguiente sueño de la noche, o fin si era el último. */
+  _dreamCleared() {
+    const run = this.run;
+    this.game.events.emit('dream:cleared', { dream: run.dream });
+    if (run.isLastDream) { this.finish('win'); return; }
+    const next = this.game.content.dreams[run.night[run.dreamIndex + 1]];
+    this.game.pushScene(new DreamTransitionScene(this.game, run.dream, next, () => this.startNextDream()));
+  }
+
+  startNextDream() {
+    this.run.nextDream();
+    this.world.changeDream();
+    this.introTime = 2.5;
+    this.game.events.emit('dream:start', { dream: this.run.dream });
+  }
+
   exit() {
+    this.game.activeRun = null;
+    this.game.activeWorld = null;
     for (const off of this._unsubs) off();
     window.removeEventListener('blur', this._onBlur);
   }

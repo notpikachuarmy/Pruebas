@@ -34,10 +34,20 @@ export class DamageSystem {
       this.world.shake(7, 0.6);
       game.haptics.play('bossDown');
       game.events.emit('boss:defeated', { def: enemy.def });
+      // Lo que invocó el jefe se desvanece con él
+      for (const o of [...this.world.enemies.list]) if (o !== enemy && !o.dead) this.killEnemy(o);
     }
     effects.burst(enemy.x, enemy.y - enemy.def.bodyHeight, 14, '#25307a', 90, 0.5, 2);
     effects.burst(enemy.x, enemy.y - enemy.def.bodyHeight, 6, '#e8e6dc', 60, 0.35);
     pickups.dropFrom(enemy);
+    // Enemigos que se dividen al morir (Bola de Polvo)
+    const split = enemy.def.splitInto;
+    if (split) {
+      for (let i = 0; i < split.count; i++) {
+        const c = this.world.enemies.spawn(split.id, enemy.x + (i ? 6 : -6), enemy.y, { quiet: true });
+        if (c) { c.spawnTimer = 0.15; c.kx = (i ? 1 : -1) * 90; }
+      }
+    }
     game.audio.play('killEnemy');
     game.haptics.play('kill');
     this.world.shake(1.5, 0.08);

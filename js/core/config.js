@@ -9,7 +9,7 @@ export const ROOM_OFFSET_Y = 24;
 export const FIXED_DT = 1 / 60;     // la simulación siempre avanza a 60 pasos/s
 export const MAX_FRAME_DT = 0.25;   // evita la "espiral de la muerte" tras pestaña inactiva
 export const SAVE_KEY = 'suenos.save';
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 export const UI_FONT = '"Pixelify Sans", "Trebuchet MS", sans-serif';
 
 export const DEBUG = new URLSearchParams(location.search).has('debug');

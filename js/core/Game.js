@@ -8,6 +8,8 @@ import { Assets } from './Assets.js';
 import { EventBus } from './EventBus.js';
 import { Toasts } from '../ui/Toasts.js';
 import { MetaStats } from '../progression/MetaStats.js';
+import { AchievementSystem } from '../progression/AchievementSystem.js';
+import { DreamerRegistry } from '../progression/DreamerRegistry.js';
 import { CONTENT } from '../../data/registry.js';
 
 /**
@@ -31,6 +33,10 @@ export class Game {
     this.assets = new Assets();
     this.toasts = new Toasts(this);
     this.meta = new MetaStats(this);
+    this.achievements = new AchievementSystem(this);
+    this.dreamers = new DreamerRegistry(this);
+    this.activeRun = null;      // los asigna GameScene mientras hay una partida
+    this.activeWorld = null;
 
     this.scenes = [];
     this.time = 0;

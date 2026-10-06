@@ -2,6 +2,7 @@
 // Diseño completo en docs/GAME_DESIGN.md. Lo que no se usa aún está marcado con su fase.
 export default {
   id: 'examen',
+  tier: 1,
   name: 'El Examen Infinito',
   owner: {
     name: 'Íñigo',
@@ -66,5 +67,17 @@ export default {
     cleared: 'Examen entregado',
     exitPrompt: 'Apagar el despertador',
     bossDoor: 'Examen final',
+    bossBoard: 'Nombre: {owner}. Asignatura pendiente.',
+    bossBoardCleared: 'Aprobado',
+    transition: 'Íñigo deja de dar vueltas en la cama.',
   },
+
+  // Registro de soñadores: fragmentos que se descubren jugando
+  fragments: [
+    { id: 'visita', unlock: 'visit', text: 'Íñigo lleva corbata en el sueño. Nunca la llevó a un examen.' },
+    { id: 'pupitre', unlock: 'event:pupitre_grabado', text: '«Í + ¿?» Nunca terminó de grabar el segundo nombre.' },
+    { id: 'fotocopiadora', unlock: 'miniboss', text: 'Todos sus compañeros entregaron el mismo examen. Él no se atrevió a copiar.' },
+    { id: 'secreto', unlock: 'secret', text: 'En un cajón escondido: un boletín de notas firmado por su padre. Profesor de instituto.' },
+    { id: 'profesora', unlock: 'boss', text: 'La letra de la nota final es la de su padre. Pone «Aprobado».' },
+  ],
 };

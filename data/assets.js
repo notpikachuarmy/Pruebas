@@ -14,6 +14,14 @@ export default {
     copia: 'assets/enemies/copia.png',
     fotocopiadora: 'assets/bosses/fotocopiadora.png',
     profesora: 'assets/bosses/profesora.png',
+    tiles_casa: 'assets/rooms/tiles_casa.png',
+    polilla: 'assets/enemies/polilla.png',
+    sombra: 'assets/enemies/sombra.png',
+    telefono: 'assets/enemies/telefono.png',
+    mecedora: 'assets/enemies/mecedora.png',
+    polvo: 'assets/enemies/polvo.png',
+    armario: 'assets/bosses/armario.png',
+    mesa_puesta: 'assets/bosses/mesa_puesta.png',
   },
 
   sprites: {
@@ -79,6 +87,41 @@ export default {
       animations: { idle: { frames: [0, 1], fps: 2 } },
       placeholder: { color: '#2e2c36', w: 36, h: 44 },
     },
+    enemy_polilla: {
+      image: 'polilla', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 12 } },
+      placeholder: { color: '#c4b696', w: 12, h: 12 },
+    },
+    enemy_sombra: {
+      image: 'sombra', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#28243e', w: 12, h: 12 },
+    },
+    enemy_telefono: {
+      image: 'telefono', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#b04034', w: 12, h: 12 },
+    },
+    enemy_mecedora: {
+      image: 'mecedora', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#7e5432', w: 12, h: 12 },
+    },
+    enemy_polvo: {
+      image: 'polvo', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#96928c', w: 12, h: 12 },
+    },
+    boss_armario: {
+      image: 'armario', frameWidth: 32, frameHeight: 32, anchor: { x: 16, y: 31 },
+      animations: { idle: { frames: [0, 1], fps: 2 }, jam: { frames: [2], fps: 1 } },
+      placeholder: { color: '#64422c', w: 26, h: 30 },
+    },
+    boss_mesa_puesta: {
+      image: 'mesa_puesta', frameWidth: 48, frameHeight: 40, anchor: { x: 24, y: 39 },
+      animations: { idle: { frames: [0, 1], fps: 3 } },
+      placeholder: { color: '#ece8da', w: 44, h: 30 },
+    },
   },
 
   tilesets: {
@@ -90,6 +133,15 @@ export default {
       wall: 2,
       wallFace: 3,         // pared con suelo debajo (cara visible)
       solids: { D: 4, T: 5, L: 6 }, // obstáculos: pupitre, taquilla, pila de libros
+    },
+    tiles_casa: {
+      image: 'tiles_casa',
+      size: 16,
+      floor: 0,
+      floorMargin: 0,
+      wall: 2,
+      wallFace: 3,
+      solids: { D: 4, T: 7, L: 6, M: 5 }, // sofá, cómoda, planta, mesa (mismos símbolos que el examen)
     },
   },
 };

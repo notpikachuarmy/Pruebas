@@ -68,6 +68,7 @@ export const KINDS = {
       const p = PRODUCTS[o.product];
       if (world.run.lucidity < o.price || !p.canApply(world, o)) { world.game.audio.play('menuBack'); return; }
       world.run.lucidity -= o.price;
+      world.game.events.emit('shop:buy', { price: o.price, product: o.product });
       p.apply(world, o);
       o.sold = true;
       world.effects.burst(o.x, o.y - 8, 10, '#c9bde6', 50, 0.4);
@@ -123,6 +124,12 @@ export const KINDS = {
         g.fillStyle = '#2e3a6e'; g.fillRect(x - 4, y - 18, 8, 8);
         g.fillStyle = '#e1c4a4'; g.fillRect(x - 3, y - 24, 6, 6);
         g.fillStyle = '#4a3229'; g.fillRect(x - 3, y - 25, 6, 2);
+      } else if (def.prop === 'phone') {
+        g.fillStyle = '#b04034'; g.fillRect(x - 5, y - 15, 10, 5);
+        g.fillStyle = Math.floor(world.time * 2) % 2 ? '#eb2f2d' : '#5a1a14'; g.fillRect(x + 2, y - 14, 2, 2);
+      } else if (def.prop === 'album') {
+        g.fillStyle = '#4a749c'; g.fillRect(x - 6, y - 14, 12, 4);
+        g.fillStyle = '#f0ecd6'; g.fillRect(x - 5, y - 15, 4, 3); g.fillRect(x + 1, y - 15, 4, 3);
       } else if (def.prop === 'papers') {
         g.fillStyle = '#f0ecd6'; g.fillRect(x - 6, y - 13, 9, 4); g.fillRect(x - 4, y - 15, 9, 3);
         g.fillStyle = '#d6403a'; g.fillRect(x - 2, y - 14, 3, 1);
@@ -130,6 +137,25 @@ export const KINDS = {
         g.fillStyle = '#4b2f1c'; g.fillRect(x - 3, y - 9, 6, 1); g.fillRect(x - 1, y - 10, 1, 3);
       }
       if (!o.done && Math.floor(world.time * 2) % 2) { g.fillStyle = '#ffd65c'; g.fillRect(x - 1, y - 32, 2, 4); g.fillRect(x - 1, y - 27, 2, 1); }
+    },
+  },
+
+  // Lámpara de pie (regla Penumbra): ilumina la sala al encenderla
+  lamp: {
+    prompt: (o) => (o.lit ? null : 'Encender la lámpara'),
+    interact(o, world) {
+      o.lit = true;
+      world.game.audio.play('pickup', { pitch: 0.6 });
+      world.effects.burst(o.x, o.y - 18, 12, '#ffb347', 50, 0.5);
+      world.game.events.emit('lamp:lit', { lamp: o });
+    },
+    render(g, o, world) {
+      const x = Math.round(o.x), y = Math.round(o.y);
+      g.fillStyle = 'rgba(20,14,40,0.3)'; g.fillRect(x - 5, y - 1, 10, 3);
+      g.fillStyle = '#3a2a1c'; g.fillRect(x - 4, y - 2, 8, 2); g.fillRect(x - 1, y - 18, 2, 16);
+      g.fillStyle = o.lit ? '#ffd38a' : '#8a7a62';
+      g.fillRect(x - 6, y - 24, 12, 7);
+      if (o.lit) { g.fillStyle = '#fff6d6'; g.fillRect(x - 2, y - 18, 4, 2); }
     },
   },
 
