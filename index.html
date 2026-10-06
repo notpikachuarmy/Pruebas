@@ -30,4 +30,36 @@
   </script>
   <script type="module" src="js/main.js"></script>
 </body>
+</html><!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sueños</title>
+  <link rel="icon" type="image/png" href="assets/ui/icon.png">
+  <!-- Fuente opcional. Si no carga (sin conexión) se usa la fuente de respaldo. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <main id="app">
+    <canvas id="screen" tabindex="0" aria-label="Sueños, roguelike de acción"></canvas>
+    <div id="boot-message" class="boot-message" hidden></div>
+  </main>
+
+  <script>
+    // Los módulos ES no funcionan abriendo el archivo con doble clic (file://).
+    if (location.protocol === 'file:') {
+      const box = document.getElementById('boot-message');
+      box.hidden = false;
+      box.innerHTML = '<h1>Sueños necesita un servidor local</h1>' +
+        '<p>Abre una terminal en la carpeta del juego y ejecuta:</p>' +
+        '<pre>python -m http.server 8000</pre>' +
+        '<p>Después visita <b>http://localhost:8000</b>. En GitHub Pages funciona sin hacer nada.</p>';
+    }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</body>
 </html>
