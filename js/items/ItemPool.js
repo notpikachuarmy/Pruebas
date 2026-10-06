@@ -4,6 +4,13 @@
  */
 const RARITY_WEIGHT = { común: 10, rara: 4, legendaria: 1 };
 
+/**
+ * Pools especiales:
+ *  'boss'     objetos de jefe
+ *  'secret'   salas secretas
+ *  'minijefe' premio del mini-jefe: objetos sencillos y de apoyo (un pool pequeño a propósito)
+ */
+
 export function drawItem(world, pools, { rng = world.rngLoot, boostRare = false } = {}) {
   const { run, game } = world;
   const unlocked = game.save.data.meta.unlocks.items;

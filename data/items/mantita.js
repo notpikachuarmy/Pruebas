@@ -3,7 +3,7 @@ export default {
   id: 'mantita',
   name: 'Mantita de Ganchillo',
   rarity: 'común',
-  pools: ['casa', 'general'],
+  pools: ['casa', 'general', 'minijefe'],
   tags: ['vida', 'casa'],
   description: 'Tras recibir un golpe, eres invulnerable durante más tiempo.',
   modifiers: [{ stat: 'hurtInvulnerability', mult: 1.6 }],

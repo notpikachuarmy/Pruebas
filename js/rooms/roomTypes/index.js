@@ -92,7 +92,9 @@ export const ROOM_TYPES = {
     },
     onClear(world) {
       const c = center(world);
-      world.interactables.add({ kind: 'chest', x: c.x, y: c.y + 30, lucidity: [4, 6], extra: [{ type: 'heart', chance: 1 }] });
+      world.interactables.add({ kind: 'chest', x: c.x - 24, y: c.y + 30, lucidity: [4, 6], extra: [{ type: 'heart', chance: 1 }] });
+      // Premio extra: un objeto de un pool pequeño y modesto
+      placeItem(world, c.x + 24, c.y + 30, ['minijefe']);
     },
   },
 

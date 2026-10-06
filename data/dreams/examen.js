@@ -47,7 +47,7 @@ export default {
       { type: 'healing', chance: 0.6, minDepth: 2 },
       { type: 'event', chance: 0.8, minDepth: 1 },
     ],
-    miniboss: true,              // la sala que da al jefe guarda al mini-jefe
+    miniboss: 0.4,               // probabilidad de que la antesala del jefe tenga mini-jefe
     challengeChance: 0.5,
     secret: true,
     budget: { base: 2, perDepth: 0.9, wavesEvery: 2, maxWaves: 3, maxPerWave: 8, delayBetweenWaves: 1.1 },

@@ -188,9 +188,10 @@ export class Projectiles {
   }
 
   /** Borra proyectiles de un equipo dentro de un radio (la Goma Gastada, Tipp-Ex). Devuelve cuántos. */
-  eraseInRadius(x, y, r, team = 'player') {
+  eraseInRadius(x, y, r, team = 'player', max = Infinity) {
     let n = 0;
     for (const p of this.pool.active) {
+      if (n >= max) break;
       if (!p.active || p.team !== team) continue;
       if ((p.x - x) ** 2 + (p.y - y) ** 2 < r * r) {
         p.active = false; n++;

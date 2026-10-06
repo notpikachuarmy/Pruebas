@@ -12,14 +12,17 @@ export default {
   sprite: 'boss_profesora',
   noFlip: true,
   radius: 14, bodyRadius: 16, bodyHeight: 24,
-  hp: 130, speed: 20, contactDamage: 1, mass: 999,
+  hp: 115, speed: 20, contactDamage: 1, mass: 999,
   behavior: 'professor',
+  // Ajustado tras las pruebas: más tiempo entre ataques, huecos más anchos y sin invocaciones
   params: {
-    slide: 22,
-    rowEvery: [2.2, 3.2, 1.8], rowSpeed: [58, 50, 72],
-    aimEvery: 2.8,
-    markEvery: [0, 2.4, 1.7], marks: 3, markDelay: 1.0,
-    arenaMargin: 48,
+    slide: 20,
+    rowEvery: [3.0, 3.8, 2.6], rowSpeed: [55, 50, 62], rowGap: 4,
+    aimEvery: 3.6,
+    markEvery: [0, 3.2, 2.5], marks: [0, 2, 3], markDelay: 1.15,
+    arenaMargin: 36,
+    phaseSpeedup: 0.85,        // en la fase 3 los ataques salen un 15 % más seguidos
+    summons: [],               // antes invocaba Gomas en la fase 2
   },
   drops: [{ type: 'lucidity', chance: 1, amount: [10, 14] }],
 };

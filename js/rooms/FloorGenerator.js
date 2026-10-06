@@ -131,8 +131,10 @@ export function generateFloor(rng, dream, rooms) {
     }
     if (required.some((s) => ![...nodes.values()].some((n) => n.type === s.type))) continue;
 
-    // Antesala del jefe: la sala que da acceso a él guarda al mini-jefe
-    if (cfg.miniboss) {
+    // Antesala del jefe: a veces la sala que da acceso a él guarda al mini-jefe.
+    // cfg.miniboss puede ser true (siempre) o una probabilidad (0–1).
+    const minibossChance = cfg.miniboss === true ? 1 : (cfg.miniboss || 0);
+    if (minibossChance > 0 && rng.chance(minibossChance)) {
       const dir = Object.keys(boss.doors)[0];
       const guard = nodes.get(key(boss.x + DIRS[dir].dx, boss.y + DIRS[dir].dy));
       if (guard.type !== 'combat') continue;

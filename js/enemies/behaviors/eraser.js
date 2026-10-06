@@ -5,7 +5,7 @@ import { toPlayer, steer, nearestAlly } from './helpers.js';
  * y cada cierto tiempo "borra" el daño de los aliados cercanos.
  */
 export default {
-  init(e) { e.data.heal = 1.5; e.data.pulse = 0; e.setState('guard'); },
+  init(e) { e.data.heal = 1.5; e.data.pulse = 0; e.data.charges = e.def.params.charges ?? 3; e.data.recharge = 0; e.setState('guard'); },
 
   update(e, world, dt) {
     const p = e.def.params;
@@ -20,9 +20,19 @@ export default {
       steer(e, world.player.x, world.player.y, e.def.speed * 0.7);
     }
     e.data.pulse = Math.max(0, e.data.pulse - dt);
-    if (world.projectiles.eraseInRadius(e.x, e.y - 5, p.eraseRadius, 'player') > 0) {
-      e.data.pulse = 0.2;
-      world.game.audio.play('wallHit', { pitch: 0.6 });
+    // El escudo tiene cargas: borra unas pocas ondas y luego necesita recargar
+    const max = p.charges ?? 3;
+    if (e.data.charges < max) {
+      e.data.recharge += dt;
+      if (e.data.recharge >= p.rechargeTime) { e.data.recharge = 0; e.data.charges++; }
+    }
+    if (e.data.charges > 0) {
+      const n = world.projectiles.eraseInRadius(e.x, e.y - 5, p.eraseRadius, 'player', e.data.charges);
+      if (n > 0) {
+        e.data.charges -= n;
+        e.data.pulse = 0.2;
+        world.game.audio.play('wallHit', { pitch: 0.6 });
+      }
     }
     e.data.heal -= dt;
     if (e.data.heal <= 0) {
@@ -38,6 +48,7 @@ export default {
   },
 
   renderExtra(g, e) {
+    if (e.data.charges <= 0) return;   // sin cargas: sin escudo visible (momento de atacar)
     if (e.data.pulse <= 0 && Math.floor(e.animTime * 2) % 2) return;
     g.globalAlpha = e.data.pulse > 0 ? 0.6 : 0.18;
     g.strokeStyle = '#ffffff';

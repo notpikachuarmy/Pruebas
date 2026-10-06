@@ -3,7 +3,7 @@ export default {
   id: 'galletas',
   name: 'Lata de Galletas',
   rarity: 'común',
-  pools: ['casa', 'general'],
+  pools: ['casa', 'general', 'minijefe'],
   tags: ['vida', 'casa'],
   description: 'Al limpiar una sala, a veces recuperas medio corazón.',
   modifiers: [],

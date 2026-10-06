@@ -44,7 +44,7 @@ export default {
       { type: 'event', chance: 0.9, minDepth: 1 },
       { type: 'healing', chance: 0.5, minDepth: 2 },
     ],
-    miniboss: true,
+    miniboss: 0.4,               // probabilidad de que la antesala del jefe tenga mini-jefe
     challengeChance: 0.5,
     secret: true,
     budget: { base: 3, perDepth: 1, wavesEvery: 2, maxWaves: 3, maxPerWave: 9, delayBetweenWaves: 1.3 },

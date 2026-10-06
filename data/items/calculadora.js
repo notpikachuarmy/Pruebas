@@ -3,7 +3,7 @@ export default {
   id: 'calculadora',
   name: 'Calculadora Sin Pilas',
   rarity: 'común',          // común | rara | legendaria
-  pools: ['examen', 'general'],
+  pools: ['examen', 'general', 'minijefe'],
   tags: ['azar'],
   description: 'Cada onda hace entre la mitad y el triple de daño. Nunca sabes cuánto.',
   modifiers: [],
