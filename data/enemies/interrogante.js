@@ -8,6 +8,7 @@ export default {
   minDepth: 1,
   description: 'Flota a distancia y lanza preguntas que manchan el suelo al caer. Si le apuntas, se esconde.',
   theme: 'Las preguntas que Íñigo no sabe responder: huyen en cuanto las miras de frente.',
+  tags: ['tinta'],
   sprite: 'enemy_interrogante',
   radius: 4, bodyRadius: 6, bodyHeight: 8,
   hp: 3, speed: 34, contactDamage: 1, mass: 0.7,

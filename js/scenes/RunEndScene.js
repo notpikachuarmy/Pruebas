@@ -5,8 +5,9 @@ const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(
 
 /** Resultado de la run: despertar tranquilo (victoria) o expulsión (muerte). */
 export class RunEndScene extends Scene {
-  constructor(game, run) {
+  constructor(game, run, world = null) {
     super(game);
+    this.itemCount = world ? `${world.items.owned.length} (${world.items.synergies.length} sinergias)` : '—';
     this.overlay = true;
     this.run = run;
     const again = async () => {
@@ -43,6 +44,7 @@ export class RunEndScene extends Scene {
       ['Enemigos disipados', this.run.kills],
       ['Precisión', this.run.shots ? `${Math.round(this.run.accuracy * 100)}%` : '—'],
       ['Lucidez', this.run.lucidity],
+      ['Objetos', this.itemCount],
       ['Semilla', this.run.seed],
     ];
     rows.forEach(([k, v], i) => {

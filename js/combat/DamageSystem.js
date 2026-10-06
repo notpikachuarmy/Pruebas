@@ -5,9 +5,10 @@
 export class DamageSystem {
   constructor(world) { this.world = world; }
 
-  hitEnemy(enemy, amount, dirX, dirY, knockback) {
-    const { game, effects } = this.world;
+  hitEnemy(enemy, amount, dirX, dirY, knockback, proj = null) {
+    const { game, effects, items } = this.world;
     amount *= enemy.behavior.damageMult?.(enemy) ?? 1;
+    amount *= items.damageMult(enemy, proj);
     enemy.hp -= amount;
     enemy.flash = 0.08;
     const l = Math.hypot(dirX, dirY) || 1;
@@ -16,6 +17,7 @@ export class DamageSystem {
     enemy.ky += (dirY / l) * kb;
     game.events.emit('player:hitEnemy', { enemy, amount });
     game.audio.play('hitEnemy', { pitch: 0.9 + Math.random() * 0.2 });
+    items.onHitEnemy(enemy, proj ?? {});
     if (enemy.hp <= 0) this.killEnemy(enemy);
     else effects.burst(enemy.x, enemy.y - enemy.def.bodyHeight, 3, '#3d4ca8', 40, 0.3);
   }
@@ -57,7 +59,8 @@ export class DamageSystem {
     this.world.shake(4, 0.2);
     this.world.hitstop(0.07);
     game.events.emit('player:damaged', { amount });
-    if (player.hp <= 0) this.world.onPlayerDeath();
+    if (player.hp <= 0 && !this.world.items.preventDeath()) this.world.onPlayerDeath();
+    else this.world.items.onHurt();
     return true;
   }
 

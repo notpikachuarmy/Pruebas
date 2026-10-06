@@ -29,9 +29,12 @@ export class EnemyManager {
   update(dt) {
     const { room, player, damage } = this.world;
 
+    const frozen = this.world.freezeTime > 0;
     for (const e of this.list) {
-      e.animTime += dt;
       e.flash = Math.max(0, e.flash - dt);
+      e.marked = Math.max(0, e.marked - dt);
+      if (frozen && !e.spawning) continue;   // Cinta de Casete: tiempo enemigo detenido
+      e.animTime += dt;
       e.haste = Math.max(0, e.haste - dt);
       if (e.spawning) { e.spawnTimer -= dt; continue; }
       e.stateTime += dt;
@@ -114,6 +117,8 @@ export class EnemyManager {
       g.fillRect(Math.round(e.x) + 5, Math.round(e.y) - 16 + Math.round(Math.sin(e.animTime * 20)), 2, 2);
     }
     e.behavior.renderExtra?.(g, e, this.world);
+    if (e.marked > 0) { g.fillStyle = '#ffd65c'; g.fillRect(Math.round(e.x) - 2, Math.round(e.y) - (e.def.bodyHeight * 2 + 10), 4, 4); }
+    if (this.world.freezeTime > 0) { g.fillStyle = '#8fd3ff'; g.fillRect(Math.round(e.x) - 3, Math.round(e.y) - 3, 2, 4); g.fillRect(Math.round(e.x) + 1, Math.round(e.y) - 3, 2, 4); }
     if (e.state === 'windup' && !e.def.boss) {
       // Señal de aviso sobre la cabeza
       g.fillStyle = '#d6403a';

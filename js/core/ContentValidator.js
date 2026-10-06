@@ -3,6 +3,7 @@ import { ROOM_TYPES } from '../rooms/roomTypes/index.js';
 import { ROOM_COLS, ROOM_ROWS } from './config.js';
 import { RULES } from '../dreams/rules.js';
 import { EVENT_EFFECTS } from '../world/EventEffects.js';
+import { ITEM_EFFECTS } from '../items/ItemEffects.js';
 
 // Celdas que deben quedar libres delante de cada puerta (fila, columna)
 const DOOR_CLEARANCE = [];
@@ -48,6 +49,17 @@ export function validateContent(c) {
   }
   for (const ev of Object.values(c.events ?? {})) {
     for (const ch of ev.choices) if (ch.effect && !EVENT_EFFECTS[ch.effect]) out.push(`Evento "${ev.id}": efecto "${ch.effect}" no existe`);
+  }
+  const STATS = ['maxHp', 'speed', 'damage', 'fireRate', 'shotSpeed', 'range', 'shotSize', 'knockback', 'dashSpeed', 'dashDuration', 'dashCooldown', 'hurtInvulnerability'];
+  for (const it of Object.values(c.items ?? {})) {
+    for (const k of ['id', 'name', 'rarity', 'pools', 'description', 'icon']) if (it[k] === undefined) out.push(`Objeto "${it.id}": falta "${k}"`);
+    if (!['común', 'rara', 'legendaria'].includes(it.rarity)) out.push(`Objeto "${it.id}": rareza "${it.rarity}" desconocida`);
+    if (it.icon?.length !== 8 || it.icon.some((row) => row.length !== 8)) out.push(`Objeto "${it.id}": el icono debe ser de 8×8`);
+    for (const e of it.effects ?? []) if (!ITEM_EFFECTS[e.effect]) out.push(`Objeto "${it.id}": efecto "${e.effect}" no existe`);
+    for (const m of it.modifiers ?? []) if (!STATS.includes(m.stat)) out.push(`Objeto "${it.id}": estadística "${m.stat}" no existe`);
+  }
+  for (const s of Object.values(c.synergies ?? {})) {
+    for (const r of s.requires) if (!c.items[r]) out.push(`Sinergia "${s.id}": requiere "${r}", que no existe`);
   }
   for (const r of Object.values(c.rooms)) {
     const w = r.layout[0].length;

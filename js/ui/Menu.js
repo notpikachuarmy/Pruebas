@@ -10,7 +10,8 @@ import { clamp } from '../core/math.js';
  * Cualquier opción acepta `hint` (texto de ayuda) y `disabled` (bool o función).
  */
 export class Menu {
-  constructor(game, items, { x = 240, y = 120, spacing = 15, width = 220, align = 'center', onCancel = null, size = 10, columns = null } = {}) {
+  constructor(game, items, { x = 240, y = 120, spacing = 15, width = 220, align = 'center', onCancel = null, size = 10, columns = null, maxVisible = 0 } = {}) {
+    this.maxVisible = maxVisible;  // >0: lista con desplazamiento
     this.columns = columns;      // posiciones x si `value()` devuelve varias columnas
     this.game = game;
     this.items = items;
@@ -68,10 +69,22 @@ export class Menu {
     return null;
   }
 
+  /** Primera fila visible cuando la lista se desplaza. */
+  get scrollStart() {
+    const n = this.items.length, v = this.maxVisible;
+    if (!v || n <= v) return 0;
+    return Math.max(0, Math.min(n - v, this.index - Math.floor(v / 2)));
+  }
+
   render(r) {
     const ctx = r.ui;
+    const start = this.scrollStart;
+    const end = this.maxVisible ? start + this.maxVisible : this.items.length;
+    if (start > 0) r.text('▲', this.x - 10, this.y - this.spacing + 4, { size: 7, color: '#9b8fc7' });
+    if (end < this.items.length) r.text('▼', this.x - 10, this.y + (end - start) * this.spacing - 4, { size: 7, color: '#9b8fc7' });
     this.items.forEach((it, i) => {
-      const y = this.y + i * this.spacing;
+      if (i < start || i >= end) return;
+      const y = this.y + (i - start) * this.spacing;
       const selected = i === this.index && this._selectable(it);
       const disabled = it.type !== 'info' && !this._selectable(it);
       const color = it.type === 'info' ? '#9b8fc7' : disabled ? '#5d5480' : selected ? '#ffffff' : '#c9bde6';

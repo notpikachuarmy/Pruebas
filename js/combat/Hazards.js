@@ -18,6 +18,21 @@ export const HAZARD_TYPES = {
       world.damage.hurtPlayer(1);
     },
   },
+  // Tipp-Ex: línea blanca del jugador que borra proyectiles enemigos
+  whiteLine: {
+    color: '#fff6d6', edge: '#ffffff',
+    onUpdate(h, world, dt) {
+      world.projectiles.eraseInRadius(h.x, h.y, h.r + 2, 'enemy');
+      // Sinergia Corrector: también daña a los enemigos de tinta
+      if (!world.items.hasSynergy('corrector')) return;
+      for (const e of world.enemies.query(h.x, h.y, 12)) {
+        if (!e.canBeHit() || !e.def.tags?.includes('tinta')) continue;
+        if ((e.x - h.x) ** 2 + (e.y - h.y) ** 2 > 100) continue;
+        e.hp -= 2.5 * dt; e.flash = 0.03;
+        if (e.hp <= 0) world.damage.killEnemy(e);
+      }
+    },
+  },
   // Cruz roja de corrección: aviso que explota al terminar
   mark: {
     render(g, h) {
@@ -66,6 +81,7 @@ export class Hazards {
       const t = HAZARD_TYPES[h.type];
       h.life -= dt;
       if (h.life <= 0) { h.active = false; t.onExpire?.(h, world); continue; }
+      t.onUpdate?.(h, world, dt);
       if (t.onPlayer && player.alive && !player.isDashing) {
         const dx = player.x - h.x, dy = (player.y - h.y) * 1.6; // elipse
         if (dx * dx + dy * dy < h.r * h.r) t.onPlayer(player, h, world);

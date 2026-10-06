@@ -11,6 +11,7 @@ export default {
     'abalanzarse y deja manchas de tinta que pegan los pies al suelo.',
   theme: 'Los fallos que Íñigo no puede borrar: no persiguen con lógica, persiguen con nervios.',
 
+  tags: ['tinta'],
   sprite: 'enemy_tachon',
   radius: 5,          // caja de pies (colisión con paredes)
   bodyRadius: 6,      // zona de impacto

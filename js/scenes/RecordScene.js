@@ -24,11 +24,12 @@ export class RecordScene extends Scene {
       ['Enemigos disipados', s.kills], ['Precisión', s.shots ? `${Math.round((s.hits / s.shots) * 100)}%` : '—'],
       ['Lucidez reunida', s.lucidity], ['Tiempo soñando', fmtTime(s.playTime)],
       ['Enemigos descubiertos', `${m.discovered.enemies.length} / ${total}`],
+      ['Objetos descubiertos', `${m.discovered.items.length} / ${Object.keys(this.game.content.items).length}`],
     ];
     r.text('Registro', 240, 36, { size: 18, weight: 700, color: '#e8e6dc', align: 'center' });
     rows.forEach(([k, v], i) => {
-      r.text(k, 140, 70 + i * 18, { size: 10, color: '#c9bde6' });
-      r.text(String(v), 340, 70 + i * 18, { size: 10, color: '#fff6d6', align: 'right' });
+      r.text(k, 140, 64 + i * 17, { size: 10, color: '#c9bde6' });
+      r.text(String(v), 340, 64 + i * 17, { size: 10, color: '#fff6d6', align: 'right' });
     });
     this.menu.render(r);
   }

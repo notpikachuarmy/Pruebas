@@ -29,6 +29,7 @@ export class PlayerController {
       game.audio.play('dash');
       game.haptics.play('shoot');
       effects.burst(player.x, player.y - 2, 6, '#c9bde6', 40, 0.3);
+      this.world.items.onDash();
     }
 
     if (player.isDashing) {

@@ -3,51 +3,97 @@ import { Pool } from '../core/Pool.js';
 function makeProjectile() {
   return {
     active: false, team: 'player',
-    x: 0, y: 0, z: 8,           // z = altura visual sobre el suelo
-    vx: 0, vy: 0, radius: 3,
-    damage: 1, knockback: 0,
-    travelLeft: 0, age: 0, pierce: 0,
-    color: '#fff', trail: '#eb2f2d',
-    hitIds: new Set(),          // evita golpear dos veces al mismo enemigo al perforar
+    x: 0, y: 0, z: 8,             // z = altura visual sobre el suelo
+    dirX: 1, dirY: 0, speed: 0,   // dirección normalizada y velocidad
+    radius: 3, damage: 1, knockback: 0,
+    travelLeft: 0, range: 0, age: 0, pierce: 0,
+    color: '#fff', trailColor: '#eb2f2d',
     shape: 'wave', expire: null, glyph: '',
+    // Modificadores (objetos)
+    bounces: 0, bounceShrink: 1, splitOnBounce: false,
+    waveAmp: 0, waveFreq: 0, wavePhase: 0, lateral: 0,
+    homing: 0, homingRange: 0,
+    boomerang: false, returned: false,
+    trail: null, trailTimer: 0,
+    strong: false, isEcho: false,
+    hitIds: new Set(),            // evita golpear dos veces al mismo enemigo al perforar
   };
 }
 
 /** Todos los proyectiles (del jugador y enemigos) en un único pool. */
 export class Projectiles {
-  constructor(world, capacity = 512) {
+  constructor(world, capacity = 600) {
     this.world = world;
     this.pool = new Pool(makeProjectile, capacity);
   }
 
+  /**
+   * opts: team, x, y, z, (vx, vy) o (angle, speed), radius, damage, knockback, range, pierce, color, trail...
+   */
   spawn(opts) {
     const p = this.pool.spawn();
     if (!p) return null;
     p.team = opts.team;
     p.x = opts.x; p.y = opts.y; p.z = opts.z ?? 8;
-    p.vx = opts.vx; p.vy = opts.vy;
+    if (opts.angle !== undefined) {
+      p.dirX = Math.cos(opts.angle); p.dirY = Math.sin(opts.angle); p.speed = opts.speed;
+    } else {
+      p.speed = Math.hypot(opts.vx, opts.vy) || 1;
+      p.dirX = opts.vx / p.speed; p.dirY = opts.vy / p.speed;
+    }
     p.radius = opts.radius ?? 3;
     p.damage = opts.damage ?? 1;
     p.knockback = opts.knockback ?? 0;
-    p.travelLeft = opts.range ?? 200;
+    p.range = p.travelLeft = opts.range ?? 200;
     p.pierce = opts.pierce ?? 0;
     p.color = opts.color ?? '#fff';
-    p.trail = opts.trail ?? p.color;
-    p.age = 0;
+    p.trailColor = opts.trailColor ?? opts.trail ?? p.color;
     p.shape = opts.shape ?? (opts.team === 'player' ? 'wave' : 'ink');
     p.expire = opts.expire ?? null;   // 'ink' | 'redInk': deja un charco al terminar su recorrido
     p.glyph = opts.glyph ?? '';
+    p.bounces = opts.bounces ?? 0;
+    p.bounceShrink = opts.bounceShrink ?? 1;
+    p.splitOnBounce = !!opts.splitOnBounce;
+    p.waveAmp = opts.waveAmp ?? 0; p.waveFreq = opts.waveFreq ?? 0; p.wavePhase = opts.wavePhase ?? 0; p.lateral = 0;
+    p.homing = opts.homing ?? 0; p.homingRange = opts.homingRange ?? 0;
+    p.boomerang = !!opts.boomerang; p.returned = false;
+    p.trail = opts.hazardTrail ?? null; p.trailTimer = 0;
+    p.strong = !!opts.strong; p.isEcho = !!opts.isEcho;
+    p.age = 0;
     p.hitIds.clear();
     return p;
   }
 
   update(dt) {
     const { room, enemies, player, damage, effects } = this.world;
+    const frozen = this.world.freezeTime > 0;
     for (const p of this.pool.active) {
       if (!p.active) continue;
-      const sx = p.vx * dt, sy = p.vy * dt;
-      p.x += sx; p.y += sy; p.age += dt;
-      p.travelLeft -= Math.hypot(sx, sy);
+      if (frozen && p.team === 'enemy') continue;   // Cinta de Casete: el tiempo enemigo se para
+      p.age += dt;
+
+      if (p.homing) this._steer(p, dt);
+
+      // Avance + desplazamiento lateral (zigzag)
+      const prevX = p.x, prevY = p.y;
+      const step = p.speed * dt;
+      p.x += p.dirX * step; p.y += p.dirY * step;
+      if (p.waveAmp) {
+        const lat = Math.sin(p.age * p.waveFreq + p.wavePhase) * p.waveAmp;
+        const d = lat - p.lateral;
+        p.x += -p.dirY * d; p.y += p.dirX * d;
+        p.lateral = lat;
+      }
+      p.travelLeft -= step;
+
+      if (p.boomerang && !p.returned && p.travelLeft <= p.range * 0.5) {
+        p.returned = true; p.dirX = -p.dirX; p.dirY = -p.dirY;
+        p.pierce += 3; p.hitIds.clear();
+      }
+      if (p.trail) {
+        p.trailTimer -= dt;
+        if (p.trailTimer <= 0) { p.trailTimer = 0.03; this.world.hazards.spawn(p.trail, p.x, p.y, 5, 0.6); }
+      }
 
       // Al final del recorrido, el proyectil "cae" (como las ondas que se apagan)
       if (p.travelLeft <= 0) {
@@ -57,12 +103,13 @@ export class Projectiles {
       }
       if (room.isSolidAt(p.x, p.y)) {
         if (p.team === 'player') this.world.onWallShot(p.x, p.y);
+        if (p.bounces > 0) { this._bounce(p, prevX, prevY); continue; }
         this._kill(p, true);
         continue;
       }
 
       if (p.team === 'player') {
-        const hits = enemies.query(p.x, p.y, p.radius + 12);
+        const hits = enemies.query(p.x, p.y, p.radius + 16);
         for (const e of hits) {
           if (!e.canBeHit() || p.hitIds.has(e.uid)) continue;
           // Comparación en el plano del suelo (z es solo visual)
@@ -70,14 +117,14 @@ export class Projectiles {
           const rr = p.radius + e.def.bodyRadius;
           if ((ex - p.x) ** 2 + (ey - p.y) ** 2 > rr * rr) continue;
           p.hitIds.add(e.uid);
-          damage.hitEnemy(e, p.damage, p.vx, p.vy, p.knockback);
-          effects.burst(p.x, p.y, 4, p.trail, 50, 0.25);
+          damage.hitEnemy(e, p.damage, p.dirX, p.dirY, p.knockback, p);
+          effects.burst(p.x, p.y, 4, p.trailColor, 50, 0.25);
           if (p.pierce-- <= 0) { p.active = false; break; }
         }
       } else if (player.alive) {
         const rr = p.radius + player.bodyRadius;
         const px = player.x, py = player.y - player.bodyHeight * 0.5;
-        if ((px - p.x) ** 2 + (py - p.y) ** 2 < rr * rr && damage.hurtPlayer(p.damage, p.vx, p.vy)) {
+        if ((px - p.x) ** 2 + (py - p.y) ** 2 < rr * rr && damage.hurtPlayer(p.damage, p.dirX, p.dirY)) {
           this._kill(p, false);
         }
       }
@@ -85,32 +132,62 @@ export class Projectiles {
     this.pool.sweep();
   }
 
-  /** Proyectil enemigo: gota de tinta con borde claro (se distingue bien sobre el papel). */
-  _renderInk(g, p, x, y) {
-    const r = p.radius;
-    g.fillStyle = p.trail;
-    g.fillRect(x - r - 1, y - r, (r + 1) * 2, r * 2);
-    g.fillRect(x - r, y - r - 1, r * 2, (r + 1) * 2);
-    g.fillStyle = p.color;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-    if (p.glyph === '?') { g.fillStyle = '#fff6d6'; g.fillRect(x - 1, y - 2, 2, 1); g.fillRect(x, y - 1, 1, 1); g.fillRect(x - 1, y + 1, 1, 1); }
-    else if (p.glyph) { g.fillStyle = '#fff6d6'; g.fillRect(x - 1, y - 1, 2, 2); }
+  /** Gira poco a poco hacia el enemigo más cercano (Diapasón). */
+  _steer(p, dt) {
+    let best = null, bd = p.homingRange * p.homingRange;
+    for (const e of this.world.enemies.list) {
+      if (!e.canBeHit()) continue;
+      const d = (e.x - p.x) ** 2 + (e.y - 4 - p.y) ** 2;
+      if (d < bd) { bd = d; best = e; }
+    }
+    if (!best) return;
+    const want = Math.atan2(best.y - 4 - p.y, best.x - p.x);
+    const cur = Math.atan2(p.dirY, p.dirX);
+    let diff = want - cur;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    const a = cur + Math.max(-p.homing * dt, Math.min(p.homing * dt, diff));
+    p.dirX = Math.cos(a); p.dirY = Math.sin(a);
+  }
+
+  /** Rebote en pared (Espejo Roto). Con Caleidoscopio se divide en dos. */
+  _bounce(p, prevX, prevY) {
+    const room = this.world.room;
+    const hitX = room.isSolidAt(p.x, prevY), hitY = room.isSolidAt(prevX, p.y);
+    if (hitX || !hitY) p.dirX = -p.dirX;
+    if (hitY || !hitX) p.dirY = -p.dirY;
+    p.x = prevX; p.y = prevY;
+    p.bounces--;
+    p.radius = Math.max(1, Math.round(p.radius * p.bounceShrink));
+    p.lateral = 0; p.waveAmp = 0;
+    p.hitIds.clear();
+    this.world.effects.burst(p.x, p.y, 3, '#8fd3ff', 40, 0.2);
+    if (p.splitOnBounce) {
+      p.splitOnBounce = false;
+      const a = Math.atan2(p.dirY, p.dirX);
+      const child = this.spawn({
+        team: p.team, x: p.x, y: p.y, z: p.z, angle: a + 0.45, speed: p.speed,
+        radius: p.radius, damage: p.damage * 0.7, knockback: p.knockback, range: Math.max(30, p.travelLeft),
+        color: p.color, trail: p.trailColor, bounces: p.bounces, bounceShrink: p.bounceShrink,
+      });
+      if (child) { const b = a - 0.45; p.dirX = Math.cos(b); p.dirY = Math.sin(b); }
+    }
   }
 
   _kill(p, wall) {
     p.active = false;
-    this.world.effects.burst(p.x, p.y, wall ? 5 : 3, p.trail, wall ? 60 : 30, 0.3);
+    this.world.effects.burst(p.x, p.y, wall ? 5 : 3, p.trailColor, wall ? 60 : 30, 0.3);
     if (wall) this.world.game.audio.play('wallHit', { volume: 0.6 });
   }
 
   clear() { this.pool.clear(); }
 
   clearTeam(team) {
-    for (const p of this.pool.active) if (p.team === team) { p.active = false; this.world.effects.burst(p.x, p.y - p.z, 2, p.trail, 20, 0.2); }
+    for (const p of this.pool.active) if (p.team === team) { p.active = false; this.world.effects.burst(p.x, p.y - p.z, 2, p.trailColor, 20, 0.2); }
     this.pool.sweep();
   }
 
-  /** Borra proyectiles de un equipo dentro de un radio (la Goma Gastada). Devuelve cuántos. */
+  /** Borra proyectiles de un equipo dentro de un radio (la Goma Gastada, Tipp-Ex). Devuelve cuántos. */
   eraseInRadius(x, y, r, team = 'player') {
     let n = 0;
     for (const p of this.pool.active) {
@@ -128,15 +205,30 @@ export class Projectiles {
       const x = Math.round(p.x), y = Math.round(p.y - p.z);
       // sombra
       g.fillStyle = 'rgba(20,14,40,0.25)';
-      g.fillRect(Math.round(p.x) - p.radius + 1, Math.round(p.y) - 1, p.radius * 2 - 2, 2);
-      // anillo de "onda" + núcleo
+      g.fillRect(Math.round(p.x) - p.radius + 1, Math.round(p.y) - 1, Math.max(1, p.radius * 2 - 2), 2);
       if (p.shape === 'ink') { this._renderInk(g, p, x, y); continue; }
+      if (p.isEcho) g.globalAlpha = 0.65;
+      // anillo de "onda" + núcleo
       const pulse = 1 + Math.floor((p.age * 12) % 2);
-      g.fillStyle = p.trail;
-      g.fillRect(x - p.radius - pulse + 1, y - p.radius + 1, (p.radius + pulse) * 2 - 2, p.radius * 2 - 2);
-      g.fillRect(x - p.radius + 1, y - p.radius - pulse + 1, p.radius * 2 - 2, (p.radius + pulse) * 2 - 2);
+      const r = p.radius;
+      g.fillStyle = p.trailColor;
+      g.fillRect(x - r - pulse + 1, y - r + 1, (r + pulse) * 2 - 2, Math.max(1, r * 2 - 2));
+      g.fillRect(x - r + 1, y - r - pulse + 1, Math.max(1, r * 2 - 2), (r + pulse) * 2 - 2);
       g.fillStyle = p.color;
-      g.fillRect(x - p.radius + 1, y - p.radius + 1, p.radius * 2 - 2, p.radius * 2 - 2);
+      g.fillRect(x - r + 1, y - r + 1, Math.max(1, r * 2 - 2), Math.max(1, r * 2 - 2));
+      g.globalAlpha = 1;
     }
+  }
+
+  /** Proyectil enemigo: gota de tinta con borde claro (se distingue bien sobre el papel). */
+  _renderInk(g, p, x, y) {
+    const r = p.radius;
+    g.fillStyle = p.trailColor;
+    g.fillRect(x - r - 1, y - r, (r + 1) * 2, r * 2);
+    g.fillRect(x - r, y - r - 1, r * 2, (r + 1) * 2);
+    g.fillStyle = p.color;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+    if (p.glyph === '?') { g.fillStyle = '#fff6d6'; g.fillRect(x - 1, y - 2, 2, 1); g.fillRect(x, y - 1, 1, 1); g.fillRect(x - 1, y + 1, 1, 1); }
+    else if (p.glyph) { g.fillStyle = '#fff6d6'; g.fillRect(x - 1, y - 1, 2, 2); }
   }
 }

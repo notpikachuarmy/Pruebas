@@ -3,6 +3,7 @@ import { Menu } from '../ui/Menu.js';
 import { OptionsScene } from './OptionsScene.js';
 import { ControlsScene } from './ControlsScene.js';
 import { ConfirmScene } from './ConfirmScene.js';
+import { ItemsScene } from './ItemsScene.js';
 
 export class PauseScene extends Scene {
   constructor(game, gameScene) {
@@ -12,10 +13,11 @@ export class PauseScene extends Scene {
     const resume = () => game.popScene();
     this.menu = new Menu(game, [
       { type: 'button', label: 'Continuar', action: resume },
+      { type: 'button', label: 'Objetos', action: () => game.pushScene(new ItemsScene(game, gameScene.world)) },
       { type: 'button', label: 'Controles', action: () => game.pushScene(new ControlsScene(game)) },
       { type: 'button', label: 'Opciones', action: () => game.pushScene(new OptionsScene(game)) },
       { type: 'button', label: 'Abandonar el sueño', action: () => this._confirmQuit() },
-    ], { x: 240, y: 118, spacing: 16, width: 180, onCancel: resume });
+    ], { x: 240, y: 114, spacing: 15, width: 180, onCancel: resume });
   }
 
   _confirmQuit() {

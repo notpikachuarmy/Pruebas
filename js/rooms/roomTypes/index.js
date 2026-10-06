@@ -6,6 +6,15 @@
 import { buildEncounter } from '../EncounterBuilder.js';
 import { TILE } from '../../core/config.js';
 import { promptText } from '../../ui/prompt.js';
+import { drawItem, ITEM_PRICES } from '../../items/ItemPool.js';
+
+/** Coloca un objeto en un pedestal. Devuelve false si el pool está agotado. */
+function placeItem(world, x, y, pools, opts) {
+  const it = drawItem(world, pools, opts);
+  if (!it) return false;
+  world.interactables.add({ kind: 'item', itemId: it.id, x, y, taken: false });
+  return true;
+}
 
 // Iconos de 5×5 que se dibujan en la puerta que lleva a cada tipo de sala
 const ICONS = {
@@ -106,7 +115,8 @@ export const ROOM_TYPES = {
     onEnter: (world, node) => combatEnter(world, node, true),
     onClear(world) {
       const c = center(world);
-      world.interactables.add({ kind: 'chest', x: c.x, y: c.y, lucidity: [5, 8], extra: [{ type: 'heart', chance: 0.6 }] });
+      world.interactables.add({ kind: 'chest', x: c.x - 24, y: c.y, lucidity: [5, 8], extra: [{ type: 'heart', chance: 0.6 }] });
+      if (world.rngLoot.chance(0.45)) placeItem(world, c.x + 24, c.y, [world.run.dream.id, 'general'], { boostRare: true });
     },
   },
 
@@ -116,8 +126,10 @@ export const ROOM_TYPES = {
       node.state.cleared = true;
       if (!first) return;
       const c = center(world);
-      // Fase 5: aquí aparecerá un objeto. De momento, un cajón del profesor con Lucidez y vida.
-      world.interactables.add({ kind: 'chest', x: c.x, y: c.y, lucidity: [5, 9], extra: [{ type: 'heart', chance: 0.7 }] });
+      if (!placeItem(world, c.x, c.y, [world.run.dream.id, 'general'])) {
+        // Si ya han salido todos los objetos, un cajón del profesor
+        world.interactables.add({ kind: 'chest', x: c.x, y: c.y, lucidity: [5, 9], extra: [{ type: 'heart', chance: 0.7 }] });
+      }
     },
   },
 
@@ -127,9 +139,11 @@ export const ROOM_TYPES = {
       node.state.cleared = true;
       if (!first) return;
       const c = center(world);
-      const items = world.run.dream.shop;
-      items.forEach((it, i) => {
-        world.interactables.add({ kind: 'shopItem', product: it.product, price: it.price, x: c.x + (i - (items.length - 1) / 2) * 40, y: c.y });
+      const slots = [...world.run.dream.shop];
+      const it = drawItem(world, [world.run.dream.id, 'general']);
+      if (it) slots.push({ product: 'item', itemId: it.id, price: ITEM_PRICES[it.rarity] });
+      slots.forEach((s, i) => {
+        world.interactables.add({ kind: 'shopItem', product: s.product, itemId: s.itemId, price: s.price, x: c.x + (i - (slots.length - 1) / 2) * 40, y: c.y });
       });
     },
   },
@@ -148,7 +162,11 @@ export const ROOM_TYPES = {
       node.state.cleared = true;
       if (!first) return;
       const c = center(world);
-      world.interactables.add({ kind: 'chest', x: c.x, y: c.y, lucidity: [8, 12], extra: [{ type: 'heart', chance: 1 }] });
+      if (placeItem(world, c.x + 24, c.y, ['secret', 'general'], { boostRare: true })) {
+        world.interactables.add({ kind: 'chest', x: c.x - 24, y: c.y, lucidity: [4, 6], extra: [{ type: 'heart', chance: 1 }] });
+      } else {
+        world.interactables.add({ kind: 'chest', x: c.x, y: c.y, lucidity: [8, 12], extra: [{ type: 'heart', chance: 1 }] });
+      }
       world.game.events.emit('secret:found', { node });
     },
   },
@@ -163,7 +181,8 @@ export const ROOM_TYPES = {
     },
     onClear(world) {
       const c = center(world);
-      world.interactables.add({ kind: 'exit', x: c.x, y: c.y + 20 });
+      world.interactables.add({ kind: 'exit', x: c.x, y: c.y + 30 });
+      placeItem(world, c.x, c.y - 14, ['boss']);
       world.game.haptics.play('bossDown');
     },
     // La pizarra del aula: el nombre del soñador y, al final, la nota

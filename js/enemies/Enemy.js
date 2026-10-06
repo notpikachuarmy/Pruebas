@@ -22,6 +22,7 @@ export class Enemy {
     this.stateTime = 0;
     this.data = {};       // memoria privada del comportamiento
     this.haste = 0;       // tiempo restante de prisa (Reloj de Pared)
+    this.marked = 0;      // tiempo restante de marca (Post-it)
     this.maxHp = def.hp;
     behavior.init?.(this);
   }

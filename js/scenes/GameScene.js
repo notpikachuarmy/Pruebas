@@ -66,7 +66,7 @@ export class GameScene extends Scene {
     this.run.result = result;
     this.game.events.emit('run:end', { result, time: this.run.time, run: this.run });
     if (result === 'win') this.game.haptics.play('bossDown');
-    this.game.pushScene(new RunEndScene(this.game, this.run));
+    this.game.pushScene(new RunEndScene(this.game, this.run, this.world));
   }
 
   renderWorld(g) {

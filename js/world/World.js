@@ -14,6 +14,7 @@ import { DamageSystem } from '../combat/DamageSystem.js';
 import { Encounter } from './Encounter.js';
 import { Interactables } from './Interactables.js';
 import { PlayerHistory } from './PlayerHistory.js';
+import { ItemManager } from '../items/ItemManager.js';
 import { RULES } from '../dreams/rules.js';
 
 const SECRET_HITS = 5;               // impactos para abrir una pared secreta
@@ -41,6 +42,9 @@ export class World {
     this.enemies = new EnemyManager(this);
     this.damage = new DamageSystem(this);
     this.interactables = new Interactables(this);
+    this.items = new ItemManager(this);
+    this.freezeTime = 0;                    // Cinta de Casete
+    this.itemBanner = null;                 // { title, text, color, t }
 
     this.node = null;
     this.room = null;
@@ -59,6 +63,7 @@ export class World {
     for (const r of this.rules) r.apply?.(this);
 
     this.playerHistory = new PlayerHistory(120);
+    this._queuedBanners = [];
     this.arena = { margin: 0, target: 0 };  // el aula que se arruga (jefe, fase 3)
     this.boss = null;
     this.banner = null;                     // rótulo grande (fases del jefe)
@@ -80,6 +85,25 @@ export class World {
 
   setArena(margin) { this.arena.target = margin; }
 
+  freezeEnemies(time) {
+    if (time > this.freezeTime) this.game.audio.play('dash', { pitch: 0.5 });
+    this.freezeTime = Math.max(this.freezeTime, time);
+  }
+
+  /** El jugador coge un objeto: lo aplica y anuncia el objeto y las sinergias nuevas. */
+  takeItem(id) {
+    const res = this.items.add(id);
+    if (!res) return;
+    const { item, synergies } = res;
+    this.itemBanner = { title: item.name, text: item.description, color: '#fff6d6', t: 0 };
+    for (const s of synergies) this._queuedBanners.push({ title: `Sinergia: ${s.name}`, text: s.description, color: '#ffd65c', t: 0 });
+    const meta = this.game.save.data.meta.discovered;
+    if (!meta.items.includes(id)) meta.items.push(id);
+    this.effects.burst(this.player.x, this.player.y - 12, 24, '#ffd65c', 90, 0.6);
+    this.game.audio.play('cleared', { pitch: 1.2 });
+    this.game.haptics.play('event');
+  }
+
   get cleared() { return this.node?.state.cleared ?? false; }
 
   // ---------- Cambio de sala ----------
@@ -88,6 +112,8 @@ export class World {
   enterNode(node, fromDir = null) {
     if (this.node) this.node.state.pickups = this.pickups.serialize();
     this.projectiles.clear(); this.effects.clear(); this.hazards.clear();
+    this.items.clearScheduled();
+    this.freezeTime = 0;
     this.enemies.clear(); this.pickups.clear();
     this.encounter = null;
     this.boss = null;
@@ -222,6 +248,9 @@ export class World {
     if (this._hitstop > 0) { this._hitstop -= dt; return; }
     this.time += dt;
     this._shakeTime = Math.max(0, this._shakeTime - dt);
+    this.freezeTime = Math.max(0, this.freezeTime - dt);
+    if (this.itemBanner && (this.itemBanner.t += dt) > 3) this.itemBanner = null;
+    if (!this.itemBanner && this._queuedBanners.length) this.itemBanner = this._queuedBanners.shift();
 
     const p = this.player;
     if (p.alive) {
@@ -291,6 +320,7 @@ export class World {
       if (o.kind === 'fountain' && !o.used) out.loot++;
       if (o.kind === 'shopItem' && !o.sold && o.price <= this.run.lucidity) out.loot++;
       if (o.kind === 'event' && !o.done) out.loot++;
+      if (o.kind === 'item' && !o.taken) out.loot++;
     }
     return out;
   }

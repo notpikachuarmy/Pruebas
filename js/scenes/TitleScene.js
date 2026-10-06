@@ -33,6 +33,6 @@ export class TitleScene extends Scene {
       const device = this.game.input.hasGamepad() ? 'Pulsa cualquier botón' : 'Pulsa cualquier tecla';
       r.text(device, 42, 170, { size: 10, color: '#fff6d6' });
     }
-    r.text('v0.4 · Fase 4: el primer sueño completo', 8, 264, { size: 7, color: '#5d5480' });
+    r.text('v0.5 · Fase 5: objetos y sinergias', 8, 264, { size: 7, color: '#5d5480' });
   }
 }

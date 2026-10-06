@@ -1,6 +1,7 @@
 import { PRODUCTS } from './Products.js';
 import { promptText } from '../ui/prompt.js';
 import { EventScene } from '../scenes/EventScene.js';
+import { itemIcon, RARITY_COLOR } from '../items/ItemIcons.js';
 
 const RADIUS = 15;
 
@@ -35,20 +36,39 @@ export const KINDS = {
     },
   },
 
+  item: {
+    prompt: (o, world) => (o.taken ? null : `Coger: ${world.game.content.items[o.itemId].name}`),
+    interact(o, world) { o.taken = true; world.takeItem(o.itemId); },
+    render(g, o, world) {
+      const x = Math.round(o.x), y = Math.round(o.y);
+      // Pedestal: un atril de pupitre
+      g.fillStyle = 'rgba(20,14,40,0.3)'; g.fillRect(x - 7, y - 1, 14, 3);
+      g.fillStyle = '#6b4428'; g.fillRect(x - 6, y - 7, 12, 7);
+      g.fillStyle = '#a06e40'; g.fillRect(x - 7, y - 8, 14, 2);
+      if (o.taken) return;
+      const it = world.game.content.items[o.itemId];
+      const by = y - 20 + Math.round(Math.sin(world.time * 3) * 1.5);
+      g.globalAlpha = 0.35; g.fillStyle = RARITY_COLOR[it.rarity];
+      g.fillRect(x - 6, by - 2, 12, 12); g.globalAlpha = 1;
+      g.drawImage(itemIcon(it), x - 4, by);
+    },
+  },
+
   shopItem: {
     prompt: (o, world) => {
       if (o.sold) return null;
       const p = PRODUCTS[o.product];
-      if (world.run.lucidity < o.price) return `${p.name}: te faltan ${o.price - world.run.lucidity} de Lucidez`;
-      if (!p.canApply(world)) return `${p.name}: ahora no te sirve`;
-      return `Comprar ${p.name.toLowerCase()} (${o.price})`;
+      const name = p.label ? p.label(world, o) : p.name;
+      if (world.run.lucidity < o.price) return `${name}: te faltan ${o.price - world.run.lucidity} de Lucidez`;
+      if (!p.canApply(world, o)) return `${name}: ahora no te sirve`;
+      return `Comprar ${name.toLowerCase()} (${o.price})`;
     },
-    available: (o, world) => world.run.lucidity >= o.price && PRODUCTS[o.product].canApply(world),
+    available: (o, world) => world.run.lucidity >= o.price && PRODUCTS[o.product].canApply(world, o),
     interact(o, world) {
       const p = PRODUCTS[o.product];
-      if (world.run.lucidity < o.price || !p.canApply(world)) { world.game.audio.play('menuBack'); return; }
+      if (world.run.lucidity < o.price || !p.canApply(world, o)) { world.game.audio.play('menuBack'); return; }
       world.run.lucidity -= o.price;
-      p.apply(world);
+      p.apply(world, o);
       o.sold = true;
       world.effects.burst(o.x, o.y - 8, 10, '#c9bde6', 50, 0.4);
       world.game.audio.play('heal');
@@ -57,7 +77,7 @@ export const KINDS = {
       const x = Math.round(o.x), y = Math.round(o.y);
       g.fillStyle = '#4b3f75'; g.fillRect(x - 7, y - 4, 14, 5);
       g.fillStyle = '#6e62a0'; g.fillRect(x - 7, y - 5, 14, 2);
-      if (!o.sold) PRODUCTS[o.product].render(g, x, y - 12 + Math.round(Math.sin(world.time * 3)), world.time);
+      if (!o.sold) PRODUCTS[o.product].render(g, x, y - 12 + Math.round(Math.sin(world.time * 3)), world.time, world, o);
     },
     renderUI(r, o, sx, sy) {
       if (!o.sold) r.text(String(o.price), sx, sy + 10, { size: 8, color: '#ffd65c', align: 'center' });

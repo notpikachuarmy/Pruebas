@@ -2,7 +2,17 @@
  * Lo que se puede comprar o encontrar en cofres. Los sueños eligen qué vender y a qué precio (dream.shop).
  * En la Fase 5 se añadirán los objetos aquí o en un sistema propio.
  */
+import { itemIcon } from '../items/ItemIcons.js';
+
+/** Las funciones reciben (world, obj): obj es el producto en la tienda (p. ej. obj.itemId). */
 export const PRODUCTS = {
+  item: {
+    name: 'Objeto',
+    label: (world, o) => world.game.content.items[o.itemId].name,
+    canApply: () => true,
+    apply: (world, o) => world.takeItem(o.itemId),
+    render: (g, x, y, t, world, o) => g.drawImage(itemIcon(world.game.content.items[o.itemId]), x - 4, y - 5),
+  },
   halfHeart: {
     name: 'Medio corazón',
     canApply: (world) => world.player.hp < world.player.stats.get('maxHp'),

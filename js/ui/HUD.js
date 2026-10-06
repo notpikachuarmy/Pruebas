@@ -1,5 +1,6 @@
 import { VIEW_W } from '../core/config.js';
 import { MapView } from './MapView.js';
+import { itemIcon } from '../items/ItemIcons.js';
 
 /** Interfaz durante la partida: vida, Lucidez, Silencio, oleada y mapa. */
 export class HUD {
@@ -29,6 +30,17 @@ export class HUD {
     g.fillStyle = '#c9bde6'; g.fillRect(lx, 5, 5, 5);
     g.fillStyle = '#ffffff'; g.fillRect(lx + 1, 6, 2, 2);
     this._lucidityX = lx + 8;
+
+    // Objetos conseguidos: columna en el margen izquierdo, fuera de la sala
+    const owned = world.items.owned;
+    owned.forEach((it, i) => {
+      const x = 4, y = 30 + i * 10;
+      if (y > 262) return;
+      g.drawImage(itemIcon(it), x, y);
+      if (it.id === 'despertador_repuesto' && world.items.state(it.id).used) {
+        g.globalAlpha = 0.7; g.fillStyle = '#100c20'; g.fillRect(x, y, 8, 8); g.globalAlpha = 1;
+      }
+    });
 
     // Barra de vida del jefe
     const boss = world.boss;
@@ -79,7 +91,14 @@ export class HUD {
       const a = Math.min(1, world.banner.t * 3, (2 - world.banner.t) * 2);
       r.text(world.banner.text, VIEW_W / 2, 118, { size: 20, weight: 700, color: '#d6403a', align: 'center', alpha: a });
     }
-    if (scene.introTime > 0) {
+    const ib = world.itemBanner;
+    if (ib) {
+      const a = Math.min(1, ib.t * 4, (3 - ib.t) * 2);
+      r.ui.globalAlpha = a * 0.8; r.ui.fillStyle = '#100c20'; r.ui.fillRect(60, 196, 360, 34); r.ui.globalAlpha = 1;
+      r.text(ib.title, VIEW_W / 2, 210, { size: 11, weight: 700, color: ib.color, align: 'center', alpha: a });
+      r.text(ib.text, VIEW_W / 2, 224, { size: 8, color: '#c9bde6', align: 'center', alpha: a });
+    }
+    if (scene.introTime > 0 && !ib) {
       r.text(dream.text.intro, VIEW_W / 2, 238, { size: 10, color: '#c9bde6', align: 'center', alpha: Math.min(1, scene.introTime) });
     }
   }

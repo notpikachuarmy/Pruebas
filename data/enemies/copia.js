@@ -8,6 +8,7 @@ export default {
   minDepth: 99,
   description: 'Una fotocopia tuya en tinta. Hace lo que tú hiciste hace un momento.',
   theme: 'La presión de ser igual que los demás.',
+  tags: ['tinta'],
   sprite: 'enemy_copia',
   radius: 4, bodyRadius: 5, bodyHeight: 10,
   hp: 6, speed: 0, contactDamage: 1, mass: 1,

@@ -17,6 +17,7 @@ export class Run {
     this.result = null;     // 'win' | 'death' | 'quit'
     this.flags = {};        // efectos de eventos (favor, mapa revelado...)
     this.usedEvents = new Set();
+    this.offeredItems = new Set();   // objetos que ya han salido (no se repiten en la run)
   }
 
   get accuracy() { return this.shots ? this.hits / this.shots : 0; }
