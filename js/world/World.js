@@ -117,8 +117,10 @@ export class World {
     const { item, synergies } = res;
     this.itemBanner = { title: item.name, text: item.description, color: '#fff6d6', t: 0 };
     for (const s of synergies) this._queuedBanners.push({ title: `Sinergia: ${s.name}`, text: s.description, color: '#ffd65c', t: 0 });
-    const meta = this.game.save.data.meta.discovered;
-    if (!meta.items.includes(id)) meta.items.push(id);
+    const meta = this.game.save.data.meta;
+    if (!meta.discovered.items.includes(id)) meta.discovered.items.push(id);
+    meta.itemCounts[id] = (meta.itemCounts[id] ?? 0) + 1;
+    for (const s of synergies) if (!meta.discovered.synergies.includes(s.id)) meta.discovered.synergies.push(s.id);
     this.effects.burst(this.player.x, this.player.y - 12, 24, '#ffd65c', 90, 0.6);
     this.game.audio.play('cleared', { pitch: 1.2 });
     this.game.haptics.play('event');
@@ -236,6 +238,7 @@ export class World {
     ROOM_TYPES[node.type].onClear?.(this, node);
     this.game.audio.play('cleared');
     this.game.haptics.play('event');
+    if (node.type === 'combat' || node.type === 'challenge') this.floatText(this.player.x, this.player.y - 26, 'Sala despejada');
     this.game.events.emit('room:cleared', { node, overtime });
   }
 
@@ -275,6 +278,7 @@ export class World {
     this.time += dt;
     this._shakeTime = Math.max(0, this._shakeTime - dt);
     this.freezeTime = Math.max(0, this.freezeTime - dt);
+    this.hurtFlash = Math.max(0, (this.hurtFlash ?? 0) - dt);
     if (this.itemBanner && (this.itemBanner.t += dt) > 3) this.itemBanner = null;
     if (!this.itemBanner && this._queuedBanners.length) this.itemBanner = this._queuedBanners.shift();
 
@@ -326,7 +330,7 @@ export class World {
     const r = this.arenaRect();
     if (p.x < r.x0 || p.x > r.x1 || p.y < r.y0 || p.y > r.y1) {
       const cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2;
-      this.damage.hurtPlayer(1, cx - p.x, cy - p.y);
+      this.damage.hurtPlayer(1, cx - p.x, cy - p.y, this.boss?.def.id ?? null);
       p.kx += Math.sign(cx - p.x) * 40; p.ky += Math.sign(cy - p.y) * 40;
     }
   }
@@ -368,6 +372,7 @@ export class World {
     this.game.haptics.play('death');
     this.hitstop(0.25);
     this.shake(6, 0.4);
+    this.game.events.emit('player:expelled', { by: this.lastHurtBy });
     this.onDeath?.();
   }
 
@@ -460,7 +465,8 @@ export class World {
     g.fillRect(Math.round(p.x) - 5, Math.round(p.y) - 1, 10, 2);
     if (p.invulnerable > 0 && !p.isDashing && Math.floor(p.invulnerable * 20) % 2 === 0) return;
     const anim = p.moving ? 'walk' : 'idle';
-    sprite.draw(g, anim, p.animTime, p.x, p.y, { flip: p.facing < 0, flash: p.flash > 0, alpha: p.isDashing ? 0.6 : 1 });
+    const flash = p.flash > 0 && !this.settings.reduceFlashes;
+    sprite.draw(g, anim, p.animTime, p.x, p.y, { flip: p.facing < 0, flash, alpha: p.isDashing ? 0.6 : 1 });
     g.fillStyle = '#fff6d6';
     g.globalAlpha = 0.7;
     g.fillRect(Math.round(p.x + p.aimX * 13) - 1, Math.round(p.y - 9 + p.aimY * 11) - 1, 2, 2);

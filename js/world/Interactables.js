@@ -1,6 +1,7 @@
 import { PRODUCTS } from './Products.js';
 import { promptText } from '../ui/prompt.js';
 import { EventScene } from '../scenes/EventScene.js';
+import { LibraryScene } from '../scenes/LibraryScene.js';
 import { itemIcon, RARITY_COLOR } from '../items/ItemIcons.js';
 
 const RADIUS = 15;
@@ -137,6 +138,24 @@ export const KINDS = {
         g.fillStyle = '#4b2f1c'; g.fillRect(x - 3, y - 9, 6, 1); g.fillRect(x - 1, y - 10, 1, 3);
       }
       if (!o.done && Math.floor(world.time * 2) % 2) { g.fillStyle = '#ffd65c'; g.fillRect(x - 1, y - 32, 2, 4); g.fillRect(x - 1, y - 27, 2, 1); }
+    },
+  },
+
+  // Estantería de la primera sala: abre la biblioteca (bestiario y guía)
+  bookshelf: {
+    prompt: () => 'Leer: bestiario y guía',
+    interact(o, world) { world.game.pushScene(new LibraryScene(world.game, { overlay: true })); },
+    render(g, o) {
+      const x = Math.round(o.x), y = Math.round(o.y);
+      g.fillStyle = 'rgba(20,14,40,0.3)'; g.fillRect(x - 13, y - 1, 26, 3);
+      g.fillStyle = '#3a2a1c'; g.fillRect(x - 12, y - 26, 24, 26);
+      g.fillStyle = '#6b4428'; g.fillRect(x - 11, y - 25, 22, 24);
+      g.fillStyle = '#3a2a1c'; g.fillRect(x - 11, y - 13, 22, 2);
+      const books = ['#eb2f2d', '#4a749c', '#ffd65c', '#7fd6a0', '#c9bde6', '#e896a0'];
+      for (let i = 0; i < 6; i++) {
+        g.fillStyle = books[i]; g.fillRect(x - 10 + i * 3, y - 23 + (i % 2), 2, 9 - (i % 2));
+        g.fillStyle = books[5 - i]; g.fillRect(x - 10 + i * 3, y - 10 + (i % 3 === 0 ? 1 : 0), 2, 8);
+      }
     },
   },
 

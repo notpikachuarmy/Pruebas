@@ -49,7 +49,7 @@ export default {
         const rng = world.rngSpawn;
         const marks = Array.isArray(p.marks) ? p.marks[phase] : p.marks;
         for (let i = 0; i < marks; i++) {
-          world.hazards.spawn('mark', world.player.x + rng.range(-34, 34), world.player.y + rng.range(-20, 20), 14, p.markDelay);
+          world.hazards.spawn('mark', world.player.x + rng.range(-34, 34), world.player.y + rng.range(-20, 20), 14, p.markDelay, e.def.id);
         }
       }
     }
@@ -66,7 +66,7 @@ export default {
       if (i >= gap && i < gap + gapSize) continue;
       world.projectiles.spawn({
         team: 'enemy', x: 24 + i * 14, y: 52, z: 4, vx: 0, vy: p.rowSpeed[phase],
-        range: world.room.height, radius: 3, damage: 1, color: '#25307a', trail: '#c9bde6', glyph: 'a',
+        range: world.room.height, radius: 3, damage: 1, color: '#25307a', trail: '#c9bde6', glyph: 'a', source: e.def.id,
       });
     }
     world.game.audio.play('windup', { pitch: 1.4 });

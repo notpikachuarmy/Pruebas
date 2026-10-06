@@ -21,6 +21,7 @@ export class EnemyManager {
     this.list.push(e);
     if (!quiet) this.world.effects.burst(x, y - 4, 10, '#25307a', 30, 0.6);
     if (def.boss) this.world.boss = e;
+    this.world.game.events.emit('enemy:seen', { def });
     return e;
   }
 
@@ -51,7 +52,7 @@ export class EnemyManager {
       if (player.alive && e.canHurt()) {
         const rr = e.def.bodyRadius + player.bodyRadius - 2;
         const dx = player.x - e.x, dy = player.y - e.y;
-        if (e.def.contactDamage && dx * dx + dy * dy < rr * rr) damage.hurtPlayer(e.def.contactDamage, dx, dy);
+        if (e.def.contactDamage && dx * dx + dy * dy < rr * rr) damage.hurtPlayer(e.def.contactDamage, dx, dy, e.def.id);
       }
     }
 

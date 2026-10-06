@@ -40,6 +40,8 @@ export class Lighting {
     for (const pk of world.pickups.pool.active) this._hole(g, pk.x, pk.y, 9, 0.5);
     // Las puertas siempre dejan pasar algo de luz para orientarse
     for (const dir of Object.keys(room.doors)) {
+      const door = room.doors[dir];
+      if (door.kind === 'secret' && !door.revealed) continue;   // una pared secreta no debe delatarse
       const d = { N: [14, 0.5], S: [14, room.rows - 0.5], W: [0.5, 7.5], E: [room.cols - 0.5, 7.5] }[dir];
       this._hole(g, d[0] * TILE, d[1] * TILE, 26, 0.7);
     }

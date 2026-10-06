@@ -1,3 +1,5 @@
+import { ROOM_OFFSET_X, ROOM_OFFSET_Y } from '../core/config.js';
+
 /**
  * Ataque del Oyente: "ondas" de sonido que salen de sus auriculares.
  * - Apuntar (flechas / stick derecho) también dispara si la opción "Disparar al apuntar" está activa.
@@ -16,9 +18,18 @@ export class PlayerCombat {
     items.update(dt, this.spawnShot);
 
     const aim = input.getAxis('AIM');
+    let mouseFire = false;
     if (aim.active) { player.aimX = aim.x; player.aimY = aim.y; }
+    else if (input.mouseAimActive()) {
+      // Ratón: apunta desde los auriculares hacia el cursor; clic izquierdo dispara
+      const dx = input.mouse.x - (player.x + ROOM_OFFSET_X);
+      const dy = input.mouse.y - (player.y - 9 + ROOM_OFFSET_Y);
+      const l = Math.hypot(dx, dy);
+      if (l > 4) { player.aimX = dx / l; player.aimY = dy / l; }
+      mouseFire = input.mouse.down;
+    }
 
-    const wantsFire = input.isDown('ATTACK') || (settings.fireOnAim && aim.active);
+    const wantsFire = input.isDown('ATTACK') || mouseFire || (settings.fireOnAim && aim.active);
     if (wantsFire && player.fireCooldown <= 0 && !player.isDashing) {
       this.fire(player);
       player.fireCooldown = 1 / player.stats.get('fireRate');

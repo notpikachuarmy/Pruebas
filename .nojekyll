@@ -55,9 +55,12 @@ export class DamageSystem {
   }
 
   /** Devuelve true si el golpe se aplicó (no estaba invulnerable). */
-  hurtPlayer(amount, dirX = 0, dirY = 0) {
+  /** `source`: id del enemigo responsable (para el bestiario y la pantalla final). */
+  hurtPlayer(amount, dirX = 0, dirY = 0, source = null) {
     const { player, game, effects } = this.world;
     if (!player.alive || player.invulnerable > 0 || player.isDashing) return false;
+    this.world.lastHurtBy = source;
+    this.world.hurtFlash = 0.35;
     player.hp = Math.max(0, player.hp - amount);
     player.invulnerable = player.stats.get('hurtInvulnerability');
     player.flash = 0.12;
@@ -68,7 +71,7 @@ export class DamageSystem {
     game.haptics.play('hurt');
     this.world.shake(4, 0.2);
     this.world.hitstop(0.07);
-    game.events.emit('player:damaged', { amount });
+    game.events.emit('player:damaged', { amount, source });
     if (player.hp <= 0 && !this.world.items.preventDeath()) this.world.onPlayerDeath();
     else this.world.items.onHurt();
     return true;

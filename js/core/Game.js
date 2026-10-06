@@ -10,6 +10,7 @@ import { Toasts } from '../ui/Toasts.js';
 import { MetaStats } from '../progression/MetaStats.js';
 import { AchievementSystem } from '../progression/AchievementSystem.js';
 import { DreamerRegistry } from '../progression/DreamerRegistry.js';
+import { Bestiary } from '../progression/Bestiary.js';
 import { CONTENT } from '../../data/registry.js';
 
 /**
@@ -28,6 +29,7 @@ export class Game {
 
     this.renderer = new Renderer(canvas, VIEW_W, VIEW_H);
     this.input = new Input(settings, bindings);
+    this.input.attachPointer(canvas, this.renderer);
     this.haptics = new Haptics(this.input, settings);
     this.audio = new AudioManager(settings, CONTENT.audio);
     this.assets = new Assets();
@@ -35,6 +37,7 @@ export class Game {
     this.meta = new MetaStats(this);
     this.achievements = new AchievementSystem(this);
     this.dreamers = new DreamerRegistry(this);
+    this.bestiary = new Bestiary(this);
     this.activeRun = null;      // los asigna GameScene mientras hay una partida
     this.activeWorld = null;
 
@@ -113,6 +116,10 @@ export class Game {
     for (const s of visible) s.renderUI?.(r);
     this.toasts.render(r);
     if (this.save.data.settings.showFps) r.text(`${Math.round(this.fps)} fps`, 4, VIEW_H - 4, { size: 7, color: '#9b8fc7' });
+
+    // El cursor del sistema se oculta cuando la escena dibuja su propia mira
+    const wantNone = !!this.scene?.hidesCursor?.();
+    if (this._cursorHidden !== wantNone) { this._cursorHidden = wantNone; this.canvas.style.cursor = wantNone ? 'none' : 'default'; }
 
     requestAnimationFrame(this._frame);
   }

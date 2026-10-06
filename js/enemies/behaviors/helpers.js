@@ -10,7 +10,7 @@ export function toPlayer(e, world) {
 export function shoot(world, e, angle, { speed = 90, range = 200, radius = 3, damage = 1, z = 8, color = '#25307a', trail = '#c9bde6', ...rest } = {}) {
   return world.projectiles.spawn({
     team: 'enemy', x: e.x, y: e.y - 2, z, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-    range, radius, damage, color, trail, ...rest,
+    range, radius, damage, color, trail, source: e.def.id, ...rest,
   });
 }
 

@@ -12,6 +12,8 @@ export function defaultSave() {
       aimDeadzone: 0.3,
       fireOnAim: true,       // apuntar con flechas / stick derecho también dispara
       screenShake: true,
+      mouseAim: true,        // apuntar con el ratón y disparar con clic izquierdo
+      reduceFlashes: false,  // accesibilidad: sin destellos al recibir daño
       showFps: false,
     },
     bindings: { keyboard: {}, gamepad: {} }, // solo se guardan los cambios del jugador
@@ -23,8 +25,10 @@ export function defaultSave() {
         bossesDefeated: 0, nights: 0, shopSpent: 0, lampsLit: 0, itemsTaken: 0,
       },
       dreamers: {},            // { idSueño: [idFragmento, ...] }
+      bestiary: {},            // { idEnemigo: { seen, kills, killedYou } }
+      itemCounts: {},          // { idObjeto: veces conseguido }
       unlocks: { dreams: ['examen'], items: [], characters: ['oyente'] },
-      discovered: { enemies: [], bosses: [], items: [] },
+      discovered: { enemies: [], bosses: [], items: [], synergies: [] },
       achievements: {},
     },
   };

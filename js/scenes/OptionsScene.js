@@ -20,12 +20,14 @@ export class OptionsScene extends Scene {
       { type: 'range', label: 'Zona muerta (mover)', get: () => s.moveDeadzone, set: set('moveDeadzone'), min: 0.05, max: 0.5, step: 0.05, format: pct, hint: 'Súbela si el personaje se mueve solo con el stick suelto' },
       { type: 'range', label: 'Zona muerta (apuntar)', get: () => s.aimDeadzone, set: set('aimDeadzone'), min: 0.05, max: 0.6, step: 0.05, format: pct },
       { type: 'toggle', label: 'Disparar al apuntar', get: () => s.fireOnAim, set: set('fireOnAim'), hint: 'Apuntar con flechas o stick derecho también dispara' },
+      { type: 'toggle', label: 'Apuntar con el ratón', get: () => s.mouseAim, set: set('mouseAim'), hint: 'Mueve el ratón para apuntar y haz clic izquierdo para disparar' },
       { type: 'toggle', label: 'Temblor de pantalla', get: () => s.screenShake, set: set('screenShake') },
+      { type: 'toggle', label: 'Reducir destellos', get: () => s.reduceFlashes, set: set('reduceFlashes'), hint: 'Quita los destellos al recibir daño (accesibilidad)' },
       { type: 'toggle', label: 'Mostrar FPS', get: () => s.showFps, set: set('showFps') },
       { type: 'button', label: 'Reiniciar progreso', action: () => this._confirmReset(), hint: 'Borra estadísticas y desbloqueos. Conserva opciones y controles' },
       { type: 'button', label: 'Borrar todos los datos', action: () => this._confirmWipe(), hint: 'Vuelve al estado de la primera vez que abriste el juego' },
       { type: 'button', label: 'Volver', action: () => this.back() },
-    ], { x: 240, y: 62, spacing: 14, width: 260, onCancel: () => this.back() });
+    ], { x: 240, y: 56, spacing: 13, width: 260, onCancel: () => this.back() });
   }
 
   back() { this.game.popScene(); }

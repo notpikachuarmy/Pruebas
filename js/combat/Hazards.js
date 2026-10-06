@@ -15,7 +15,7 @@ export const HAZARD_TYPES = {
     ink: true, color: '#b72025', edge: '#eb5a4a',
     onPlayer(player, h, world) {
       player.slowFactor = Math.min(player.slowFactor, 0.75);
-      world.damage.hurtPlayer(1);
+      world.damage.hurtPlayer(1, 0, 0, h.source);
     },
   },
   // Tipp-Ex: línea blanca del jugador que borra proyectiles enemigos
@@ -49,9 +49,9 @@ export const HAZARD_TYPES = {
     onExpire(h, world) {
       const p = world.player;
       const dx = p.x - h.x, dy = (p.y - h.y) * 1.6;
-      if (p.alive && dx * dx + dy * dy < h.r * h.r) world.damage.hurtPlayer(1, dx, dy);
+      if (p.alive && dx * dx + dy * dy < h.r * h.r) world.damage.hurtPlayer(1, dx, dy, h.source);
       world.effects.burst(h.x, h.y, 12, '#d6403a', 80, 0.4);
-      world.hazards.spawn('redInk', h.x, h.y, h.r * 0.8, 2.2);
+      world.hazards.spawn('redInk', h.x, h.y, h.r * 0.8, 2.2, h.source);
       world.game.audio.play('killEnemy', { pitch: 1.4, volume: 0.6 });
     },
   },
@@ -60,10 +60,10 @@ export const HAZARD_TYPES = {
 export class Hazards {
   constructor(world, capacity = 160) {
     this.world = world;
-    this.pool = new Pool(() => ({ active: false, type: 'ink', x: 0, y: 0, r: 6, life: 0, max: 1, seed: 0 }), capacity);
+    this.pool = new Pool(() => ({ active: false, type: 'ink', x: 0, y: 0, r: 6, life: 0, max: 1, seed: 0, source: null }), capacity);
   }
 
-  spawn(type, x, y, r, life) {
+  spawn(type, x, y, r, life, source = null) {
     let h = this.pool.spawn();
     if (!h) {
       // Pool lleno: reciclamos el charco más viejo en lugar de perder el nuevo
@@ -71,6 +71,7 @@ export class Hazards {
     }
     if (HAZARD_TYPES[type].ink) life *= this.world.mods.inkLife;
     h.type = type; h.x = x; h.y = y; h.r = r; h.life = life; h.max = life; h.seed = Math.random() * 10;
+    h.source = source;
     return h;
   }
 

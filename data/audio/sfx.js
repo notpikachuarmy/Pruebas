@@ -14,6 +14,7 @@ export default {
   spawn:      { wave: 'noise', from: 500, duration: 0.25, volume: 0.07 },
   waveStart:  { wave: 'triangle', from: 660, to: 660, duration: 0.25, volume: 0.18 },
   cleared:    { wave: 'triangle', from: 523, to: 1046, duration: 0.5, volume: 0.22 },
+  heartbeat:  { wave: 'sine', from: 70, to: 45, duration: 0.18, volume: 0.35 },
   menuMove:   { wave: 'square', from: 700, to: 700, duration: 0.03, volume: 0.06 },
   menuOk:     { wave: 'square', from: 880, to: 1320, duration: 0.07, volume: 0.08 },
   menuBack:   { wave: 'square', from: 520, to: 330, duration: 0.07, volume: 0.08 },

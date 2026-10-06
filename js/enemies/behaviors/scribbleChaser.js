@@ -52,7 +52,7 @@ export default {
         e.data.inkTimer -= dt;
         if (p.inkType !== null && e.data.inkTimer <= 0) {
           e.data.inkTimer = p.inkEvery;
-          hazards.spawn(p.inkType ?? 'ink', e.x, e.y - 1, p.inkRadius, p.inkLife);
+          hazards.spawn(p.inkType ?? 'ink', e.x, e.y - 1, p.inkRadius, p.inkLife, e.def.id);
         }
         if (e.stateTime >= p.lungeTime) e.setState('recover');
         break;

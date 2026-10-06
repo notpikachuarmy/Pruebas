@@ -30,9 +30,9 @@ export class TitleScene extends Scene {
     r.text('Sueños', 40, 104, { size: 46, weight: 700, color: '#e8e6dc', shadow: '#eb2f2d' });
     r.text('Escucha lo que sueñan los demás. Entra. Despierta.', 42, 124, { size: 9, color: '#c9bde6' });
     if (Math.floor(this.time * 1.6) % 2 === 0) {
-      const device = this.game.input.hasGamepad() ? 'Pulsa cualquier botón' : 'Pulsa cualquier tecla';
+      const device = this.game.input.hasGamepad() ? 'Pulsa cualquier botón' : 'Pulsa cualquier tecla o haz clic';
       r.text(device, 42, 170, { size: 10, color: '#fff6d6' });
     }
-    r.text('v0.6 · Fase 6: progresión y segundo sueño', 8, 264, { size: 7, color: '#5d5480' });
+    r.text('v0.7 · Fase 7: pulido', 8, 264, { size: 7, color: '#5d5480' });
   }
 }

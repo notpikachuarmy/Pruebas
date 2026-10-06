@@ -64,6 +64,33 @@ export class Input {
     window.addEventListener('gamepaddisconnected', (e) => this._onPadDisconnected(e.gamepad));
   }
 
+  // ---------- Ratón (opcional, solo para apuntar y disparar) ----------
+
+  /** Conecta el ratón al canvas. Las coordenadas se pasan a píxeles virtuales del juego. */
+  attachPointer(canvas, renderer) {
+    this.mouse = { x: 0, y: 0, down: false, lastMove: -1e9, tapped: false };
+    const toVirtual = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = canvas.width / rect.width;
+      this.mouse.x = ((e.clientX - rect.left) * dpr - renderer.offsetX) / renderer.scale;
+      this.mouse.y = ((e.clientY - rect.top) * dpr - renderer.offsetY) / renderer.scale;
+    };
+    canvas.addEventListener('pointermove', (e) => { toVirtual(e); this.mouse.lastMove = performance.now(); });
+    canvas.addEventListener('pointerdown', (e) => {
+      toVirtual(e);
+      if (e.button === 0) { this.mouse.down = true; this.mouse.tapped = true; this.mouse.lastMove = performance.now(); }
+    });
+    window.addEventListener('pointerup', (e) => { if (e.button === 0) this.mouse.down = false; });
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  /** ¿Está el jugador usando el ratón para apuntar? (lo ha movido hace poco o mantiene el clic) */
+  mouseAimActive() {
+    const m = this.mouse;
+    if (!m || !this.settings.mouseAim || this.lastDevice === 'gamepad') return false;
+    return m.down || performance.now() - m.lastMove < 2500;
+  }
+
   // ---------- API pública para la lógica del juego ----------
 
   isDown(action) { return this.down.has(action); }
@@ -131,7 +158,8 @@ export class Input {
   update(dt) {
     this.pressed.clear();
     this.down.clear();
-    this.anyPressed = this.keysTapped.size > 0;
+    this.anyPressed = this.keysTapped.size > 0 || !!this.mouse?.tapped;
+    if (this.mouse) this.mouse.tapped = false;
 
     const pad = this._pollPad();
 

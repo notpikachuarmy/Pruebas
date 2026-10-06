@@ -15,7 +15,7 @@ function makeProjectile() {
     homing: 0, homingRange: 0,
     boomerang: false, returned: false,
     trail: null, trailTimer: 0,
-    strong: false, isEcho: false,
+    strong: false, isEcho: false, source: null,
     hitIds: new Set(),            // evita golpear dos veces al mismo enemigo al perforar
   };
 }
@@ -59,6 +59,7 @@ export class Projectiles {
     p.boomerang = !!opts.boomerang; p.returned = false;
     p.trail = opts.hazardTrail ?? null; p.trailTimer = 0;
     p.strong = !!opts.strong; p.isEcho = !!opts.isEcho;
+    p.source = opts.source ?? null;
     p.age = 0;
     p.hitIds.clear();
     return p;
@@ -97,7 +98,7 @@ export class Projectiles {
 
       // Al final del recorrido, el proyectil "cae" (como las ondas que se apagan)
       if (p.travelLeft <= 0) {
-        if (p.expire) this.world.hazards.spawn(p.expire, p.x, p.y, 8, 2.5);
+        if (p.expire) this.world.hazards.spawn(p.expire, p.x, p.y, 8, 2.5, p.source);
         this._kill(p, false);
         continue;
       }
@@ -124,7 +125,7 @@ export class Projectiles {
       } else if (player.alive) {
         const rr = p.radius + player.bodyRadius;
         const px = player.x, py = player.y - player.bodyHeight * 0.5;
-        if ((px - p.x) ** 2 + (py - p.y) ** 2 < rr * rr && damage.hurtPlayer(p.damage, p.dirX, p.dirY)) {
+        if ((px - p.x) ** 2 + (py - p.y) ** 2 < rr * rr && damage.hurtPlayer(p.damage, p.dirX, p.dirY, p.source)) {
           this._kill(p, false);
         }
       }

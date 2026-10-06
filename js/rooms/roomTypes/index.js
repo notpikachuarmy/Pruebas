@@ -54,7 +54,11 @@ export { ICONS as DOOR_ICONS };
 export const ROOM_TYPES = {
   start: {
     label: 'Inicio', mapColor: '#9b8fc7',
-    onEnter(world, node) { node.state.cleared = true; },
+    onEnter(world, node, first) {
+      node.state.cleared = true;
+      // Estantería con el bestiario y la guía de objetos
+      if (first) world.interactables.add({ kind: 'bookshelf', x: 6 * TILE + 8, y: 2 * TILE + 12 });
+    },
     // Pistas de control escritas en el suelo con tiza (solo en la primera sala)
     renderUI(r, world, ox, oy) {
       const g = world.game, k = (a) => g.input.glyph(a);
