@@ -30,6 +30,16 @@ export class HUD {
     g.fillStyle = '#ffffff'; g.fillRect(lx + 1, 6, 2, 2);
     this._lucidityX = lx + 8;
 
+    // Barra de vida del jefe
+    const boss = world.boss;
+    if (boss && !boss.dead && !boss.spawning) {
+      const w = 220, x = (VIEW_W - w) / 2, y = 258;
+      g.fillStyle = '#100c20'; g.fillRect(x - 1, y - 1, w + 2, 6);
+      g.fillStyle = '#3a2f5c'; g.fillRect(x, y, w, 4);
+      g.fillStyle = '#d6403a'; g.fillRect(x, y, Math.round(w * Math.max(0, boss.hp) / boss.maxHp), 4);
+      if (boss.flash > 0) { g.fillStyle = '#ffffff'; g.fillRect(x, y, Math.round(w * Math.max(0, boss.hp) / boss.maxHp), 1); }
+    }
+
     if (this.showFullMap(world)) this.map.renderFull(g, world);
     else this.map.renderMini(g, world);
   }
@@ -47,7 +57,7 @@ export class HUD {
     r.text(String(run.lucidity), this._lucidityX ?? 60, 11, { size: 9, color: '#e8e6dc' });
 
     const enc = world.encounter;
-    if (enc && enc.waveIndex >= 0 && !enc.finished) {
+    if (enc && enc.waveIndex >= 0 && !enc.finished && !enc.def.noBanner) {
       const label = dream.text.wave.replace('{n}', enc.waveIndex + 1).replace('{total}', enc.totalWaves);
       r.text(label, VIEW_W / 2, 14, { size: 9, color: '#e8e6dc', align: 'center' });
       if (enc.banner > 0) {
@@ -56,6 +66,18 @@ export class HUD {
       }
     } else if (world.node.type === 'boss' && world.cleared) {
       r.text(dream.text.cleared, VIEW_W / 2, 14, { size: 9, color: '#ffd65c', align: 'center' });
+    }
+    const boss = world.boss;
+    if (boss && !boss.dead && !boss.spawning) r.text(boss.def.name, VIEW_W / 2, 255, { size: 8, color: '#e8e6dc', align: 'center' });
+    const intro = world.bossIntro;
+    if (intro) {
+      const a = Math.min(1, intro.t * 3, (2.6 - intro.t) * 2);
+      r.text(intro.name, VIEW_W / 2, 118, { size: 22, weight: 700, color: '#fff6d6', align: 'center', alpha: a, shadow: '#d6403a' });
+      if (intro.title) r.text(intro.title, VIEW_W / 2, 134, { size: 10, color: '#c9bde6', align: 'center', alpha: a });
+    }
+    if (world.banner) {
+      const a = Math.min(1, world.banner.t * 3, (2 - world.banner.t) * 2);
+      r.text(world.banner.text, VIEW_W / 2, 118, { size: 20, weight: 700, color: '#d6403a', align: 'center', alpha: a });
     }
     if (scene.introTime > 0) {
       r.text(dream.text.intro, VIEW_W / 2, 238, { size: 10, color: '#c9bde6', align: 'center', alpha: Math.min(1, scene.introTime) });

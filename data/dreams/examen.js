@@ -11,10 +11,26 @@ export default {
   concept: 'La ansiedad de ser evaluado. Nada es peligroso de verdad, pero todo da prisa.',
   palette: { background: '#17122b', ink: '#25307a', accent: '#d6403a', paper: '#e8e6dc' },
   tileset: 'tiles_examen',
-  music: { explore: 'examen_explore' },   // Fase 4: combat, boss
+  music: { explore: 'examen_explore', combat: 'examen_combat', boss: 'examen_boss' },
 
-  rules: [],                     // Fase 4: 'relojDeExamen', 'folioEnBlanco'
-  enemyPool: [{ id: 'tachon', weight: 1 }],
+  // Reglas especiales (js/dreams/rules.js)
+  rules: ['relojDeExamen', 'folioEnBlanco', 'tintaNoSeSeca'],
+  ruleConfig: {
+    relojDeExamen: { base: 10, perEnemy: 2.2, overtimeSpeed: 1.2, reinforcements: 2 },
+  },
+
+  enemyPool: [
+    { id: 'tachon', weight: 4 },
+    { id: 'tachon_rojo', weight: 2 },
+    { id: 'interrogante', weight: 3 },
+    { id: 'goma', weight: 1.5 },
+    { id: 'chuleta', weight: 1 },
+    { id: 'compas', weight: 1.5 },
+    { id: 'reloj', weight: 1 },
+  ],
+  miniboss: 'fotocopiadora',
+  boss: 'profesora',
+  eventPool: ['companero_sin_goma', 'pupitre_grabado', 'revision_examen'],
   roomPool: [
     'aula_inicio', 'aula_filas', 'aula_vacia', 'aula_circulo',
     'pasillo_taquillas', 'aula_trincheras', 'despacho', 'examen_final',
@@ -28,11 +44,13 @@ export default {
       { type: 'reward', required: true },
       { type: 'shop', required: true, minDepth: 2 },
       { type: 'healing', chance: 0.6, minDepth: 2 },
+      { type: 'event', chance: 0.8, minDepth: 1 },
     ],
+    miniboss: true,              // la sala que da al jefe guarda al mini-jefe
     challengeChance: 0.5,
     secret: true,
     budget: { base: 2, perDepth: 0.9, wavesEvery: 2, maxWaves: 3, maxPerWave: 8, delayBetweenWaves: 1.1 },
-    roleCaps: { soporte: 1, modificador: 1 },
+    roleCaps: { soporte: 1, modificador: 1, huidizo: 1, trampa: 2 },
     clearDrop: { chance: 0.4, table: [{ type: 'lucidity', weight: 3, amount: [2, 4] }, { type: 'heart', weight: 1, amount: [1, 1] }] },
   },
 
@@ -41,18 +59,6 @@ export default {
     { product: 'heart', price: 5 },
     { product: 'container', price: 14 },
   ],
-
-  encounters: {
-    // Sala del jefe mientras no exista La Profesora Sin Cara (Fase 4)
-    final: {
-      waves: [
-        [{ id: 'tachon', count: 6 }],
-        [{ id: 'tachon', count: 8 }],
-        [{ id: 'tachon', count: 10 }],
-      ],
-      delayBetweenWaves: 1.4,
-    },
-  },
 
   text: {
     intro: 'Íñigo está soñando con un examen',

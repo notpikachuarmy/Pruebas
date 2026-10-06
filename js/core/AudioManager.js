@@ -15,7 +15,11 @@ export class AudioManager {
     this.currentMusic = null;
     this.musicNode = null;
     this.seq = null;
+    this.tempo = 1;
   }
+
+  /** Multiplicador de velocidad de la música placeholder (tiempo extra del examen). */
+  setTempo(t) { this.tempo = t; }
 
   /** Los navegadores exigen un gesto del usuario (tecla/clic) antes de sonar. */
   unlock() {
@@ -149,10 +153,10 @@ export class AudioManager {
       while (seq.next < this.ctx.currentTime + 0.15) {
         for (const voice of def.pattern) {
           const note = voice.notes[seq.step % voice.notes.length];
-          if (note !== null && note !== undefined) this._note(def.root * 2 ** (note / 12) * (voice.octave ?? 1), seq.next, stepDur * (voice.length ?? 0.9), voice);
+          if (note !== null && note !== undefined) this._note(def.root * 2 ** (note / 12) * (voice.octave ?? 1), seq.next, (stepDur / this.tempo) * (voice.length ?? 0.9), voice);
         }
         seq.step++;
-        seq.next += stepDur;
+        seq.next += stepDur / this.tempo;
       }
     };
     seq.timer = setInterval(schedule, 40);

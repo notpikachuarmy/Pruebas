@@ -131,6 +131,14 @@ export function generateFloor(rng, dream, rooms) {
     }
     if (required.some((s) => ![...nodes.values()].some((n) => n.type === s.type))) continue;
 
+    // Antesala del jefe: la sala que da acceso a él guarda al mini-jefe
+    if (cfg.miniboss) {
+      const dir = Object.keys(boss.doors)[0];
+      const guard = nodes.get(key(boss.x + DIRS[dir].dx, boss.y + DIRS[dir].dy));
+      if (guard.type !== 'combat') continue;
+      guard.type = 'miniboss';
+    }
+
     // Desafío opcional: una sala normal profunda se convierte en desafío
     if (cfg.challengeChance && rng.chance(cfg.challengeChance)) {
       const options = [...nodes.values()].filter((n) => n.type === 'combat' && n.depth >= 2);

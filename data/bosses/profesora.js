@@ -1,0 +1,25 @@
+// Jefe del Examen Infinito
+export default {
+  id: 'profesora',
+  name: 'La Profesora Sin Cara',
+  dream: 'examen',
+  role: 'jefe',
+  boss: true,
+  cost: 99, minDepth: 99,
+  title: 'Asignatura pendiente',
+  description: 'Una figura sin rostro tras una mesa enorme. Dicta, corrige y suspende.',
+  theme: 'La evaluación que Íñigo lleva doce años esperando. Al vencerla, la nota cambia a "Aprobado".',
+  sprite: 'boss_profesora',
+  noFlip: true,
+  radius: 14, bodyRadius: 16, bodyHeight: 24,
+  hp: 130, speed: 20, contactDamage: 1, mass: 999,
+  behavior: 'professor',
+  params: {
+    slide: 22,
+    rowEvery: [2.2, 3.2, 1.8], rowSpeed: [58, 50, 72],
+    aimEvery: 2.8,
+    markEvery: [0, 2.4, 1.7], marks: 3, markDelay: 1.0,
+    arenaMargin: 48,
+  },
+  drops: [{ type: 'lucidity', chance: 1, amount: [10, 14] }],
+};

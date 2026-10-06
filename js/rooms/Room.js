@@ -203,7 +203,7 @@ export class Room {
     const cells = DOOR_CELLS[dir];
     const [r0, c0] = cells[0], [r1, c1] = cells[cells.length - 1];
     const x = c0 * TILE, y = r0 * TILE, w = (c1 - c0 + 1) * TILE, h = (r1 - r0 + 1) * TILE;
-    const frame = { normal: '#584e82', boss: '#d6403a', challenge: '#ffd65c', secret: '#584e82' }[door.kind];
+    const frame = door.color ?? '#584e82';
 
     if (door.kind === 'secret' && !door.revealed) {
       // Pared con un garabato: pista de que ahí hay algo
@@ -228,6 +228,13 @@ export class Room {
     } else if (door.kind === 'boss') {
       const a = 0.4 + 0.3 * Math.sin(this.time * 4);
       g.globalAlpha = a; g.fillStyle = '#d6403a'; g.fillRect(x + 2, y + 2, w - 4, h - 4); g.globalAlpha = 1;
+    }
+    if (door.icon) {
+      // Icono del tipo de sala, con fondo oscuro para que se lea sobre los barrotes
+      const ix = Math.round(x + w / 2 - 3), iy = Math.round(y + h / 2 - 3);
+      g.fillStyle = '#100c20'; g.fillRect(ix - 1, iy - 1, 7, 7);
+      g.fillStyle = door.color;
+      door.icon.forEach((row, ry) => { for (let rx = 0; rx < 5; rx++) if (row[rx] === '#') g.fillRect(ix + rx, iy + ry, 1, 1); });
     }
   }
 }

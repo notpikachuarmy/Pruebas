@@ -3,7 +3,7 @@ export default {
   id: 'despacho',
   name: 'Despacho',
   dream: 'examen',
-  types: ['reward', 'shop', 'healing', 'secret'],
+  types: ['reward', 'shop', 'healing', 'secret', 'event'],
   layout: [
     '############################',
     '#TTTTTTTTTTT....TTTTTTTTTTT#',

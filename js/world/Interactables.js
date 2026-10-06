@@ -1,5 +1,6 @@
 import { PRODUCTS } from './Products.js';
 import { promptText } from '../ui/prompt.js';
+import { EventScene } from '../scenes/EventScene.js';
 
 const RADIUS = 15;
 
@@ -86,6 +87,29 @@ export const KINDS = {
         g.fillRect(x + 1, y - 15 + k, 1, 1); g.fillRect(x + 2, y - 13 + k, 1, 2);
         g.fillRect(x - 5, y - 9, 10, 2);
       }
+    },
+  },
+
+  event: {
+    prompt: (o, world) => (o.done ? null : world.game.content.events[o.event].title),
+    interact(o, world) { world.game.pushScene(new EventScene(world.game, world, o)); },
+    render(g, o, world) {
+      const x = Math.round(o.x), y = Math.round(o.y), def = world.game.content.events[o.event];
+      g.fillStyle = 'rgba(20,14,40,0.3)'; g.fillRect(x - 9, y - 1, 18, 3);
+      // Mesa común a todos los eventos
+      g.fillStyle = '#6b4428'; g.fillRect(x - 8, y - 8, 16, 8);
+      g.fillStyle = '#a06e40'; g.fillRect(x - 8, y - 10, 16, 3);
+      if (def.prop === 'student') {
+        g.fillStyle = '#2e3a6e'; g.fillRect(x - 4, y - 18, 8, 8);
+        g.fillStyle = '#e1c4a4'; g.fillRect(x - 3, y - 24, 6, 6);
+        g.fillStyle = '#4a3229'; g.fillRect(x - 3, y - 25, 6, 2);
+      } else if (def.prop === 'papers') {
+        g.fillStyle = '#f0ecd6'; g.fillRect(x - 6, y - 13, 9, 4); g.fillRect(x - 4, y - 15, 9, 3);
+        g.fillStyle = '#d6403a'; g.fillRect(x - 2, y - 14, 3, 1);
+      } else {
+        g.fillStyle = '#4b2f1c'; g.fillRect(x - 3, y - 9, 6, 1); g.fillRect(x - 1, y - 10, 1, 3);
+      }
+      if (!o.done && Math.floor(world.time * 2) % 2) { g.fillStyle = '#ffd65c'; g.fillRect(x - 1, y - 32, 2, 4); g.fillRect(x - 1, y - 27, 2, 1); }
     },
   },
 

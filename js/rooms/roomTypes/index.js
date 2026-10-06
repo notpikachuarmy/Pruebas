@@ -7,6 +7,18 @@ import { buildEncounter } from '../EncounterBuilder.js';
 import { TILE } from '../../core/config.js';
 import { promptText } from '../../ui/prompt.js';
 
+// Iconos de 5×5 que se dibujan en la puerta que lleva a cada tipo de sala
+const ICONS = {
+  boss: ['.###.', '#.#.#', '#####', '.###.', '.#.#.'],
+  miniboss: ['#.#.#', '#.#.#', '#####', '#####', '.....'],
+  reward: ['..#..', '#####', '.###.', '.#.#.', '#...#'],
+  shop: ['.###.', '#.#..', '.###.', '..#.#', '.###.'],
+  healing: ['..#..', '..#..', '#####', '..#..', '..#..'],
+  challenge: ['..#..', '..#..', '..#..', '.....', '..#..'],
+  secret: ['.###.', '#...#', '..##.', '.....', '..#..'],
+  event: ['#####', '#...#', '#####', '.#...', '#....'],
+};
+
 const center = (world) => ({ x: (world.room.cols / 2) * TILE, y: (world.room.rows / 2) * TILE + 6 });
 
 /** Recompensa aleatoria al limpiar una sala (tabla del sueño). */
@@ -28,6 +40,8 @@ function combatEnter(world, node, challenge) {
   world.startEncounter(node.encounter);
 }
 
+export { ICONS as DOOR_ICONS };
+
 export const ROOM_TYPES = {
   start: {
     label: 'Inicio', mapColor: '#9b8fc7',
@@ -48,11 +62,47 @@ export const ROOM_TYPES = {
   combat: {
     label: 'Combate', mapColor: '#c9bde6',
     onEnter: (world, node) => combatEnter(world, node, false),
-    onClear: (world) => clearDrop(world),
+    onClear(world) {
+      if (world.run.flags.favor) {
+        world.run.flags.favor = false;
+        const c = center(world);
+        world.pickups.spawn('heart', c.x, c.y);
+        world.toast('El compañero te devuelve el favor');
+      }
+      clearDrop(world);
+    },
+  },
+
+  miniboss: {
+    label: 'Antesala', mapColor: '#ff6ad5',
+    onEnter(world, node) {
+      if (node.state.cleared) return;
+      const id = world.run.dream.miniboss;
+      world.bossIntro = { name: world.game.content.enemies[id].name, title: 'Antes del examen final', t: 0 };
+      world.startEncounter({ waves: [[{ id, count: 1, at: [14, 4] }]], startDelay: 1.6, noBanner: true, noClock: true }, { music: 'combat' });
+    },
+    onClear(world) {
+      const c = center(world);
+      world.interactables.add({ kind: 'chest', x: c.x, y: c.y + 30, lucidity: [4, 6], extra: [{ type: 'heart', chance: 1 }] });
+    },
+  },
+
+  event: {
+    label: 'Evento', mapColor: '#ffffff',
+    onEnter(world, node, first) {
+      node.state.cleared = true;
+      if (!first) return;
+      const run = world.run;
+      const pool = run.dream.eventPool.filter((id) => !run.usedEvents.has(id));
+      const id = world.rngLoot.pick(pool.length ? pool : run.dream.eventPool);
+      run.usedEvents.add(id);
+      const c = center(world);
+      world.interactables.add({ kind: 'event', event: id, x: c.x, y: c.y, done: false });
+    },
   },
 
   challenge: {
-    label: 'Desafío', mapColor: '#ff9a3c', doorKind: 'challenge',
+    label: 'Desafío', mapColor: '#ff9a3c',
     onEnter: (world, node) => combatEnter(world, node, true),
     onClear(world) {
       const c = center(world);
@@ -104,16 +154,24 @@ export const ROOM_TYPES = {
   },
 
   boss: {
-    label: 'Jefe', mapColor: '#d6403a', doorKind: 'boss',
+    label: 'Jefe', mapColor: '#d6403a',
     onEnter(world, node) {
       if (node.state.cleared) return;
-      // Fase 4: La Profesora Sin Cara. Mientras tanto, oleadas finales definidas en el sueño.
-      world.startEncounter(world.run.dream.encounters.final);
+      const def = world.game.content.enemies[world.run.dream.boss];
+      world.bossIntro = { name: def.name, title: def.title ?? '', t: 0 };
+      world.startEncounter({ waves: [[{ id: def.id, count: 1, at: [14, 4] }]], startDelay: 2, noBanner: true, noClock: true }, { music: 'boss' });
     },
     onClear(world) {
       const c = center(world);
-      world.interactables.add({ kind: 'exit', x: c.x, y: c.y });
+      world.interactables.add({ kind: 'exit', x: c.x, y: c.y + 20 });
       world.game.haptics.play('bossDown');
+    },
+    // La pizarra del aula: el nombre del soñador y, al final, la nota
+    renderUI(r, world, ox, oy) {
+      const owner = world.run.dream.owner.name;
+      const cleared = world.node.state.cleared;
+      r.text(cleared ? 'Aprobado' : `Nombre: ${owner}. Asignatura pendiente.`, ox + 224, oy + 11,
+        { size: cleared ? 10 : 8, weight: cleared ? 700 : 400, color: cleared ? '#7fd6a0' : '#e8e6dc', align: 'center', shadow: null, alpha: 0.9 });
     },
   },
 };

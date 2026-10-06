@@ -17,4 +17,21 @@ export default {
       { wave: 'sine', volume: 0.12, octave: 0.5, length: 3.5, notes: [0, null, null, null, 0, null, null, null, -4, null, null, null, -5, null, null, null] },
     ],
   },
+  examen_combat: {
+    bpm: 132, root: 196,
+    pattern: [
+      { wave: 'square', volume: 0.04, length: 0.1, notes: [24, 19, 24, 19] },
+      { wave: 'triangle', volume: 0.11, notes: [0, 3, 7, 10, 7, 3, 0, 3, -2, 2, 5, 9, 5, 2, -2, 2] },
+      { wave: 'sawtooth', volume: 0.05, octave: 0.5, length: 1.5, notes: [0, null, 0, null, 0, null, 0, null, -4, null, -4, null, -5, null, -5, null] },
+    ],
+  },
+  examen_boss: {
+    bpm: 144, root: 174.6,
+    pattern: [
+      // metrónomo implacable
+      { wave: 'square', volume: 0.05, length: 0.08, notes: [24, null, 24, null, 24, null, 24, null] },
+      { wave: 'sawtooth', volume: 0.07, notes: [0, 1, 0, 6, 0, 1, 0, 7, 0, 1, 0, 6, 12, 11, 7, 6] },
+      { wave: 'triangle', volume: 0.14, octave: 0.5, length: 3.5, notes: [0, null, null, null, 1, null, null, null, -2, null, null, null, -1, null, null, null] },
+    ],
+  },
 };

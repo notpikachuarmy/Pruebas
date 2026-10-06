@@ -5,6 +5,15 @@ export default {
     protagonista: 'assets/player/protagonista.png',
     tachon: 'assets/enemies/tachon.png',
     tiles_examen: 'assets/rooms/tiles_examen.png',
+    tachon_rojo: 'assets/enemies/tachon_rojo.png',
+    interrogante: 'assets/enemies/interrogante.png',
+    goma: 'assets/enemies/goma.png',
+    chuleta: 'assets/enemies/chuleta.png',
+    compas: 'assets/enemies/compas.png',
+    reloj: 'assets/enemies/reloj.png',
+    copia: 'assets/enemies/copia.png',
+    fotocopiadora: 'assets/bosses/fotocopiadora.png',
+    profesora: 'assets/bosses/profesora.png',
   },
 
   sprites: {
@@ -24,6 +33,51 @@ export default {
       anchor: { x: 8, y: 14 },
       animations: { idle: { frames: [0, 1], fps: 6 } },
       placeholder: { color: '#25307a', w: 12, h: 12 },
+    },
+    enemy_tachon_rojo: {
+      image: 'tachon_rojo', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#d6403a', w: 12, h: 12 },
+    },
+    enemy_interrogante: {
+      image: 'interrogante', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#25307a', w: 12, h: 12 },
+    },
+    enemy_goma: {
+      image: 'goma', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#e896a0', w: 12, h: 12 },
+    },
+    enemy_chuleta: {
+      image: 'chuleta', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#f0ecd6', w: 12, h: 12 },
+    },
+    enemy_compas: {
+      image: 'compas', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#969fae', w: 12, h: 12 },
+    },
+    enemy_reloj: {
+      image: 'reloj', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#d6403a', w: 12, h: 12 },
+    },
+    enemy_copia: {
+      image: 'copia', frameWidth: 32, frameHeight: 32, anchor: { x: 16, y: 26 },
+      animations: { idle: { frames: [2, 3, 4, 5], fps: 9 } },
+      placeholder: { color: '#25307a', w: 12, h: 20 },
+    },
+    boss_fotocopiadora: {
+      image: 'fotocopiadora', frameWidth: 32, frameHeight: 28, anchor: { x: 16, y: 26 },
+      animations: { idle: { frames: [0, 1], fps: 3 }, jam: { frames: [2], fps: 1 } },
+      placeholder: { color: '#b4b8be', w: 28, h: 22 },
+    },
+    boss_profesora: {
+      image: 'profesora', frameWidth: 40, frameHeight: 48, anchor: { x: 20, y: 46 },
+      animations: { idle: { frames: [0, 1], fps: 2 } },
+      placeholder: { color: '#2e2c36', w: 36, h: 44 },
     },
   },
 

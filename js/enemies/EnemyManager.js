@@ -12,14 +12,15 @@ export class EnemyManager {
     this.grid = new SpatialGrid(ROOM_COLS * TILE, ROOM_ROWS * TILE, 32);
   }
 
-  spawn(id, x, y) {
+  spawn(id, x, y, { quiet = false } = {}) {
     const def = this.world.game.content.enemies[id];
     if (!def) { console.error(`[Enemies] No existe el enemigo "${id}"`); return null; }
     const behavior = BEHAVIORS[def.behavior];
     if (!behavior) { console.error(`[Enemies] "${id}" usa el comportamiento desconocido "${def.behavior}"`); return null; }
     const e = new Enemy(def, behavior, x, y);
     this.list.push(e);
-    this.world.effects.burst(x, y - 4, 10, '#25307a', 30, 0.6);
+    if (!quiet) this.world.effects.burst(x, y - 4, 10, '#25307a', 30, 0.6);
+    if (def.boss) this.world.boss = e;
     return e;
   }
 
@@ -31,13 +32,15 @@ export class EnemyManager {
     for (const e of this.list) {
       e.animTime += dt;
       e.flash = Math.max(0, e.flash - dt);
+      e.haste = Math.max(0, e.haste - dt);
       if (e.spawning) { e.spawnTimer -= dt; continue; }
       e.stateTime += dt;
       e.behavior.update(e, this.world, dt);
 
       e.kx = approach(e.kx, 0, 600 * dt);
       e.ky = approach(e.ky, 0, 600 * dt);
-      const hit = room.move(e, (e.vx + e.kx) * dt, (e.vy + e.ky) * dt);
+      const sm = (e.haste > 0 ? 1.5 : 1) * this.world.mods.enemySpeed;
+      const hit = room.move(e, (e.vx * sm + e.kx) * dt, (e.vy * sm + e.ky) * dt);
       if (hit) e.behavior.onWall?.(e, hit);
       if (Math.abs(e.vx) > 3) e.facing = Math.sign(e.vx);
 
@@ -45,7 +48,7 @@ export class EnemyManager {
       if (player.alive && e.canHurt()) {
         const rr = e.def.bodyRadius + player.bodyRadius - 2;
         const dx = player.x - e.x, dy = player.y - e.y;
-        if (dx * dx + dy * dy < rr * rr) damage.hurtPlayer(e.def.contactDamage, dx, dy);
+        if (e.def.contactDamage && dx * dx + dy * dy < rr * rr) damage.hurtPlayer(e.def.contactDamage, dx, dy);
       }
     }
 
@@ -103,9 +106,15 @@ export class EnemyManager {
     g.save();
     g.translate(Math.round(e.x + ox), Math.round(e.y));
     g.scale(1 / sq, sq);
-    sprite.draw(g, 'idle', e.animTime, 0, 0, { flip: e.facing < 0, flash: e.flash > 0 });
+    const anim = e.behavior.anim?.(e) ?? 'idle';
+    sprite.draw(g, anim, e.animTime, 0, 0, { flip: e.def.noFlip ? false : e.facing < 0, flash: e.flash > 0 });
     g.restore();
-    if (e.state === 'windup') {
+    if (e.haste > 0) {
+      g.fillStyle = '#ffd65c';
+      g.fillRect(Math.round(e.x) + 5, Math.round(e.y) - 16 + Math.round(Math.sin(e.animTime * 20)), 2, 2);
+    }
+    e.behavior.renderExtra?.(g, e, this.world);
+    if (e.state === 'windup' && !e.def.boss) {
       // Señal de aviso sobre la cabeza
       g.fillStyle = '#d6403a';
       g.fillRect(Math.round(e.x) - 1, Math.round(e.y) - 19, 2, 4);

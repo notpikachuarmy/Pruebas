@@ -3,7 +3,7 @@ export default {
   id: 'aula_vacia',
   name: 'Aula vacía',
   dream: 'examen',
-  types: ['combat', 'challenge', 'boss'],
+  types: ['combat', 'challenge', 'miniboss'],
   layout: [
     '############################',
     '#..........................#',

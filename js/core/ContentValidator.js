@@ -1,6 +1,8 @@
 import { BEHAVIORS } from '../enemies/behaviors/index.js';
 import { ROOM_TYPES } from '../rooms/roomTypes/index.js';
 import { ROOM_COLS, ROOM_ROWS } from './config.js';
+import { RULES } from '../dreams/rules.js';
+import { EVENT_EFFECTS } from '../world/EventEffects.js';
 
 // Celdas que deben quedar libres delante de cada puerta (fila, columna)
 const DOOR_CLEARANCE = [];
@@ -28,6 +30,10 @@ export function validateContent(c) {
     const types = new Set(['start', 'combat', 'boss', ...(d.floor?.specials ?? []).map((s) => s.type)]);
     if (d.floor?.challengeChance) types.add('challenge');
     if (d.floor?.secret) types.add('secret');
+    if (d.floor?.miniboss) types.add('miniboss');
+    for (const k of ['boss', 'miniboss']) if (d[k] && !c.enemies[d[k]]?.boss) out.push(`Sueño "${d.id}": ${k} "${d[k]}" no existe o no tiene boss: true`);
+    for (const r of d.rules ?? []) if (!RULES[r]) out.push(`Sueño "${d.id}": regla "${r}" no existe en js/dreams/rules.js`);
+    for (const ev of d.eventPool ?? []) if (!c.events?.[ev]) out.push(`Sueño "${d.id}": evento "${ev}" no está registrado`);
     for (const t of types) {
       if (!ROOM_TYPES[t]) out.push(`Sueño "${d.id}": tipo de sala "${t}" no existe en roomTypes`);
       if (!d.roomPool.some((id) => c.rooms[id]?.types.includes(t))) out.push(`Sueño "${d.id}": ninguna plantilla admite el tipo "${t}"`);
@@ -39,6 +45,9 @@ export function validateContent(c) {
       }));
     }
     for (const m of Object.values(d.music ?? {})) if (!c.audio.music[m]) out.push(`Sueño "${d.id}": música "${m}" no definida`);
+  }
+  for (const ev of Object.values(c.events ?? {})) {
+    for (const ch of ev.choices) if (ch.effect && !EVENT_EFFECTS[ch.effect]) out.push(`Evento "${ev.id}": efecto "${ch.effect}" no existe`);
   }
   for (const r of Object.values(c.rooms)) {
     const w = r.layout[0].length;

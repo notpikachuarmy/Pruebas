@@ -21,11 +21,13 @@ export class Enemy {
     this.state = 'idle';
     this.stateTime = 0;
     this.data = {};       // memoria privada del comportamiento
+    this.haste = 0;       // tiempo restante de prisa (Reloj de Pared)
+    this.maxHp = def.hp;
     behavior.init?.(this);
   }
 
   get spawning() { return this.spawnTimer > 0; }
-  canBeHit() { return !this.dead && !this.spawning; }
+  canBeHit() { return !this.dead && !this.spawning && (this.behavior.canBeHit?.(this) ?? true); }
   canHurt() { return !this.dead && !this.spawning && (this.behavior.canHurt?.(this) ?? true); }
 
   setState(state) { this.state = state; this.stateTime = 0; }

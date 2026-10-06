@@ -9,11 +9,18 @@ import { DIRS } from '../rooms/FloorGenerator.js';
 export class MapView {
   constructor(game) { this.game = game; }
 
-  _visible(floor) {
+  _visible(world) {
+    const floor = world.run.floor;
     const shown = new Map(); // key → 'visited' | 'seen'
+    // Plano revelado (evento): todo lo que no es secreto
+    if (world.run.flags.mapRevealed) {
+      for (const n of floor.nodes.values()) if (n.type !== 'secret' || n.state.discovered) shown.set(n.key, n.state.visited ? 'visited' : 'seen');
+      return shown;
+    }
     for (const n of floor.nodes.values()) {
       if (!n.state.visited) continue;
       shown.set(n.key, 'visited');
+      if (world.mods.hideUnvisited) continue;   // regla "Folio en blanco"
       for (const [dir, kind] of Object.entries(n.doors)) {
         if (kind === 'secret' && !n.state.revealed?.[dir]) continue;
         const m = floor.nodes.get(`${n.x + DIRS[dir].dx},${n.y + DIRS[dir].dy}`);
@@ -26,7 +33,7 @@ export class MapView {
   /** Dibuja el mapa en una caja; cw/ch = tamaño de cada sala en píxeles. */
   _draw(g, world, cx, cy, cw, ch, gap, range) {
     const floor = world.run.floor, cur = world.node;
-    const shown = this._visible(floor);
+    const shown = this._visible(world);
     for (const [key, how] of shown) {
       const n = floor.nodes.get(key);
       const dx = n.x - cur.x, dy = n.y - cur.y;
@@ -50,6 +57,23 @@ export class MapView {
         g.fillStyle = ROOM_TYPES[n.type].mapColor;
         const s = Math.max(2, Math.floor(Math.min(cw, ch) / 3));
         g.fillRect(x + Math.floor((cw - s) / 2), y + Math.floor((ch - s) / 2), s, s);
+      }
+      // Cosas que te has dejado: corazones (rojo), Lucidez (lila), algo por usar (dorado)
+      if (how === 'visited') {
+        const left = world.leftovers(n);
+        const marks = [];
+        if (left.hearts) marks.push('#eb2f2d');
+        if (left.lucidity) marks.push('#e8e6dc');
+        if (left.loot) marks.push('#ffd65c');
+        const ms = cw >= 16 ? 3 : 2;
+        if (marks.length) {
+          // Franja oscura en la base de la sala para que las marcas se lean sobre cualquier color
+          g.fillStyle = '#100c20';
+          g.fillRect(x, y + ch - ms - 2, marks.length * (ms + 1) + 1, ms + 2);
+        }
+        marks.forEach((c, i) => {
+          g.fillStyle = c; g.fillRect(x + 1 + i * (ms + 1), y + ch - ms - 1, ms, ms);
+        });
       }
     }
   }
@@ -76,13 +100,22 @@ export class MapView {
 
   renderFullUI(r, world) {
     r.text(world.run.dream.name, VIEW_W / 2, 22, { size: 12, weight: 700, color: '#e8e6dc', align: 'center' });
-    const types = ['boss', 'reward', 'shop', 'healing', 'challenge', 'secret'];
-    let x = 30;
+    const types = ['boss', 'miniboss', 'reward', 'shop', 'healing', 'challenge', 'event', 'secret'];
+    let x = 18;
     for (const t of types) {
       const c = r.ui;
       c.fillStyle = ROOM_TYPES[t].mapColor; c.fillRect(x, 254, 6, 6);
-      r.text(ROOM_TYPES[t].label, x + 9, 260, { size: 8, color: '#c9bde6' });
-      x += r.measure(ROOM_TYPES[t].label, 8) + 26;
+      r.text(ROOM_TYPES[t].label, x + 9, 260, { size: 7, color: '#c9bde6' });
+      x += r.measure(ROOM_TYPES[t].label, 7) + 18;
     }
+    // Leyenda de lo pendiente
+    const pend = [['#eb2f2d', 'Corazón'], ['#e8e6dc', 'Lucidez'], ['#ffd65c', 'Algo por usar']];
+    let px = 150;
+    for (const [c, label] of pend) {
+      r.ui.fillStyle = c; r.ui.fillRect(px, 237, 4, 4);
+      r.text(label, px + 7, 242, { size: 7, color: '#9b8fc7' });
+      px += r.measure(label, 7) + 22;
+    }
+    if (world.mods.hideUnvisited && !world.run.flags.mapRevealed) r.text('Folio en blanco: solo ves lo que ya has recorrido', 240, 36, { size: 7, color: '#9b8fc7', align: 'center' });
   }
 }

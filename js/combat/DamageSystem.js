@@ -7,10 +7,11 @@ export class DamageSystem {
 
   hitEnemy(enemy, amount, dirX, dirY, knockback) {
     const { game, effects } = this.world;
+    amount *= enemy.behavior.damageMult?.(enemy) ?? 1;
     enemy.hp -= amount;
     enemy.flash = 0.08;
     const l = Math.hypot(dirX, dirY) || 1;
-    const kb = knockback / (enemy.def.mass ?? 1);
+    const kb = enemy.def.mass >= 50 ? 0 : knockback / (enemy.def.mass ?? 1);
     enemy.kx += (dirX / l) * kb;
     enemy.ky += (dirY / l) * kb;
     game.events.emit('player:hitEnemy', { enemy, amount });
@@ -21,7 +22,17 @@ export class DamageSystem {
 
   killEnemy(enemy) {
     const { game, effects, pickups } = this.world;
+    if (enemy.dead) return;
     enemy.dead = true;
+    enemy.behavior.onDeath?.(enemy, this.world);
+    if (enemy.def.boss) {
+      this.world.boss = null;
+      effects.burst(enemy.x, enemy.y - 20, 50, '#d6403a', 140, 1, 2);
+      this.world.hitstop(0.35);
+      this.world.shake(7, 0.6);
+      game.haptics.play('bossDown');
+      game.events.emit('boss:defeated', { def: enemy.def });
+    }
     effects.burst(enemy.x, enemy.y - enemy.def.bodyHeight, 14, '#25307a', 90, 0.5, 2);
     effects.burst(enemy.x, enemy.y - enemy.def.bodyHeight, 6, '#e8e6dc', 60, 0.35);
     pickups.dropFrom(enemy);

@@ -7,7 +7,7 @@ export class Encounter {
     this.world = world;
     this.def = def;
     this.waveIndex = -1;
-    this.timer = 0.9;            // margen para orientarse al entrar
+    this.timer = def.startDelay ?? 0.9;   // margen para orientarse al entrar
     this.finished = false;
     this.banner = 0;             // tiempo restante del rótulo "Pregunta N"
   }
@@ -38,8 +38,8 @@ export class Encounter {
     const used = [];
     for (const g of groups) {
       for (let i = 0; i < g.count; i++) {
-        let pt = null;
-        for (let t = 0; t < 10; t++) {
+        let pt = g.at ? { x: g.at[0] * 16 + 8, y: g.at[1] * 16 + 14 } : null;
+        for (let t = 0; t < 10 && !g.at; t++) {
           const cand = room.enemySpawns.length ? rngSpawn.pick(room.enemySpawns) : room.randomFloorPoint(rngSpawn, player.x, player.y, 90);
           pt = cand;
           if (used.every((u) => Math.hypot(u.x - cand.x, u.y - cand.y) > 20)) break;
@@ -48,7 +48,7 @@ export class Encounter {
         enemies.spawn(g.id, pt.x, pt.y);
       }
     }
-    this.banner = 1.4;
+    this.banner = this.def.noBanner ? 0 : 1.4;
     game.audio.play('waveStart');
     game.audio.play('spawn');
   }

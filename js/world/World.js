@@ -1,7 +1,7 @@
 import { TILE, ROOM_OFFSET_X, ROOM_OFFSET_Y } from '../core/config.js';
 import { Room, DOOR_ENTRY } from '../rooms/Room.js';
 import { DIRS, neighborOf } from '../rooms/FloorGenerator.js';
-import { ROOM_TYPES } from '../rooms/roomTypes/index.js';
+import { ROOM_TYPES, DOOR_ICONS } from '../rooms/roomTypes/index.js';
 import { Player } from '../player/Player.js';
 import { PlayerController } from '../player/PlayerController.js';
 import { PlayerCombat } from '../player/PlayerCombat.js';
@@ -13,6 +13,8 @@ import { Pickups } from '../combat/Pickups.js';
 import { DamageSystem } from '../combat/DamageSystem.js';
 import { Encounter } from './Encounter.js';
 import { Interactables } from './Interactables.js';
+import { PlayerHistory } from './PlayerHistory.js';
+import { RULES } from '../dreams/rules.js';
 
 const SECRET_HITS = 5;               // impactos para abrir una pared secreta
 const FADE_OUT = 0.14, FADE_IN = 0.2; // transición entre salas
@@ -50,7 +52,33 @@ export class World {
     this._drawList = [];
     this.onDeath = null;             // callbacks de GameScene
     this.onExit = null;
+
+    // Modificadores que las reglas del sueño y los enemigos pueden tocar
+    this.mods = { inkLife: 1, enemySpeed: 1, hideUnvisited: false };
+    this.rules = (run.dream.rules ?? []).map((id) => RULES[id]).filter(Boolean);
+    for (const r of this.rules) r.apply?.(this);
+
+    this.playerHistory = new PlayerHistory(120);
+    this.arena = { margin: 0, target: 0 };  // el aula que se arruga (jefe, fase 3)
+    this.boss = null;
+    this.banner = null;                     // rótulo grande (fases del jefe)
+    this.bossIntro = null;
+    this.texts = [];                        // textos flotantes ("¡5 minutos!")
+    this.examClock = null;
   }
+
+  // ---------- Avisos ----------
+
+  toast(text) { this.game.toasts.show(text); }
+
+  floatText(x, y, text) {
+    if (this.texts.length > 8) this.texts.shift();
+    this.texts.push({ x, y, text, t: 0 });
+  }
+
+  bossBanner(text) { this.banner = { text, t: 0 }; }
+
+  setArena(margin) { this.arena.target = margin; }
 
   get cleared() { return this.node?.state.cleared ?? false; }
 
@@ -62,6 +90,11 @@ export class World {
     this.projectiles.clear(); this.effects.clear(); this.hazards.clear();
     this.enemies.clear(); this.pickups.clear();
     this.encounter = null;
+    this.boss = null;
+    this.arena.margin = 0; this.arena.target = 0;
+    this.texts.length = 0;
+    this.banner = null;
+    this.bossIntro = null;
 
     const first = !node.state.visited;
     node.state.visited = true;
@@ -93,6 +126,7 @@ export class World {
     this._configureDoors(node);
     ROOM_TYPES[node.type].onEnter(this, node, first);
     this.room.setAllDoors(!this.encounter);
+    if (!this.encounter) this._music('explore');
     this.game.events.emit('room:enter', { node, first });
   }
 
@@ -111,11 +145,14 @@ export class World {
     const spec = {};
     for (const [dir, kind] of Object.entries(node.doors)) {
       const other = neighborOf(this.run.floor, node, dir);
-      const typeKind = ROOM_TYPES[other.type].doorKind ?? ROOM_TYPES[node.type].doorKind;
       const isSecret = kind === 'secret';
       const revealed = !isSecret || !!node.state.revealed?.[dir];
+      // La puerta anuncia a qué tipo de sala lleva: color del marco + icono
+      const icon = DOOR_ICONS[other.type] ?? null;
       spec[dir] = {
-        kind: isSecret ? 'secret' : (typeKind ?? 'normal'),
+        kind: isSecret ? 'secret' : other.type === 'boss' ? 'boss' : 'normal',
+        color: icon ? ROOM_TYPES[other.type].mapColor : null,
+        icon,
         open: revealed,
         revealed,
         hits: node.state.secretHits[dir] ?? 0,
@@ -124,14 +161,26 @@ export class World {
     this.room.setDoors(spec);
   }
 
-  startEncounter(def) {
+  startEncounter(def, { music = 'combat' } = {}) {
     this.encounter = new Encounter(this, def);
+    for (const r of this.rules) r.onEncounterStart?.(this, this.encounter);
+    this._music(music);
+  }
+
+  _music(kind) {
+    const m = this.run.dream.music;
+    this.game.audio.playMusic(m[kind] ?? m.explore);
   }
 
   onEncounterCleared() {
     const node = this.node;
     node.state.cleared = true;
     this.room.setAllDoors(true);
+    for (const r of this.rules) r.onEncounterEnd?.(this);
+    this._music('explore');
+    // Sala limpia = sala segura: fuera proyectiles enemigos y suelo que hace daño
+    this.projectiles.clearTeam('enemy');
+    this.hazards.clearDangerous();
     ROOM_TYPES[node.type].onClear?.(this, node);
     this.game.audio.play('cleared');
     this.game.haptics.play('event');
@@ -181,6 +230,9 @@ export class World {
     } else {
       p.deathTime += dt;
     }
+    this.playerHistory.record(p, this.time);
+    this._updateArena(dt);
+    for (const r of this.rules) r.update?.(this, dt);
     this.encounter?.update(dt);
     this.enemies.update(dt);
     this.projectiles.update(dt);
@@ -188,6 +240,10 @@ export class World {
     this.pickups.update(dt);
     this.interactables.update(dt);
     this.effects.update(dt);
+    for (const t of this.texts) t.t += dt;
+    if (this.texts.length && this.texts[0].t > 1.2) this.texts.shift();
+    if (this.banner && (this.banner.t += dt) > 2) this.banner = null;
+    if (this.bossIntro && (this.bossIntro.t += dt) > 2.6) this.bossIntro = null;
 
     if (p.alive) {
       const dir = this.room.exitDirection(p.x, p.y);
@@ -203,6 +259,40 @@ export class World {
       this.enterNode(neighborOf(this.run.floor, this.node, tr.dir), tr.dir);
     }
     if (tr.t >= FADE_OUT + FADE_IN) this.transition = null;
+  }
+
+  /** Fase 3 del jefe: los bordes del aula se cierran. Pisar el borde hace daño y empuja hacia dentro. */
+  _updateArena(dt) {
+    const a = this.arena;
+    if (a.margin === a.target && a.margin === 0) return;
+    a.margin += Math.sign(a.target - a.margin) * Math.min(Math.abs(a.target - a.margin), 16 * dt);
+    const p = this.player;
+    if (!p.alive || a.margin < 4) return;
+    const r = this.arenaRect();
+    if (p.x < r.x0 || p.x > r.x1 || p.y < r.y0 || p.y > r.y1) {
+      const cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2;
+      this.damage.hurtPlayer(1, cx - p.x, cy - p.y);
+      p.kx += Math.sign(cx - p.x) * 40; p.ky += Math.sign(cy - p.y) * 40;
+    }
+  }
+
+  arenaRect() {
+    const m = this.arena.margin, w = this.room.width, h = this.room.height;
+    return { x0: TILE + m, x1: w - TILE - m, y0: TILE + m * 0.6, y1: h - TILE - m * 0.6 };
+  }
+
+  /** Lo que queda pendiente en una sala (para marcarlo en el mapa). */
+  leftovers(node) {
+    const out = { hearts: 0, lucidity: 0, loot: 0 };
+    const pickups = node === this.node ? this.pickups.serialize() : node.state.pickups;
+    for (const p of pickups) { if (p.type === 'heart') out.hearts++; else out.lucidity++; }
+    for (const o of node.state.interactables ?? []) {
+      if (o.kind === 'chest' && !o.opened) out.loot++;
+      if (o.kind === 'fountain' && !o.used) out.loot++;
+      if (o.kind === 'shopItem' && !o.sold && o.price <= this.run.lucidity) out.loot++;
+      if (o.kind === 'event' && !o.done) out.loot++;
+    }
+    return out;
   }
 
   /** Opacidad del fundido entre salas (0 = nada). */
@@ -244,6 +334,7 @@ export class World {
     g.save();
     g.translate(ROOM_OFFSET_X + sx, ROOM_OFFSET_Y + sy);
     this.room.render(g);
+    this._renderArena(g);
     this.hazards.render(g);
     this.pickups.render(g);
 
@@ -268,10 +359,37 @@ export class World {
     g.restore();
   }
 
+  _renderArena(g) {
+    if (this.arena.margin < 1) return;
+    const r = this.arenaRect(), w = this.room.width, h = this.room.height;
+    g.globalAlpha = 0.78;
+    g.fillStyle = '#2e2552';
+    g.fillRect(0, 0, w, r.y0); g.fillRect(0, r.y1, w, h - r.y1);
+    g.fillRect(0, r.y0, r.x0, r.y1 - r.y0); g.fillRect(r.x1, r.y0, w - r.x1, r.y1 - r.y0);
+    // Pliegues del papel arrugado
+    g.fillStyle = '#4b3f75';
+    for (let i = 0; i < 10; i++) {
+      const k = (i * 47) % 100 / 100;
+      g.fillRect(Math.round(r.x0 * k), Math.round(r.y0 + (r.y1 - r.y0) * ((i * 31) % 100 / 100)), 6, 1);
+      g.fillRect(Math.round(r.x1 + (w - r.x1) * k), Math.round(r.y0 + (r.y1 - r.y0) * ((i * 73) % 100 / 100)), 6, 1);
+    }
+    g.globalAlpha = 1;
+    g.fillStyle = '#d6403a';
+    g.fillRect(Math.round(r.x0), Math.round(r.y0), Math.round(r.x1 - r.x0), 1);
+    g.fillRect(Math.round(r.x0), Math.round(r.y1), Math.round(r.x1 - r.x0), 1);
+    g.fillRect(Math.round(r.x0), Math.round(r.y0), 1, Math.round(r.y1 - r.y0));
+    g.fillRect(Math.round(r.x1), Math.round(r.y0), 1, Math.round(r.y1 - r.y0));
+  }
+
   /** Textos que van sobre la sala (precios, avisos, pistas). */
   renderUI(r) {
-    ROOM_TYPES[this.node.type].renderUI?.(r, this, ROOM_OFFSET_X, ROOM_OFFSET_Y);
-    if (!this.run.result) this.interactables.renderUI(r, ROOM_OFFSET_X, ROOM_OFFSET_Y);
+    const ox = ROOM_OFFSET_X, oy = ROOM_OFFSET_Y;
+    ROOM_TYPES[this.node.type].renderUI?.(r, this, ox, oy);
+    if (!this.run.result) this.interactables.renderUI(r, ox, oy);
+    for (const t of this.texts) {
+      r.text(t.text, t.x + ox, t.y + oy - t.t * 14, { size: 8, weight: 700, color: '#ffd65c', align: 'center', alpha: Math.min(1, (1.2 - t.t) * 3) });
+    }
+    for (const rule of this.rules) rule.renderUI?.(r, this);
   }
 
   _renderPlayer(g, sprite) {

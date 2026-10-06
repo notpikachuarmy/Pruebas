@@ -15,6 +15,8 @@ export class Run {
     this.shots = 0;
     this.hits = 0;
     this.result = null;     // 'win' | 'death' | 'quit'
+    this.flags = {};        // efectos de eventos (favor, mapa revelado...)
+    this.usedEvents = new Set();
   }
 
   get accuracy() { return this.shots ? this.hits / this.shots : 0; }
