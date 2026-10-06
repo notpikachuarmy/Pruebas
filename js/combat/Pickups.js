@@ -38,13 +38,19 @@ export class Pickups {
     this.pool = new Pool(() => ({ active: false, type: 'lucidity', x: 0, y: 0, vx: 0, vy: 0, t: 0 }), capacity);
   }
 
-  spawn(type, x, y) {
+  spawn(type, x, y, still = false) {
     const p = this.pool.spawn();
     if (!p) return;
     const a = Math.random() * Math.PI * 2;
-    p.type = type; p.x = x; p.y = y; p.t = 0;
-    p.vx = Math.cos(a) * 50; p.vy = Math.sin(a) * 50;
+    p.type = type; p.x = x; p.y = y; p.t = still ? 1 : 0;
+    const s = still ? 0 : 50;
+    p.vx = Math.cos(a) * s; p.vy = Math.sin(a) * s;
   }
+
+  /** Para guardar los recogibles que quedan en una sala al salir de ella. */
+  serialize() { return this.pool.active.map((p) => ({ type: p.type, x: p.x, y: p.y })); }
+
+  restore(list) { for (const p of list) this.spawn(p.type, p.x, p.y, true); }
 
   /** Aplica la tabla `drops` de un enemigo. */
   dropFrom(enemy) {

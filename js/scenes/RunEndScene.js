@@ -39,14 +39,15 @@ export class RunEndScene extends Scene {
     r.text(sub, 240, 86, { size: 9, color: '#c9bde6', align: 'center' });
     const rows = [
       ['Tiempo', fmt(this.run.time)],
+      ['Salas exploradas', `${this.run.roomsVisited} / ${this.run.floor.nodes.size}`],
       ['Enemigos disipados', this.run.kills],
       ['Precisión', this.run.shots ? `${Math.round(this.run.accuracy * 100)}%` : '—'],
       ['Lucidez', this.run.lucidity],
       ['Semilla', this.run.seed],
     ];
     rows.forEach(([k, v], i) => {
-      r.text(k, 170, 116 + i * 14, { size: 9, color: '#9b8fc7' });
-      r.text(String(v), 310, 116 + i * 14, { size: 9, color: '#e8e6dc', align: 'right' });
+      r.text(k, 170, 112 + i * 14, { size: 9, color: '#9b8fc7' });
+      r.text(String(v), 310, 112 + i * 14, { size: 9, color: '#e8e6dc', align: 'right' });
     });
     if (this.time > 0.6) this.menu.render(r);
   }

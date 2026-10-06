@@ -47,7 +47,11 @@ export class Projectiles {
 
       // Al final del recorrido, el proyectil "cae" (como las ondas que se apagan)
       if (p.travelLeft <= 0) { this._kill(p, false); continue; }
-      if (room.isSolidAt(p.x, p.y)) { this._kill(p, true); continue; }
+      if (room.isSolidAt(p.x, p.y)) {
+        if (p.team === 'player') this.world.onWallShot(p.x, p.y);
+        this._kill(p, true);
+        continue;
+      }
 
       if (p.team === 'player') {
         const hits = enemies.query(p.x, p.y, p.radius + 12);

@@ -2,13 +2,14 @@ import { Enemy, SPAWN_TIME } from './Enemy.js';
 import { BEHAVIORS } from './behaviors/index.js';
 import { SpatialGrid } from '../combat/SpatialGrid.js';
 import { approach } from '../core/math.js';
+import { TILE, ROOM_COLS, ROOM_ROWS } from '../core/config.js';
 
 /** Crea, actualiza, separa y dibuja enemigos. */
 export class EnemyManager {
   constructor(world) {
     this.world = world;
     this.list = [];
-    this.grid = new SpatialGrid(world.room.width, world.room.height, 32);
+    this.grid = new SpatialGrid(ROOM_COLS * TILE, ROOM_ROWS * TILE, 32);
   }
 
   spawn(id, x, y) {

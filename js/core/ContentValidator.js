@@ -1,4 +1,11 @@
 import { BEHAVIORS } from '../enemies/behaviors/index.js';
+import { ROOM_TYPES } from '../rooms/roomTypes/index.js';
+import { ROOM_COLS, ROOM_ROWS } from './config.js';
+
+// Celdas que deben quedar libres delante de cada puerta (fila, columna)
+const DOOR_CLEARANCE = [];
+for (const r of [1, 2, 12, 13]) for (let c = 12; c <= 15; c++) DOOR_CLEARANCE.push([r, c]);
+for (let r = 5; r <= 9; r++) for (const c of [1, 2, 25, 26]) DOOR_CLEARANCE.push([r, c]);
 
 /**
  * Comprueba referencias entre datos al arrancar (ids que no existen, sprites sin definir...).
@@ -8,7 +15,7 @@ export function validateContent(c) {
   const out = [];
   const sprites = c.assets.sprites;
   for (const e of Object.values(c.enemies)) {
-    for (const k of ['id', 'name', 'hp', 'speed', 'radius', 'bodyRadius', 'bodyHeight', 'behavior', 'sprite']) {
+    for (const k of ['id', 'name', 'cost', 'role', 'hp', 'speed', 'radius', 'bodyRadius', 'bodyHeight', 'behavior', 'sprite']) {
       if (e[k] === undefined) out.push(`Enemigo "${e.id}": falta "${k}"`);
     }
     if (!BEHAVIORS[e.behavior]) out.push(`Enemigo "${e.id}": comportamiento "${e.behavior}" no registrado`);
@@ -18,6 +25,14 @@ export function validateContent(c) {
     if (!c.assets.tilesets[d.tileset]) out.push(`Sueño "${d.id}": tileset "${d.tileset}" no existe`);
     for (const p of d.enemyPool) if (!c.enemies[p.id]) out.push(`Sueño "${d.id}": enemyPool usa "${p.id}", que no existe`);
     for (const r of d.roomPool) if (!c.rooms[r]) out.push(`Sueño "${d.id}": roomPool usa "${r}", que no existe`);
+    const types = new Set(['start', 'combat', 'boss', ...(d.floor?.specials ?? []).map((s) => s.type)]);
+    if (d.floor?.challengeChance) types.add('challenge');
+    if (d.floor?.secret) types.add('secret');
+    for (const t of types) {
+      if (!ROOM_TYPES[t]) out.push(`Sueño "${d.id}": tipo de sala "${t}" no existe en roomTypes`);
+      if (!d.roomPool.some((id) => c.rooms[id]?.types.includes(t))) out.push(`Sueño "${d.id}": ninguna plantilla admite el tipo "${t}"`);
+    }
+    for (const it of d.shop ?? []) if (!it.price) out.push(`Sueño "${d.id}": producto de tienda sin precio`);
     for (const [encId, enc] of Object.entries(d.encounters ?? {})) {
       enc.waves.forEach((w, i) => w.forEach((g) => {
         if (!c.enemies[g.id]) out.push(`Sueño "${d.id}", encuentro "${encId}", oleada ${i + 1}: "${g.id}" no existe`);
@@ -28,7 +43,12 @@ export function validateContent(c) {
   for (const r of Object.values(c.rooms)) {
     const w = r.layout[0].length;
     r.layout.forEach((row, i) => { if (row.length !== w) out.push(`Sala "${r.id}": la fila ${i} mide ${row.length} (esperado ${w})`); });
-    if (!r.layout.some((row) => row.includes('P'))) out.push(`Sala "${r.id}": no tiene punto de aparición 'P'`);
+    if (r.layout.length !== ROOM_ROWS || w !== ROOM_COLS) out.push(`Sala "${r.id}": mide ${w}×${r.layout.length}, debe medir ${ROOM_COLS}×${ROOM_ROWS}`);
+    for (const [row, col] of DOOR_CLEARANCE) {
+      const ch = r.layout[row]?.[col];
+      if (ch && ch !== '.' && ch !== 'P' && ch !== 'S') out.push(`Sala "${r.id}": la celda (${row},${col}) bloquea una puerta`);
+    }
+    if (!Array.isArray(r.types) || !r.types.length) out.push(`Sala "${r.id}": falta "types"`);
   }
   return out;
 }

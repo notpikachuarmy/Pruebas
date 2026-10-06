@@ -4,6 +4,8 @@ export default {
   name: 'Tachón',
   dream: 'examen',
   role: 'perseguidor',
+  cost: 1,            // puntos de amenaza (generación de encuentros)
+  minDepth: 0,        // profundidad mínima del sueño a la que puede aparecer
   description:
     'Un error tachado con tanta rabia que cobró vida. Avanza a trompicones, se encoge antes de ' +
     'abalanzarse y deja manchas de tinta que pegan los pies al suelo.',

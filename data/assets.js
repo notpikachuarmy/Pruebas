@@ -35,7 +35,7 @@ export default {
       floorMargin: 1,      // suelo con margen rojo de cuaderno
       wall: 2,
       wallFace: 3,         // pared con suelo debajo (cara visible)
-      solids: { D: 4 },    // obstáculos: símbolo del layout → índice del tile
+      solids: { D: 4, T: 5, L: 6 }, // obstáculos: pupitre, taquilla, pila de libros
     },
   },
 };
