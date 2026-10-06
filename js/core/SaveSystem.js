@@ -27,6 +27,7 @@ export function defaultSave() {
       dreamers: {},            // { idSueño: [idFragmento, ...] }
       bestiary: {},            // { idEnemigo: { seen, kills, killedYou } }
       itemCounts: {},          // { idObjeto: veces conseguido }
+      defeatedBosses: [],      // jefes vencidos alguna vez
       unlocks: { dreams: ['examen'], items: [], characters: ['oyente'] },
       discovered: { enemies: [], bosses: [], items: [], synergies: [] },
       achievements: {},

@@ -15,7 +15,7 @@ function makeProjectile() {
     homing: 0, homingRange: 0,
     boomerang: false, returned: false,
     trail: null, trailTimer: 0,
-    strong: false, isEcho: false, source: null,
+    strong: false, isEcho: false, source: null, variant: 0,
     hitIds: new Set(),            // evita golpear dos veces al mismo enemigo al perforar
   };
 }
@@ -60,6 +60,7 @@ export class Projectiles {
     p.trail = opts.hazardTrail ?? null; p.trailTimer = 0;
     p.strong = !!opts.strong; p.isEcho = !!opts.isEcho;
     p.source = opts.source ?? null;
+    p.variant = (Math.random() * 3) | 0;     // tipo de nota (♪, ♩ o ♫) solo visual
     p.age = 0;
     p.hitIds.clear();
     return p;
@@ -210,15 +211,35 @@ export class Projectiles {
       g.fillRect(Math.round(p.x) - p.radius + 1, Math.round(p.y) - 1, Math.max(1, p.radius * 2 - 2), 2);
       if (p.shape === 'ink') { this._renderInk(g, p, x, y); continue; }
       if (p.isEcho) g.globalAlpha = 0.65;
-      // anillo de "onda" + núcleo
-      const pulse = 1 + Math.floor((p.age * 12) % 2);
-      const r = p.radius;
-      g.fillStyle = p.trailColor;
-      g.fillRect(x - r - pulse + 1, y - r + 1, (r + pulse) * 2 - 2, Math.max(1, r * 2 - 2));
-      g.fillRect(x - r + 1, y - r - pulse + 1, Math.max(1, r * 2 - 2), (r + pulse) * 2 - 2);
-      g.fillStyle = p.color;
-      g.fillRect(x - r + 1, y - r + 1, Math.max(1, r * 2 - 2), Math.max(1, r * 2 - 2));
+      // Nota musical: primero el contorno (color de estela), luego la nota (color principal)
+      const bob = Math.round(Math.sin(p.age * 18) * 0.6);
+      this._note(g, x, y + bob, p.radius, p.variant, p.trailColor, 1);
+      this._note(g, x, y + bob, p.radius, p.variant, p.color, 0);
       g.globalAlpha = 1;
+    }
+  }
+
+  /**
+   * Dibuja una nota (cabeza + plica + corchete) en píxeles. El centro de la cabeza es el punto de impacto.
+   * o = grosor extra del contorno (1) o 0 para el relleno.
+   */
+  _note(g, x, y, r, variant, color, o) {
+    g.fillStyle = color;
+    const hw = r + 1, hh = Math.max(2, r);
+    // cabeza (óvalo inclinado aproximado)
+    g.fillRect(x - hw - o, y - hh / 2 - o, hw * 2 + o * 2, hh + o * 2);
+    g.fillRect(x - hw + 1 - o, y - hh / 2 - 1 - o, hw * 2 - 2 + o * 2, hh + 2 + o * 2);
+    // plica
+    const sx = x + hw - 1, stemH = r * 3 + 2;
+    g.fillRect(sx - o, y - stemH - o, 1 + o * 2 + (r > 3 ? 1 : 0), stemH + o);
+    if (variant === 0) {
+      // corchete (♪)
+      g.fillRect(sx + 1 - o, y - stemH - o, Math.ceil(r * 0.9) + o * 2, 1 + o * 2);
+      g.fillRect(sx + Math.ceil(r * 0.9) - o, y - stemH + 1 - o, 1 + o * 2, Math.ceil(r * 0.8) + o * 2);
+    } else if (variant === 2) {
+      // doble corchete (♬)
+      g.fillRect(sx + 1 - o, y - stemH - o, Math.ceil(r * 0.9) + o * 2, 1 + o * 2);
+      g.fillRect(sx + 1 - o, y - stemH + 2 - o, Math.ceil(r * 0.9) + o * 2, 1 + o * 2);
     }
   }
 

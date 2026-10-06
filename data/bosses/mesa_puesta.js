@@ -1,10 +1,11 @@
-// Jefe de La Casa que se Vacía
+// Jefe de La Casa a Oscuras
 export default {
-  id: 'mesa_puesta', name: 'La Mesa Puesta', dream: 'casa', role: 'jefe', boss: true, tags: ['casa'],
+  id: 'mesa_puesta', name: 'La Cena que Nadie Sirve', dream: 'casa', role: 'jefe', boss: true, tags: ['casa'],
   cost: 99, minDepth: 99,
-  title: 'Cena para seis, cada domingo',
-  description: 'Seis platos, una vela y nadie más. Lanza la vajilla y apaga la casa.',
-  theme: 'Carmen pone la mesa para toda la familia cada domingo. Al vencerla, por fin hay alguien sentado.',
+  title: 'Cena para tres',
+  description: 'Platos fríos y una vela. Lanza la vajilla y, cuando espera, la casa se apaga.',
+  theme: 'Lucía espera sentada a que alguien vuelva a casa para cenar.',
+  board: 'Cena para tres', boardCleared: 'Alguien se ha quedado',
   sprite: 'boss_mesa_puesta', noFlip: true,
   light: 70,          // la vela ilumina alrededor de la mesa (regla Penumbra)
   radius: 18, bodyRadius: 20, bodyHeight: 18,

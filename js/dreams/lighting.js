@@ -34,7 +34,8 @@ export class Lighting {
     }
     for (const e of world.enemies.list) {
       // Siluetas tenues; los que llevan luz propia (la vela de la Mesa) iluminan de verdad
-      if (e.def.light) this._hole(g, e.x, e.y - e.def.bodyHeight, e.def.light, 1);
+      const own = e.behavior.light?.(e) ?? e.def.light;
+      if (own) this._hole(g, e.x, e.y - e.def.bodyHeight, own, 1);
       else this._hole(g, e.x, e.y - e.def.bodyHeight * 0.6, 13, 0.45);
     }
     for (const pk of world.pickups.pool.active) this._hole(g, pk.x, pk.y, 9, 0.5);

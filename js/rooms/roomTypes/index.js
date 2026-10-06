@@ -181,9 +181,9 @@ export const ROOM_TYPES = {
     label: 'Jefe', mapColor: '#d6403a',
     onEnter(world, node) {
       if (node.state.cleared) return;
-      const def = world.game.content.enemies[world.run.dream.boss];
+      const def = world.game.content.enemies[world.run.bossId];
       world.bossIntro = { name: def.name, title: def.title ?? '', t: 0 };
-      world.startEncounter({ waves: [[{ id: def.id, count: 1, at: [14, 4] }]], startDelay: 2, noBanner: true, noClock: true }, { music: 'boss' });
+      world.startEncounter({ waves: [[{ id: def.id, count: 1, at: def.spawnAt ?? [14, 4] }]], startDelay: 2, noBanner: true, noClock: true }, { music: 'boss' });
     },
     onClear(world) {
       const c = center(world);
@@ -194,8 +194,10 @@ export const ROOM_TYPES = {
     // La pizarra del aula: el nombre del soñador y, al final, la nota
     renderUI(r, world, ox, oy) {
       const { owner, text } = world.run.dream;
+      const def = world.game.content.enemies[world.run.bossId];
       const cleared = world.node.state.cleared;
-      const board = (cleared ? text.bossBoardCleared : text.bossBoard) ?? '';
+      // Cartel de la sala: propio del jefe o, si no tiene, el del sueño
+      const board = (cleared ? def.boardCleared ?? text.bossBoardCleared : def.board ?? text.bossBoard) ?? '';
       r.text(board.replace('{owner}', owner.name), ox + 224, oy + 11,
         { size: cleared ? 10 : 8, weight: cleared ? 700 : 400, color: cleared ? '#7fd6a0' : '#e8e6dc', align: 'center', shadow: null, alpha: 0.9 });
     },

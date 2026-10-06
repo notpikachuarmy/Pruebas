@@ -4,11 +4,11 @@ export default {
   prop: 'phone',
   title: 'El contestador parpadea',
   text: [
-    'Hay un mensaje sin escuchar. La lucecita roja parpadea despacio.',
-    'Alguien lleva mucho tiempo sin pulsar ese botón.',
+    'Un mensaje antiguo. La lucecita roja parpadea en la oscuridad.',
+    'Lucía lo ha escuchado tantas veces que la cinta está gastada.',
   ],
   choices: [
-    { label: 'Escuchar el mensaje', effect: 'healFull', result: '«Mamá, el domingo vamos. Te lo prometo.» Te sientes mejor.' },
-    { label: 'Llevarte la cinta (+8 Lucidez)', effect: 'lucidity', amount: 8, result: 'La cinta está gastada de tanto rebobinarla.' },
+    { label: 'Escuchar el mensaje', effect: 'healFull', result: '«Volvemos pronto, cariño.» Lucía se lo sabe de memoria. Te sientes mejor.' },
+    { label: 'Llevarte la cinta (+8 Lucidez)', effect: 'lucidity', amount: 8, result: 'Así no tendrá que escucharlo más.' },
   ],
 };

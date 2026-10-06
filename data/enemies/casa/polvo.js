@@ -3,7 +3,7 @@ export default {
   id: 'polvo', name: 'Bola de Polvo', dream: 'casa', role: 'perseguidor', tags: ['casa'],
   cost: 1.3, minDepth: 1,
   description: 'Se acumula donde nadie limpia. Al deshacerla, se separa en dos más pequeñas.',
-  theme: 'Habitaciones que nadie pisa.',
+  theme: 'Habitaciones que ya nadie limpia.',
   sprite: 'enemy_polvo',
   radius: 5, bodyRadius: 7, bodyHeight: 6,
   hp: 4, speed: 34, contactDamage: 1, mass: 0.9,

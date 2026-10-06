@@ -33,6 +33,23 @@ export const HAZARD_TYPES = {
       }
     },
   },
+  // Mano de debajo de la cama: sombra en el suelo que agarra al terminar el aviso
+  grab: {
+    render(g, h) {
+      const k = 1 - h.life / h.max;
+      g.globalAlpha = 0.35 + k * 0.5;
+      g.fillStyle = '#08060e';
+      g.beginPath(); g.ellipse(Math.round(h.x), Math.round(h.y), h.r * (0.4 + k * 0.6), h.r * 0.5 * (0.4 + k * 0.6), 0, 0, Math.PI * 2); g.fill();
+      g.globalAlpha = 1;
+      if (h.life < 0.25) { g.fillStyle = '#ffd65c'; g.fillRect(Math.round(h.x) - 3, Math.round(h.y) - 1, 2, 1); g.fillRect(Math.round(h.x) + 2, Math.round(h.y) - 1, 2, 1); }
+    },
+    onExpire(h, world) {
+      const p = world.player;
+      const dx = p.x - h.x, dy = (p.y - h.y) * 1.6;
+      if (p.alive && dx * dx + dy * dy < h.r * h.r) world.damage.hurtPlayer(1, dx, dy, h.source);
+      world.effects.burst(h.x, h.y - 4, 10, '#28243e', 70, 0.4);
+    },
+  },
   // Cruz roja de corrección: aviso que explota al terminar
   mark: {
     render(g, h) {

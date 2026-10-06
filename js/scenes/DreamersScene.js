@@ -1,4 +1,4 @@
-import { Scene } from './Scene.js';
+import { Scene, closeHint, wantsClose } from './Scene.js';
 import { Menu } from '../ui/Menu.js';
 import { Backdrop } from '../ui/Backdrop.js';
 
@@ -14,10 +14,15 @@ export class DreamersScene extends Scene {
     this.menu = new Menu(game, rows, { x: 40, y: 70, align: 'left', width: 110, spacing: 14, size: 10, onCancel: () => game.popScene() });
   }
 
-  update(dt) { super.update(dt); this.menu.update(dt); }
+  update(dt) {
+    super.update(dt);
+    if (this.time > 0.1 && wantsClose(this.game)) { this.game.popScene(); return; }
+    this.menu.update(dt);
+  }
   renderWorld(g) { this.backdrop.render(g, this.game.time); }
 
   renderUI(r) {
+    closeHint(r, this.game);
     r.text('Soñadores', 240, 32, { size: 18, weight: 700, color: '#e8e6dc', align: 'center' });
     this.menu.render(r);
     const d = this.dreams[this.menu.index];

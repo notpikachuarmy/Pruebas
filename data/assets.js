@@ -22,6 +22,11 @@ export default {
     polvo: 'assets/enemies/polvo.png',
     armario: 'assets/bosses/armario.png',
     mesa_puesta: 'assets/bosses/mesa_puesta.png',
+    regla: 'assets/enemies/regla.png',
+    interrogante_doble: 'assets/enemies/interrogante_doble.png',
+    peluche: 'assets/enemies/peluche.png',
+    cama: 'assets/bosses/cama.png',
+    perfecto: 'assets/bosses/perfecto.png',
   },
 
   sprites: {
@@ -121,6 +126,31 @@ export default {
       image: 'mesa_puesta', frameWidth: 48, frameHeight: 40, anchor: { x: 24, y: 39 },
       animations: { idle: { frames: [0, 1], fps: 3 } },
       placeholder: { color: '#ece8da', w: 44, h: 30 },
+    },
+    enemy_regla: {
+      image: 'regla', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#ecc850', w: 12, h: 12 },
+    },
+    enemy_interrogante_doble: {
+      image: 'interrogante_doble', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#d6403a', w: 12, h: 12 },
+    },
+    enemy_peluche: {
+      image: 'peluche', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#966846', w: 12, h: 12 },
+    },
+    boss_cama: {
+      image: 'cama', frameWidth: 48, frameHeight: 32, anchor: { x: 24, y: 31 },
+      animations: { idle: { frames: [0, 0, 0, 1], fps: 3 }, peek: { frames: [2], fps: 1 } },
+      placeholder: { color: '#6e8cc8', w: 44, h: 24 },
+    },
+    boss_perfecto: {
+      image: 'perfecto', frameWidth: 32, frameHeight: 32, anchor: { x: 16, y: 26 },
+      animations: { idle: { frames: [0, 1], fps: 2 }, walk: { frames: [2, 3, 4, 5], fps: 9 } },
+      placeholder: { color: '#e0c060', w: 12, h: 20 },
     },
   },
 

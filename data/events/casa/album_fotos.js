@@ -2,13 +2,13 @@ export default {
   id: 'album_fotos',
   dream: 'casa',
   prop: 'album',
-  title: 'Un álbum abierto en la mesita',
+  title: 'Una caja de dibujos',
   text: [
-    'Fotos de cumpleaños, de playas, de una cocina llena de gente.',
-    'Las últimas páginas están vacías.',
+    'Dibujos con ceras: una casa, un sol y tres personas cogidas de la mano.',
+    'Cuanto más al fondo, menos personas hay en ellos.',
   ],
   choices: [
-    { label: 'Llevarte una foto', effect: 'giveItem', item: 'foto_familia', result: 'Una familia entera sonríe en una cocina diminuta.' },
-    { label: 'Hojear hasta el final (revela el plano)', effect: 'revealMap', result: 'En la última página alguien dibujó la casa entera.' },
+    { label: 'Llevarte el primer dibujo', effect: 'giveItem', item: 'foto_familia', result: 'Tres personas sonríen. Alguien escribió debajo: «MI FAMILIA».' },
+    { label: 'Mirar el último dibujo (revela el plano)', effect: 'revealMap', result: 'Solo está ella. Y un plano de la casa, por si se pierde a oscuras.' },
   ],
 };

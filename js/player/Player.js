@@ -24,7 +24,8 @@ export class Player {
     this.fireCooldown = 0;
 
     this.dashTime = 0;
-    this.dashCooldown = 0;
+    this.dashCharges = 1;            // cargas de Silencio disponibles
+    this.dashRecharge = 0;           // progreso de recarga de la siguiente carga (s)
     this.dashX = 0; this.dashY = 0;
     this.ghostTimer = 0;
 

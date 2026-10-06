@@ -1,7 +1,7 @@
 // Objeto: Lata de Galletas
 export default {
   id: 'galletas',
-  name: 'Lata de Galletas',
+  name: 'Galletas de la Merienda',
   rarity: 'común',
   pools: ['casa', 'general', 'minijefe'],
   tags: ['vida', 'casa'],

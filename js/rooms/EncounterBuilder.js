@@ -25,7 +25,8 @@ export function buildEncounter(rng, dream, enemyDefs, depth, { challenge = false
       const options = pool.filter((e) => e.def.cost <= left + 0.001 &&
         (caps[e.def.role] === undefined || (roles[e.def.role] ?? 0) < caps[e.def.role]));
       if (!options.length) break;
-      const pick = rng.weighted(options);
+      // Variedad: cada repetición del mismo enemigo en la oleada reduce mucho su peso
+      const pick = rng.weighted(options.map((o) => ({ ...o, weight: (o.weight ?? 1) * 0.45 ** (counts.get(o.id) ?? 0) })));
       left -= pick.def.cost;
       roles[pick.def.role] = (roles[pick.def.role] ?? 0) + 1;
       counts.set(pick.id, (counts.get(pick.id) ?? 0) + 1);

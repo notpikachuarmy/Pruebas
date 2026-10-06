@@ -1,4 +1,4 @@
-import { Scene, dim } from './Scene.js';
+import { Scene, dim, closeHint, wantsClose } from './Scene.js';
 import { Menu } from '../ui/Menu.js';
 import { itemIcon, RARITY_COLOR } from '../items/ItemIcons.js';
 
@@ -18,10 +18,15 @@ export class ItemsScene extends Scene {
     this.menu = new Menu(game, rows, { x: 60, y: 60, align: 'left', width: 150, spacing: 12, size: 9, maxVisible: 15, onCancel: () => game.popScene() });
   }
 
-  update(dt) { super.update(dt); this.menu.update(dt); }
+  update(dt) {
+    super.update(dt);
+    if (this.time > 0.1 && wantsClose(this.game)) { this.game.popScene(); return; }
+    this.menu.update(dt);
+  }
 
   renderUI(r) {
     dim(r, 0.96);
+    closeHint(r, this.game);
     r.text('Objetos de esta run', 240, 30, { size: 14, weight: 700, color: '#e8e6dc', align: 'center' });
     if (!this.entries.length) r.text('Todavía no llevas nada. Busca salas de recompensa, la tienda o los rincones secretos.', 240, 110, { size: 8, color: '#9b8fc7', align: 'center' });
     this.renderOverDim(r);

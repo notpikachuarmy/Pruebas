@@ -30,7 +30,12 @@ export default {
       case 'windup':
         e.vx *= 0.8; e.vy *= 0.8;
         if (e.stateTime >= p.windup) {
-          shoot(world, e, t.angle, { speed: p.shotSpeed, range: Math.min(t.dist + 10, 220), radius: 4, glyph: '?', expire: 'ink' });
+          // Varias preguntas en abanico si p.shots > 1 (Interrogante Doble)
+          const n = p.shots ?? 1;
+          for (let i = 0; i < n; i++) {
+            const a = t.angle + (i - (n - 1) / 2) * (p.spread ?? 0.3);
+            shoot(world, e, a, { speed: p.shotSpeed, range: Math.min(t.dist + 10, 220), radius: 4, glyph: '?', expire: p.expire ?? 'ink' });
+          }
           world.game.audio.play('windup', { pitch: 2 });
           e.data.cool = p.cooldown;
           e.setState('drift');

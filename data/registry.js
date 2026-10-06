@@ -26,6 +26,16 @@ import polvo from './enemies/casa/polvo.js';
 import polvoMini from './enemies/casa/polvo_mini.js';
 import armario from './bosses/armario.js';
 import mesaPuesta from './bosses/mesa_puesta.js';
+import regla from './enemies/regla.js';
+import borron from './enemies/borron.js';
+import interroganteDoble from './enemies/interrogante_doble.js';
+import peluche from './enemies/casa/peluche.js';
+import polillaGigante from './enemies/casa/polilla_gigante.js';
+import relojGigante from './bosses/reloj_gigante.js';
+import companeroPerfecto from './bosses/companero_perfecto.js';
+import monstruoCama from './bosses/monstruo_cama.js';
+import vocesPasillo from './bosses/voces_pasillo.js';
+import item_dobleBombo from './items/doble_bombo.js';
 
 import aulaInicio from './rooms/aula_inicio.js';
 import aulaFilas from './rooms/aula_filas.js';
@@ -94,13 +104,14 @@ export const CONTENT = {
   dreams: byId([examen, casa]),
   // Jefes y mini-jefes son enemigos con `boss: true` (comparten motor)
   enemies: byId([tachon, tachonRojo, interrogante, goma, chuleta, compas, reloj, copia, fotocopiadora, profesora,
-    polilla, sombra, telefono, mecedora, polvo, polvoMini, armario, mesaPuesta]),
+    polilla, sombra, telefono, mecedora, polvo, polvoMini, armario, mesaPuesta,
+    regla, borron, interroganteDoble, peluche, polillaGigante, relojGigante, companeroPerfecto, monstruoCama, vocesPasillo]),
   rooms: byId([aulaInicio, aulaFilas, aulaVacia, aulaCirculo, pasilloTaquillas, aulaTrincheras, despacho, examenFinal,
     casaRecibidor, casaSalon, casaComedor, casaPasillo, casaDormitorio, casaCocina, casaTrastero, casaComedorGrande]),
   events: byId([companeroSinGoma, pupitreGrabado, revisionExamen, llamadaPerdida, albumFotos]),
   items: byId([
     item_eco, item_metronomo, item_cableEnredado, item_tippEx, item_chuletaArrugada, item_calculadora, item_boligrafoPapa, item_despertadorRepuesto, item_espejoRoto, item_altavoz, item_subwoofer, item_silbato, item_cancelacionRuido, item_discoRayado, item_diapason, item_cintaCasete, item_estuche, item_cafe, item_postIt, item_megafono,
-    item_linterna, item_fotoFamilia, item_galletas, item_mantita,
+    item_linterna, item_fotoFamilia, item_galletas, item_mantita, item_dobleBombo,
   ]),
   synergies: byId([
     syn_polirritmia, syn_acople, syn_caleidoscopio, syn_corrector, syn_zigzagDoble, syn_notaPerfecta, syn_bajoYBateria, syn_sintoniaFina, syn_silencioAbsoluto, syn_hogar,

@@ -33,6 +33,8 @@ export function validateContent(c) {
     if (d.floor?.secret) types.add('secret');
     if (d.floor?.miniboss) types.add('miniboss');
     for (const k of ['boss', 'miniboss']) if (d[k] && !c.enemies[d[k]]?.boss) out.push(`Sueño "${d.id}": ${k} "${d[k]}" no existe o no tiene boss: true`);
+    for (const b of d.bosses ?? []) if (!c.enemies[b]?.boss) out.push(`Sueño "${d.id}": jefe "${b}" de "bosses" no existe o no tiene boss: true`);
+    if (!d.boss && !d.bosses?.length) out.push(`Sueño "${d.id}": no tiene jefe (bosses)`);
     for (const r of d.rules ?? []) if (!RULES[r]) out.push(`Sueño "${d.id}": regla "${r}" no existe en js/dreams/rules.js`);
     for (const ev of d.eventPool ?? []) if (!c.events?.[ev]) out.push(`Sueño "${d.id}": evento "${ev}" no está registrado`);
     for (const t of types) {
@@ -50,7 +52,7 @@ export function validateContent(c) {
   for (const ev of Object.values(c.events ?? {})) {
     for (const ch of ev.choices) if (ch.effect && !EVENT_EFFECTS[ch.effect]) out.push(`Evento "${ev.id}": efecto "${ch.effect}" no existe`);
   }
-  const STATS = ['maxHp', 'speed', 'damage', 'fireRate', 'shotSpeed', 'range', 'shotSize', 'knockback', 'dashSpeed', 'dashDuration', 'dashCooldown', 'hurtInvulnerability'];
+  const STATS = ['maxHp', 'speed', 'damage', 'fireRate', 'shotSpeed', 'range', 'shotSize', 'knockback', 'dashSpeed', 'dashDuration', 'dashCooldown', 'dashCharges', 'hurtInvulnerability'];
   for (const it of Object.values(c.items ?? {})) {
     for (const k of ['id', 'name', 'rarity', 'pools', 'description', 'icon']) if (it[k] === undefined) out.push(`Objeto "${it.id}": falta "${k}"`);
     if (!['común', 'rara', 'legendaria'].includes(it.rarity)) out.push(`Objeto "${it.id}": rareza "${it.rarity}" desconocida`);
@@ -72,6 +74,7 @@ export function validateContent(c) {
     if (a.reward?.dream) { rewards.dream.add(a.reward.dream); if (!c.dreams[a.reward.dream]) out.push(`Logro "${a.id}": sueño "${a.reward.dream}" no existe`); }
     if (a.reward?.item) { rewards.item.add(a.reward.item); if (!c.items[a.reward.item]) out.push(`Logro "${a.id}": objeto "${a.reward.item}" no existe`); }
     if (a.condition.type === 'bossDefeated' && !c.enemies[a.condition.boss]) out.push(`Logro "${a.id}": jefe "${a.condition.boss}" no existe`);
+    if (['dreamBoss', 'allDreamBosses'].includes(a.condition.type) && !c.dreams[a.condition.dream]) out.push(`Logro "${a.id}": sueño "${a.condition.dream}" no existe`);
   }
   const fromEvents = new Set(Object.values(c.events).flatMap((e) => e.choices.filter((ch) => ch.effect === 'giveItem').map((ch) => ch.item)));
   for (const it of Object.values(c.items)) if (it.locked && !rewards.item.has(it.id) && !fromEvents.has(it.id)) out.push(`Objeto "${it.id}": está bloqueado pero nada lo desbloquea`);

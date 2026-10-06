@@ -1,4 +1,4 @@
-import { Scene, dim } from './Scene.js';
+import { Scene, dim, closeHint, wantsClose } from './Scene.js';
 import { Menu } from '../ui/Menu.js';
 import { Backdrop } from '../ui/Backdrop.js';
 import { itemIcon, RARITY_COLOR } from '../items/ItemIcons.js';
@@ -53,6 +53,7 @@ export class LibraryScene extends Scene {
 
   update(dt) {
     super.update(dt);
+    if (this.time > 0.1 && wantsClose(this.game)) { this.game.popScene(); return; }
     const input = this.game.input;
     if (input.isPressed('UI_LEFT') || input.isPressed('UI_RIGHT')) {
       this.book = 1 - this.book;
@@ -67,6 +68,7 @@ export class LibraryScene extends Scene {
 
   renderUI(r) {
     if (this.overlay) dim(r, 0.94);
+    closeHint(r, this.game);
     // Tapas de los dos libros como pestañas
     BOOKS.forEach((name, i) => {
       const x = 150 + i * 180, active = i === this.book;

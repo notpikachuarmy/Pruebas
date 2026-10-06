@@ -11,8 +11,13 @@ import professor from './professor.js';
 import flutter from './flutter.js';
 import fadingVisitor from './fadingVisitor.js';
 import dinnerTable from './dinnerTable.js';
+import staring from './staring.js';
+import clockBoss from './clockBoss.js';
+import rival from './rival.js';
+import underBed from './underBed.js';
+import argument from './argument.js';
 
 export const BEHAVIORS = {
   scribbleChaser, shyShooter, eraser, fleeing, compass, wallClock, photocopier, mimic, professor,
-  flutter, fadingVisitor, dinnerTable,
+  flutter, fadingVisitor, dinnerTable, staring, clockBoss, rival, underBed, argument,
 };

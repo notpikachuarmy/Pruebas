@@ -1,19 +1,21 @@
-// Sueño 2: La Casa que se Vacía
+// Sueño 2: La Casa a Oscuras (una pesadilla)
+// Se conserva el id 'casa' para no romper partidas guardadas.
 export default {
   id: 'casa',
   tier: 2,                       // orden en la noche (1 = primer sueño)
-  locked: true,                  // se desbloquea (ver data/progression/unlocks.js)
-  name: 'La Casa que se Vacía',
+  locked: true,                  // se desbloquea con el logro "Aprobado"
+  name: 'La Casa a Oscuras',
   owner: {
-    name: 'Carmen',
-    age: 81,
-    summary: 'Viuda desde hace seis años. Sus hijos viven lejos. Cada domingo pone la mesa para todos.',
+    name: 'Lucía',
+    age: 8,
+    summary: 'Una noche sus padres se fueron y la casa se quedó vacía. Desde entonces no puede dormir con la luz apagada.',
   },
-  concept: 'La soledad. Nada ataca con prisa: las cosas se apagan, se van o se quedan quietas esperando.',
-  palette: { background: '#141220', accent: '#ffb347', paper: '#ece8da' },
+  concept: 'Una pesadilla infantil: la oscuridad, una casa demasiado grande y los recuerdos de unos padres que discutían y se iban.',
+  palette: { background: '#0e0c18', accent: '#ffb347', paper: '#ece8da' },
   tileset: 'tiles_casa',
   music: { explore: 'casa_explore', combat: 'casa_combat', boss: 'casa_boss' },
 
+  // Penumbra: el miedo a la oscuridad. Nadie espera: nadie se queda con ella.
   rules: ['penumbra', 'nadieEspera'],
   ruleConfig: {
     penumbra: { radius: 78, lamps: [1, 2] },
@@ -22,12 +24,15 @@ export default {
   enemyPool: [
     { id: 'polilla', weight: 4 },
     { id: 'sombra', weight: 3 },
-    { id: 'polvo', weight: 3 },
+    { id: 'polvo', weight: 2.5 },
+    { id: 'peluche', weight: 2.5 },
     { id: 'mecedora', weight: 1.5 },
     { id: 'telefono', weight: 1 },
+    { id: 'polilla_gigante', weight: 1.5 },
   ],
   miniboss: 'armario',
-  boss: 'mesa_puesta',
+  // Cada noche se elige uno de estos jefes al azar
+  bosses: ['mesa_puesta', 'monstruo_cama', 'voces_pasillo'],
   eventPool: ['llamada_perdida', 'album_fotos'],
 
   roomPool: [
@@ -60,20 +65,20 @@ export default {
 
   // Registro de soñadores: fragmentos que se descubren jugando
   fragments: [
-    { id: 'visita', unlock: 'visit', text: 'La casa huele a cerrado y a colonia de hombre.' },
-    { id: 'llamada', unlock: 'event:llamada_perdida', text: 'El contestador tiene once mensajes. Todos dicen «Mamá, ya te llamo el domingo».' },
-    { id: 'armario', unlock: 'miniboss', text: 'En el armario sigue su chaqueta de los domingos. Nadie la ha movido.' },
-    { id: 'secreto', unlock: 'secret', text: 'Detrás del papel pintado: las marcas de altura de tres niños.' },
-    { id: 'mesa', unlock: 'boss', text: 'Seis platos. Esta vez hay alguien en una de las sillas.' },
+    { id: 'visita', unlock: 'visit', text: 'La luz del pasillo siempre se quedaba encendida. Hasta que dejó de hacerlo.' },
+    { id: 'llamada', unlock: 'event:llamada_perdida', text: 'El contestador repite la misma frase de su madre: «Volvemos pronto, cariño». Es de hace mucho.' },
+    { id: 'armario', unlock: 'miniboss', text: 'En el armario vive algo. Lucía lo sabe porque nadie vino nunca a comprobar que no estaba.' },
+    { id: 'secreto', unlock: 'secret', text: 'Bajo la cama, una caja de dibujos. En todos hay tres personas. En los últimos, solo una.' },
+    { id: 'mesa', unlock: 'boss', text: 'Por primera vez en mucho tiempo, alguien se queda con ella hasta que se duerme.' },
   ],
 
   text: {
-    intro: 'Carmen está soñando con su casa',
-    wave: 'Visita {n} de {total}',
-    cleared: 'La casa vuelve a estar en silencio',
-    exitPrompt: 'Abrir las cortinas',
-    bossBoard: 'Mesa para seis',
-    bossBoardCleared: 'Mesa para dos',
-    transition: 'Carmen duerme tranquila.',
+    intro: 'Lucía tiene una pesadilla',
+    wave: 'Susto {n} de {total}',
+    cleared: 'La casa se queda en silencio',
+    exitPrompt: 'Encender la luz',
+    bossBoard: 'Cena para tres',
+    bossBoardCleared: 'Alguien se ha quedado',
+    transition: 'Lucía se duerme con la luz encendida.',
   },
 };

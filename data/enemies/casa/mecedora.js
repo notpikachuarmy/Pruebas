@@ -1,9 +1,9 @@
-// Enemigo: Mecedora Vacía (reutiliza el comportamiento del Compás)
+// Enemigo: Caballito de Balancín (reutiliza el comportamiento del Compás)
 export default {
-  id: 'mecedora', name: 'Mecedora Vacía', dream: 'casa', role: 'trampa', tags: ['casa'],
+  id: 'mecedora', name: 'Caballito de Balancín', dream: 'casa', role: 'trampa', tags: ['casa'],
   cost: 1.4, minDepth: 1,
-  description: 'Se mece sola, cada vez más cerca de donde estás.',
-  theme: 'La silla de alguien que ya no está.',
+  description: 'Se balancea solo en círculos y, de vez en cuando, salta junto a ti.',
+  theme: 'Su juguete favorito. En la oscuridad se mece sin que nadie lo empuje.',
   sprite: 'enemy_mecedora',
   radius: 4, bodyRadius: 7, bodyHeight: 6,
   hp: 8, speed: 0, contactDamage: 1, mass: 50,

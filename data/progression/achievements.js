@@ -1,6 +1,8 @@
 /**
  * Logros. `condition` es declarativa; la interpreta js/progression/AchievementSystem.js:
  *   { type: 'bossDefeated', boss }                  vencer a un jefe concreto
+ *   { type: 'dreamBoss', dream }                     vencer al jefe (cualquiera) de un sueño
+ *   { type: 'allDreamBosses', dream }                haber vencido alguna vez a todos los jefes de un sueño
  *   { type: 'noHitBoss' }                            vencer a un jefe sin recibir daño en su sala
  *   { type: 'nightComplete' }                        terminar una noche entera
  *   { type: 'event', event }                         que ocurra un evento del juego
@@ -11,10 +13,14 @@
  * `reward` (opcional): { dream } o { item } que se desbloquea.
  */
 export default [
-  { id: 'aprobado', name: 'Aprobado', description: 'Vence a La Profesora Sin Cara.',
-    condition: { type: 'bossDefeated', boss: 'profesora' }, reward: { dream: 'casa' } },
-  { id: 'mesa_para_dos', name: 'Mesa para dos', description: 'Vence a La Mesa Puesta.',
-    condition: { type: 'bossDefeated', boss: 'mesa_puesta' }, reward: { item: 'foto_familia' } },
+  { id: 'aprobado', name: 'Aprobado', description: 'Vence al jefe de El Examen Infinito.',
+    condition: { type: 'dreamBoss', dream: 'examen' }, reward: { dream: 'casa' } },
+  { id: 'mesa_para_dos', name: 'Ya no estás sola', description: 'Vence al jefe de La Casa a Oscuras.',
+    condition: { type: 'dreamBoss', dream: 'casa' }, reward: { item: 'foto_familia' } },
+  { id: 'todo_el_temario', name: 'Todo el temario', description: 'Vence a los tres jefes de El Examen Infinito.',
+    condition: { type: 'allDreamBosses', dream: 'examen' } },
+  { id: 'luz_encendida', name: 'Con la luz encendida', description: 'Vence a los tres jefes de La Casa a Oscuras.',
+    condition: { type: 'allDreamBosses', dream: 'casa' } },
   { id: 'primera_noche', name: 'Una noche entera', description: 'Calma todos los sueños de una noche.',
     condition: { type: 'nightComplete' } },
   { id: 'sin_rasgunos', name: 'Sin un rasguño', description: 'Vence a un jefe sin recibir daño en su sala.',

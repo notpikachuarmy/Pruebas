@@ -1,4 +1,4 @@
-// Plantilla de sala de La Casa que se Vacía. Leyenda en docs/CONTENT_GUIDE.md
+// Plantilla de sala de La Casa a Oscuras. Leyenda en docs/CONTENT_GUIDE.md
 // D sofá · T cómoda · L planta · M mesa
 export default {
   id: 'casa_pasillo_largo',

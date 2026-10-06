@@ -3,7 +3,7 @@ export default {
   id: 'telefono', name: 'Teléfono que No Suena', dream: 'casa', role: 'modificador', tags: ['casa'],
   cost: 2, minDepth: 2,
   description: 'No ataca. A veces da un timbrazo y todos se ponen nerviosos.',
-  theme: 'Esperar una llamada de los hijos que viven lejos.',
+  theme: 'Esperar una llamada de sus padres que nunca llega.',
   sprite: 'enemy_telefono',
   radius: 5, bodyRadius: 7, bodyHeight: 6,
   hp: 5, speed: 0, contactDamage: 0, mass: 50,

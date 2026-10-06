@@ -28,9 +28,13 @@ export default {
     { id: 'chuleta', weight: 1 },
     { id: 'compas', weight: 1.5 },
     { id: 'reloj', weight: 1 },
+    { id: 'regla', weight: 2 },
+    { id: 'borron', weight: 1.2 },
+    { id: 'interrogante_doble', weight: 1.5 },
   ],
   miniboss: 'fotocopiadora',
-  boss: 'profesora',
+  // Cada noche se elige uno de estos jefes al azar
+  bosses: ['profesora', 'reloj_gigante', 'companero_perfecto'],
   eventPool: ['companero_sin_goma', 'pupitre_grabado', 'revision_examen'],
   roomPool: [
     'aula_inicio', 'aula_filas', 'aula_vacia', 'aula_circulo',
@@ -51,7 +55,7 @@ export default {
     challengeChance: 0.5,
     secret: true,
     budget: { base: 2, perDepth: 0.9, wavesEvery: 2, maxWaves: 3, maxPerWave: 8, delayBetweenWaves: 1.1 },
-    roleCaps: { soporte: 1, modificador: 1, huidizo: 1, trampa: 2 },
+    roleCaps: { soporte: 1, modificador: 1, huidizo: 1, trampa: 2, tanque: 1 },
     clearDrop: { chance: 0.4, table: [{ type: 'lucidity', weight: 3, amount: [2, 4] }, { type: 'heart', weight: 1, amount: [1, 1] }] },
   },
 

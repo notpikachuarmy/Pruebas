@@ -11,7 +11,17 @@ export class AchievementSystem {
 
     ev.on('boss:defeated', ({ def }) => {
       this.meta.stats.bossesDefeated++;
+      const beaten = (this.meta.defeatedBosses ??= []);
+      if (!beaten.includes(def.id)) beaten.push(def.id);
       this._check((c) => c.type === 'bossDefeated' && c.boss === def.id);
+      if (def.role === 'jefe') {
+        this._check((c) => c.type === 'dreamBoss' && c.dream === def.dream);
+        this._check((c) => {
+          if (c.type !== 'allDreamBosses' || c.dream !== def.dream) return false;
+          const d = game.content.dreams[c.dream];
+          return (d.bosses ?? [d.boss]).every((id) => beaten.includes(id));
+        });
+      }
       if (def.role === 'jefe' && !this.bossHit) this._check((c) => c.type === 'noHitBoss');
     });
     ev.on('room:enter', ({ node }) => { if (node.type === 'boss' || node.type === 'miniboss') this.bossHit = false; });

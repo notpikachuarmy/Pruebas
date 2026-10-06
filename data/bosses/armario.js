@@ -1,9 +1,9 @@
-// Mini-jefe de La Casa que se Vacía (reutiliza el comportamiento de la Fotocopiadora)
+// Mini-jefe de La Casa a Oscuras (reutiliza el comportamiento de la Fotocopiadora)
 export default {
   id: 'armario', name: 'El Armario', dream: 'casa', role: 'minijefe', boss: true, tags: ['casa'],
   cost: 99, minDepth: 99,
-  description: 'Cerrado apenas siente los golpes. Cuando abre las puertas para soltar polillas, está indefenso.',
-  theme: 'La ropa de él sigue colgada. Nadie se atreve a sacarla.',
+  description: 'Cerrado apenas siente los golpes. Cuando abre las puertas para soltar lo que vive dentro, está indefenso.',
+  theme: 'El monstruo del armario. Nadie vino nunca a comprobar que no estaba.',
   sprite: 'boss_armario', noFlip: true,
   light: 34,
   radius: 12, bodyRadius: 14, bodyHeight: 16,

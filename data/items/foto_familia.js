@@ -1,7 +1,7 @@
-// Objeto: Foto de Familia
+// Objeto: Dibujo de Familia (id antiguo: foto_familia)
 export default {
   id: 'foto_familia',
-  name: 'Foto de Familia',
+  name: 'Dibujo de Familia',
   rarity: 'rara',
   pools: ['casa'],
   locked: true,

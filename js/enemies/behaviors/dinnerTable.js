@@ -3,7 +3,7 @@ import { toPlayer, shoot } from './helpers.js';
 const PHASES = ['Poner la mesa', 'Esperar', 'Recoger'];
 
 /**
- * La Mesa Puesta (jefe de La Casa que se Vacía): una mesa para una familia que no viene.
+ * La Cena que Nadie Sirve (jefe de La Casa a Oscuras): una mesa puesta para una familia que no vuelve.
  *  Fase 1: lanza la vajilla en anillos con huecos.
  *  Fase 2: la casa se oscurece y llegan Sombras de Visita.
  *  Fase 3: platos en espiral y polvo que se acumula.
@@ -72,6 +72,6 @@ export default {
 
   onDeath(e, world) {
     world.mods.lightMult = 1;
-    world.bossBanner('Alguien ha venido');
+    world.bossBanner('Alguien se ha quedado');
   },
 };

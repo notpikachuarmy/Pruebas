@@ -1,4 +1,4 @@
-// Música placeholder de La Casa que se Vacía: una cajita de música en compás de vals.
+// Música placeholder de La Casa a Oscuras: una cajita de música en compás de vals.
 export default {
   casa_explore: {
     bpm: 84, root: 261.6,

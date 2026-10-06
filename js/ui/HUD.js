@@ -21,11 +21,16 @@ export class HUD {
     }
     const lx = 8 + Math.min(8, max / 2) * 12 + 4;
     // Silencio (dash): barra de recarga bajo los corazones
-    const cd = p.dashCooldown / (p.stats.get('dashCooldown') + p.stats.get('dashDuration'));
-    g.fillStyle = '#3a2f5c';
-    g.fillRect(8, max > 16 ? 23 : 15, 34, 2);
-    g.fillStyle = cd <= 0 ? '#c9bde6' : '#6e62a0';
-    g.fillRect(8, max > 16 ? 23 : 15, Math.round(34 * (1 - cd)), 2);
+    // Un segmento por carga de Silencio; el que se está recargando se va llenando
+    const charges = Math.round(p.stats.get('dashCharges'));
+    const segW = Math.floor((34 - (charges - 1) * 2) / charges);
+    const by = max > 16 ? 23 : 15;
+    for (let i = 0; i < charges; i++) {
+      const sx = 8 + i * (segW + 2);
+      g.fillStyle = '#3a2f5c'; g.fillRect(sx, by, segW, 2);
+      if (i < p.dashCharges) { g.fillStyle = '#c9bde6'; g.fillRect(sx, by, segW, 2); }
+      else if (i === p.dashCharges) { g.fillStyle = '#6e62a0'; g.fillRect(sx, by, Math.round(segW * p.dashRecharge / p.stats.get('dashCooldown')), 2); }
+    }
     // Lucidez
     g.fillStyle = '#c9bde6'; g.fillRect(lx, 5, 5, 5);
     g.fillStyle = '#ffffff'; g.fillRect(lx + 1, 6, 2, 2);

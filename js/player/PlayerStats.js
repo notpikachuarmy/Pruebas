@@ -14,7 +14,8 @@ export const BASE_STATS = {
   knockback: 70,
   dashSpeed: 270,
   dashDuration: 0.16,
-  dashCooldown: 0.55,
+  dashCooldown: 0.55,        // tiempo de recarga de cada carga de Silencio
+  dashCharges: 1,            // Silencios acumulables (objeto Doble Bombo)
   hurtInvulnerability: 1.0,  // s
 };
 

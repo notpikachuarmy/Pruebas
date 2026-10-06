@@ -43,6 +43,9 @@ export class Run {
     this.dreamIndex = index;
     this.dream = this.game.content.dreams[this.night[index]];
     this.floor = generateFloor(this.rng.fork(`map:${this.dream.id}`), this.dream, this.game.content.rooms);
+    // Jefe de este sueño: uno de su lista `bosses` (o el único `boss`)
+    const pool = this.dream.bosses ?? [this.dream.boss];
+    this.bossId = this.rng.fork(`boss:${this.dream.id}`).pick(pool);
     this.flags.mapRevealed = false;
   }
 

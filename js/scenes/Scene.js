@@ -8,6 +8,16 @@ export class Scene {
   renderUI(r) {}
 }
 
+/** Aviso "[Esc] Cerrar" en la esquina, con el botón del dispositivo en uso. */
+export function closeHint(r, game, label = 'Cerrar') {
+  r.text(`[${game.input.glyph('UI_CANCEL')}] ${label}`, r.width - 10, 16, { size: 8, color: '#9b8fc7', align: 'right' });
+}
+
+/** ¿Se ha pedido cerrar? Volver/Cancelar ya lo hace el menú; Pausa también cierra. */
+export function wantsClose(game) {
+  return game.input.isPressed('PAUSE') || game.input.isPressed('MAP');
+}
+
 /** Oscurece lo que hay debajo (para pausas y diálogos). */
 export function dim(r, alpha = 0.7) {
   const ctx = r.ui;

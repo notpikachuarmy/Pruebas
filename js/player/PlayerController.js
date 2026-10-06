@@ -13,18 +13,24 @@ export class PlayerController {
     player.animTime += dt;
     player.invulnerable = Math.max(0, player.invulnerable - dt);
     player.flash = Math.max(0, player.flash - dt);
-    player.dashCooldown = Math.max(0, player.dashCooldown - dt);
+    // Recarga de Silencios: una carga cada `dashCooldown` segundos
+    const maxCharges = Math.round(st.get('dashCharges'));
+    if (player.dashCharges > maxCharges) player.dashCharges = maxCharges;
+    if (player.dashCharges < maxCharges && !player.isDashing) {
+      player.dashRecharge += dt;
+      if (player.dashRecharge >= st.get('dashCooldown')) { player.dashRecharge = 0; player.dashCharges++; }
+    } else if (player.dashCharges >= maxCharges) player.dashRecharge = 0;
 
     const move = input.getAxis('MOVE');
 
     // --- Silencio: esquiva corta con invulnerabilidad ---
-    if (input.isPressed('DASH') && player.dashCooldown <= 0 && !player.isDashing) {
+    if (input.isPressed('DASH') && player.dashCharges >= 1 && !player.isDashing) {
+      player.dashCharges--;
       let dx = move.x, dy = move.y;
       if (move.mag === 0) { dx = player.aimX; dy = player.aimY; }
       const l = Math.hypot(dx, dy) || 1;
       player.dashX = dx / l; player.dashY = dy / l;
       player.dashTime = st.get('dashDuration');
-      player.dashCooldown = st.get('dashCooldown') + player.dashTime;
       player.invulnerable = Math.max(player.invulnerable, player.dashTime + 0.04);
       game.audio.play('dash');
       game.haptics.play('shoot');
