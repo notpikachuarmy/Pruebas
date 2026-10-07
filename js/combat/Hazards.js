@@ -33,6 +33,32 @@ export const HAZARD_TYPES = {
       }
     },
   },
+  // Sirope de los sueños dulces: frena pero no hace daño
+  syrup: {
+    color: '#ff8fc0', edge: '#ffd0e4',
+    onPlayer(player) { player.slowFactor = Math.min(player.slowFactor, 0.6); },
+  },
+  // Bomba de caramelo: aviso que cae y deja sirope
+  caramelDrop: {
+    render(g, h) {
+      const k = 1 - h.life / h.max;
+      g.globalAlpha = 0.3 + 0.4 * k;
+      g.fillStyle = '#ff8fc0';
+      g.beginPath(); g.ellipse(Math.round(h.x), Math.round(h.y), h.r * k, h.r * 0.6 * k, 0, 0, Math.PI * 2); g.fill();
+      g.globalAlpha = 1;
+      // el caramelo cayendo
+      const y = Math.round(h.y - (1 - k) * 60);
+      g.fillStyle = '#eb2f2d'; g.fillRect(Math.round(h.x) - 2, y - 2, 4, 4);
+      g.fillStyle = '#fff6d6'; g.fillRect(Math.round(h.x) - 1, y - 1, 1, 1);
+    },
+    onExpire(h, world) {
+      const p = world.player;
+      const dx = p.x - h.x, dy = (p.y - h.y) * 1.6;
+      if (p.alive && dx * dx + dy * dy < h.r * h.r) world.damage.hurtPlayer(1, dx, dy, h.source);
+      world.effects.burst(h.x, h.y - 2, 10, '#ff8fc0', 70, 0.35);
+      world.hazards.spawn('syrup', h.x, h.y, h.r, 3, h.source);
+    },
+  },
   // Mano de debajo de la cama: sombra en el suelo que agarra al terminar el aviso
   grab: {
     render(g, h) {

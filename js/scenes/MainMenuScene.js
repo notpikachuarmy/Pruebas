@@ -31,7 +31,8 @@ export class MainMenuScene extends Scene {
   /** Qué sueños tocan esta noche (según lo desbloqueado). */
   _nightHint() {
     const ids = Run.planNight(this.game, new Random('vista'));
-    return `Esta noche: ${ids.map((id) => this.game.content.dreams[id].name).join(' → ')}`;
+    if (ids.length === 1) return `Esta noche: ${this.game.content.dreams[ids[0]].name}`;
+    return `Esta noche, ${ids.length} sueños en orden aleatorio`;
   }
 
   update(dt) { super.update(dt); this.menu.update(dt); }

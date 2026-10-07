@@ -23,6 +23,8 @@ export class Lighting {
 
     const p = world.player;
     if (p.alive) this._hole(g, p.x, p.y - 8, radius);
+    const aura = world.items.auraRadius();
+    if (aura && p.alive) this._hole(g, p.x, p.y - 4, aura + 10, 0.7);
     for (const o of world.interactables.list) {
       if (o.kind === 'lamp' && o.lit) this._hole(g, o.x, o.y - 18, 120);
       else this._hole(g, o.x, o.y - 8, 18, 0.6);   // pista: los objetos se intuyen

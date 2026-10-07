@@ -3,7 +3,7 @@ export default {
   id: 'espejo_roto',
   name: 'Espejo Roto',
   rarity: 'rara',          // común | rara | legendaria
-  pools: ['examen', 'general'],
+  pools: ['examen', 'general', 'boss'],
   tags: ['reflejo'],
   description: 'Las ondas rebotan dos veces en las paredes. Cada rebote las hace un poco más pequeñas.',
   modifiers: [],

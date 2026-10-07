@@ -48,10 +48,10 @@ export const KINDS = {
       g.fillStyle = '#a06e40'; g.fillRect(x - 7, y - 8, 14, 2);
       if (o.taken) return;
       const it = world.game.content.items[o.itemId];
-      const by = y - 20 + Math.round(Math.sin(world.time * 3) * 1.5);
+      const by = y - 26 + Math.round(Math.sin(world.time * 3) * 1.5);
       g.globalAlpha = 0.35; g.fillStyle = RARITY_COLOR[it.rarity];
-      g.fillRect(x - 6, by - 2, 12, 12); g.globalAlpha = 1;
-      g.drawImage(itemIcon(it), x - 4, by, 8, 8);
+      g.fillRect(x - 9, by - 2, 18, 20); g.globalAlpha = 1;
+      g.drawImage(itemIcon(it), x - 8, by, 16, 16);
     },
   },
 
@@ -128,6 +128,14 @@ export const KINDS = {
       } else if (def.prop === 'phone') {
         g.fillStyle = '#b04034'; g.fillRect(x - 5, y - 15, 10, 5);
         g.fillStyle = Math.floor(world.time * 2) % 2 ? '#eb2f2d' : '#5a1a14'; g.fillRect(x + 2, y - 14, 2, 2);
+      } else if (def.prop === 'stall') {
+        g.fillStyle = '#ff6aa0'; g.fillRect(x - 8, y - 22, 16, 3);
+        g.fillStyle = '#fff6d6'; g.fillRect(x - 8, y - 19, 4, 2); g.fillRect(x, y - 19, 4, 2);
+        for (let i = 0; i < 3; i++) { g.fillStyle = ['#7fd6a0', '#ffd65c', '#8fd3ff'][i]; g.fillRect(x - 6 + i * 5, y - 14, 3, 4); }
+      } else if (def.prop === 'house') {
+        g.fillStyle = '#6e3e28'; g.fillRect(x - 6, y - 18, 12, 9);
+        g.fillStyle = '#ffd6e2'; g.fillRect(x - 7, y - 21, 14, 3);
+        g.fillStyle = '#ffd65c'; g.fillRect(x - 1, y - 14, 3, 5);
       } else if (def.prop === 'album') {
         g.fillStyle = '#4a749c'; g.fillRect(x - 6, y - 14, 12, 4);
         g.fillStyle = '#f0ecd6'; g.fillRect(x - 5, y - 15, 4, 3); g.fillRect(x + 1, y - 15, 4, 3);

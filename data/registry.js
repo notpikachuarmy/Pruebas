@@ -3,10 +3,12 @@ import assets from './assets.js';
 import sfx from './audio/sfx.js';
 import music from './audio/music.js';
 import casaMusic from './audio/casa_music.js';
+import dulceMusic from './audio/dulce_music.js';
 import achievements from './progression/achievements.js';
 
 import examen from './dreams/examen.js';
 import casa from './dreams/casa.js';
+import dulce from './dreams/dulce.js';
 
 import tachon from './enemies/tachon.js';
 import tachonRojo from './enemies/tachon_rojo.js';
@@ -36,6 +38,34 @@ import companeroPerfecto from './bosses/companero_perfecto.js';
 import monstruoCama from './bosses/monstruo_cama.js';
 import vocesPasillo from './bosses/voces_pasillo.js';
 import item_dobleBombo from './items/doble_bombo.js';
+import item_anilloRosa from './items/anillo_rosa.js';
+import item_energiaPesadilla from './items/energia_pesadilla.js';
+import item_guiaPesadillas from './items/guia_pesadillas.js';
+import item_polvoLuminoso from './items/polvo_luminoso.js';
+import item_carameloExplosivo from './items/caramelo_explosivo.js';
+import item_pompasChicle from './items/pompas_chicle.js';
+import item_bolsaChuches from './items/bolsa_chuches.js';
+import syn_faro from './synergies/faro.js';
+import gominola from './enemies/dulce/gominola.js';
+import gominolaMini from './enemies/dulce/gominola_mini.js';
+import piruleta from './enemies/dulce/piruleta.js';
+import algodon from './enemies/dulce/algodon.js';
+import osito from './enemies/dulce/osito.js';
+import bombon from './enemies/dulce/bombon.js';
+import tarta from './bosses/tarta.js';
+import reyCaramelo from './bosses/rey_caramelo.js';
+import fuenteChocolate from './bosses/fuente_chocolate.js';
+import pinata from './bosses/pinata.js';
+import puestoChuches from './events/dulce/puesto_chuches.js';
+import casitaChocolate from './events/dulce/casita_chocolate.js';
+import dulceEntrada from './rooms/dulce/entrada.js';
+import dulcePasteleria from './rooms/dulce/pasteleria.js';
+import dulceTabletas from './rooms/dulce/tabletas.js';
+import dulceBosque from './rooms/dulce/bosque_piruletas.js';
+import dulceGominolas from './rooms/dulce/gominolas.js';
+import dulceFabrica from './rooms/dulce/fabrica.js';
+import dulceTienda from './rooms/dulce/tienda_chuches.js';
+import dulceSalon from './rooms/dulce/salon_trono.js';
 
 import aulaInicio from './rooms/aula_inicio.js';
 import aulaFilas from './rooms/aula_filas.js';
@@ -100,21 +130,24 @@ const byId = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
 
 export const CONTENT = {
   assets,
-  audio: { sfx, music: { ...music, ...casaMusic } },
-  dreams: byId([examen, casa]),
+  audio: { sfx, music: { ...music, ...casaMusic, ...dulceMusic } },
+  dreams: byId([examen, casa, dulce]),
   // Jefes y mini-jefes son enemigos con `boss: true` (comparten motor)
   enemies: byId([tachon, tachonRojo, interrogante, goma, chuleta, compas, reloj, copia, fotocopiadora, profesora,
     polilla, sombra, telefono, mecedora, polvo, polvoMini, armario, mesaPuesta,
-    regla, borron, interroganteDoble, peluche, polillaGigante, relojGigante, companeroPerfecto, monstruoCama, vocesPasillo]),
+    regla, borron, interroganteDoble, peluche, polillaGigante, relojGigante, companeroPerfecto, monstruoCama, vocesPasillo,
+    gominola, gominolaMini, piruleta, algodon, osito, bombon, tarta, reyCaramelo, fuenteChocolate, pinata]),
   rooms: byId([aulaInicio, aulaFilas, aulaVacia, aulaCirculo, pasilloTaquillas, aulaTrincheras, despacho, examenFinal,
-    casaRecibidor, casaSalon, casaComedor, casaPasillo, casaDormitorio, casaCocina, casaTrastero, casaComedorGrande]),
-  events: byId([companeroSinGoma, pupitreGrabado, revisionExamen, llamadaPerdida, albumFotos]),
+    casaRecibidor, casaSalon, casaComedor, casaPasillo, casaDormitorio, casaCocina, casaTrastero, casaComedorGrande,
+    dulceEntrada, dulcePasteleria, dulceTabletas, dulceBosque, dulceGominolas, dulceFabrica, dulceTienda, dulceSalon]),
+  events: byId([companeroSinGoma, pupitreGrabado, revisionExamen, llamadaPerdida, albumFotos, puestoChuches, casitaChocolate]),
   items: byId([
     item_eco, item_metronomo, item_cableEnredado, item_tippEx, item_chuletaArrugada, item_calculadora, item_boligrafoPapa, item_despertadorRepuesto, item_espejoRoto, item_altavoz, item_subwoofer, item_silbato, item_cancelacionRuido, item_discoRayado, item_diapason, item_cintaCasete, item_estuche, item_cafe, item_postIt, item_megafono,
     item_linterna, item_fotoFamilia, item_galletas, item_mantita, item_dobleBombo,
+    item_anilloRosa, item_energiaPesadilla, item_guiaPesadillas, item_polvoLuminoso, item_carameloExplosivo, item_pompasChicle, item_bolsaChuches,
   ]),
   synergies: byId([
-    syn_polirritmia, syn_acople, syn_caleidoscopio, syn_corrector, syn_zigzagDoble, syn_notaPerfecta, syn_bajoYBateria, syn_sintoniaFina, syn_silencioAbsoluto, syn_hogar,
+    syn_polirritmia, syn_acople, syn_caleidoscopio, syn_corrector, syn_zigzagDoble, syn_notaPerfecta, syn_bajoYBateria, syn_sintoniaFina, syn_silencioAbsoluto, syn_hogar, syn_faro,
   ]),
   achievements,
 };

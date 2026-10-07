@@ -3,7 +3,7 @@ export default {
   id: 'diapason',
   name: 'Diapasón',
   rarity: 'rara',          // común | rara | legendaria
-  pools: ['general'],
+  pools: ['general', 'boss'],
   tags: ['afinacion'],
   description: 'Las ondas se curvan suavemente hacia el enemigo más cercano.',
   modifiers: [],

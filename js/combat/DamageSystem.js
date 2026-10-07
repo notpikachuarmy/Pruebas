@@ -16,7 +16,7 @@ export class DamageSystem {
     enemy.kx += (dirX / l) * kb;
     enemy.ky += (dirY / l) * kb;
     game.events.emit('player:hitEnemy', { enemy, amount });
-    game.audio.play('hitEnemy', { pitch: 0.9 + Math.random() * 0.2 });
+    if (!proj?.isAura) game.audio.play('hitEnemy', { pitch: 0.9 + Math.random() * 0.2 });
     items.onHitEnemy(enemy, proj ?? {});
     if (enemy.hp <= 0) this.killEnemy(enemy);
     else effects.burst(enemy.x, enemy.y - enemy.def.bodyHeight, 3, '#3d4ca8', 40, 0.3);
@@ -40,6 +40,16 @@ export class DamageSystem {
     effects.burst(enemy.x, enemy.y - enemy.def.bodyHeight, 14, '#25307a', 90, 0.5, 2);
     effects.burst(enemy.x, enemy.y - enemy.def.bodyHeight, 6, '#e8e6dc', 60, 0.35);
     pickups.dropFrom(enemy);
+    this.world.items.onKill(enemy);
+    for (const r of this.world.rules) r.onEnemyKilled?.(this.world, enemy);
+    // Enemigos que revientan en proyectiles al morir (Bombón Relleno)
+    const burst = enemy.def.deathBurst;
+    if (burst?.count) {
+      for (let i = 0; i < burst.count; i++) {
+        const a = (i / burst.count) * Math.PI * 2;
+        this.world.projectiles.spawn({ team: 'enemy', x: enemy.x, y: enemy.y - 4, angle: a, speed: burst.speed, range: 160, radius: 3, color: burst.color, trail: burst.trail, source: enemy.def.id });
+      }
+    }
     // Enemigos que se dividen al morir (Bola de Polvo)
     const split = enemy.def.splitInto;
     if (split) {

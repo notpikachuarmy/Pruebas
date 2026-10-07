@@ -46,6 +46,7 @@ export class World {
     this.items = new ItemManager(this);
     this.freezeTime = 0;                    // Cinta de Casete
     this.itemBanner = null;                 // { title, text, color, t }
+    this.constructs = [];                   // Anillo Rosa: constructos cayendo
 
     this.node = null;
     this.room = null;
@@ -75,6 +76,10 @@ export class World {
   _applyDreamRules() {
     // Modificadores que las reglas del sueño y los enemigos pueden tocar
     this.mods = { inkLife: 1, enemySpeed: 1, hideUnvisited: false, light: 0, lightMult: 1 };
+    // Quita los modificadores de estadísticas que pusiera la regla de un sueño anterior
+    const st = this.player.stats;
+    st.modifiers = st.modifiers.filter((m) => !String(m.source).startsWith('rule:'));
+    st.recalculate();
     this.rules = (this.run.dream.rules ?? []).map((id) => RULES[id]).filter(Boolean);
     for (const r of this.rules) r.apply?.(this);
   }
@@ -110,6 +115,73 @@ export class World {
     this.freezeTime = Math.max(this.freezeTime, time);
   }
 
+  /** Anillo Rosa: un constructo cae sobre `enemy` tras un breve aviso. */
+  spawnConstruct(kind, enemy) {
+    if (this.constructs.length > 6) return;
+    this.constructs.push({ kind, target: enemy, x: enemy.x, y: enemy.y, t: 0, delay: 0.35, done: false });
+  }
+
+  _updateConstructs(dt) {
+    for (const c of this.constructs) {
+      c.t += dt;
+      if (!c.target.dead) { c.x = c.target.x; c.y = c.target.y; }
+      if (c.t < c.delay || c.done) continue;
+      c.done = true;
+      const hit = { isConstruct: true };
+      if (c.kind === 'corazon') {
+        if (!c.target.dead) this.damage.hitEnemy(c.target, 2, 0, 1, 20, hit);
+        if (this.rngLoot.chance(0.3) && this.damage.healPlayer(1)) this.game.audio.play('heal');
+      } else if (c.kind === 'martillo') {
+        if (!c.target.dead) this.damage.hitEnemy(c.target, 4, c.x - this.player.x, c.y - this.player.y, 180, hit);
+        this.shake(2, 0.12);
+      } else {
+        for (const e of this.enemies.query(c.x, c.y, 42)) {
+          if (e.canBeHit() && (e.x - c.x) ** 2 + (e.y - c.y) ** 2 < 34 * 34) this.damage.hitEnemy(e, 3, e.x - c.x, e.y - c.y, 90, hit);
+        }
+        this.shake(3, 0.15);
+      }
+      this.effects.burst(c.x, c.y - 6, 16, '#ff6ad5', 90, 0.45, 2);
+      this.game.audio.play('cleared', { pitch: 2, volume: 0.5 });
+    }
+    this.constructs = this.constructs.filter((c) => !c.done || c.t < c.delay + 0.2);
+  }
+
+  _renderConstructs(g) {
+    for (const c of this.constructs) {
+      const k = Math.min(1, c.t / c.delay);
+      const x = Math.round(c.x), y = Math.round(c.y - 8 - (1 - k) * 46);
+      g.globalAlpha = c.done ? Math.max(0, 1 - (c.t - c.delay) / 0.2) : 0.9;
+      g.fillStyle = '#ff6ad5';
+      if (c.kind === 'corazon') {
+        g.fillRect(x - 4, y - 3, 3, 2); g.fillRect(x + 1, y - 3, 3, 2); g.fillRect(x - 5, y - 2, 10, 3); g.fillRect(x - 3, y + 1, 6, 2); g.fillRect(x - 1, y + 3, 2, 1);
+      } else if (c.kind === 'martillo') {
+        g.fillRect(x - 6, y - 4, 12, 6); g.fillRect(x - 1, y + 2, 2, 8);
+      } else {
+        g.fillRect(x - 1, y - 7, 2, 14); g.fillRect(x - 7, y - 1, 14, 2); g.fillRect(x - 4, y - 4, 8, 8);
+      }
+      g.fillStyle = '#ffe0f4'; g.fillRect(x - 1, y - 1, 2, 2);
+      // sombra/objetivo en el suelo
+      g.globalAlpha = 0.5 * k; g.strokeStyle = '#ff6ad5';
+      g.beginPath(); g.ellipse(Math.round(c.x), Math.round(c.y), 7, 4, 0, 0, Math.PI * 2); g.stroke();
+      g.globalAlpha = 1;
+    }
+  }
+
+  _renderAura(g) {
+    const r = this.items.auraRadius();
+    if (!r || !this.player.alive) return;
+    const p = this.player;
+    g.globalAlpha = 0.12 + 0.05 * Math.sin(this.time * 5);
+    g.fillStyle = '#ffd65c';
+    g.beginPath(); g.ellipse(Math.round(p.x), Math.round(p.y - 2), r, r * 0.7, 0, 0, Math.PI * 2); g.fill();
+    g.globalAlpha = 0.6; g.fillStyle = '#fff6d6';
+    for (let i = 0; i < 8; i++) {
+      const a = this.time * 1.5 + (i / 8) * Math.PI * 2;
+      g.fillRect(Math.round(p.x + Math.cos(a) * r), Math.round(p.y - 2 + Math.sin(a) * r * 0.7), 1, 1);
+    }
+    g.globalAlpha = 1;
+  }
+
   /** El jugador coge un objeto: lo aplica y anuncia el objeto y las sinergias nuevas. */
   takeItem(id) {
     const res = this.items.add(id);
@@ -138,6 +210,7 @@ export class World {
     }
     this.projectiles.clear(); this.effects.clear(); this.hazards.clear();
     this.items.clearScheduled();
+    this.constructs.length = 0;
     this.freezeTime = 0;
     this.enemies.clear(); this.pickups.clear();
     this.encounter = null;
@@ -296,6 +369,7 @@ export class World {
     this.enemies.update(dt);
     this.projectiles.update(dt);
     this.hazards.update(dt);
+    this._updateConstructs(dt);
     this.pickups.update(dt);
     this.interactables.update(dt);
     this.effects.update(dt);
@@ -397,6 +471,7 @@ export class World {
     this.room.render(g);
     this._renderArena(g);
     this.hazards.render(g);
+    this._renderAura(g);
     this.pickups.render(g);
 
     // Orden de profundidad: lo que está más abajo se dibuja encima
@@ -415,6 +490,7 @@ export class World {
     }
 
     this.projectiles.render(g);
+    this._renderConstructs(g);
     this.effects.render(g);
     this.lighting.render(g, this);
     if (this.game.debug) this._renderDebug(g);

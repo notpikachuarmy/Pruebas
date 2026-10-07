@@ -3,7 +3,7 @@ export default {
   id: 'metronomo',
   name: 'Metrónomo',
   rarity: 'rara',          // común | rara | legendaria
-  pools: ['examen', 'general'],
+  pools: ['examen', 'general', 'boss'],
   tags: ['ritmo'],
   description: 'Si disparas sin parar, cada cuarta onda golpea el triple.',
   modifiers: [],

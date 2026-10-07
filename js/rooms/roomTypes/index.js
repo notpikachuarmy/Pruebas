@@ -44,7 +44,11 @@ function combatEnter(world, node, challenge) {
   if (node.state.cleared) return;
   if (!node.encounter) {
     const { dream } = world.run;
-    node.encounter = buildEncounter(world.run.rng.fork(`enc:${node.key}`), dream, world.game.content.enemies, node.depth, { challenge });
+    // Cada sueño más avanzado de la noche suma dificultad; Energía de Pesadilla mezcla enemigos de otros sueños
+    const depth = node.depth + world.run.dreamIndex * (dream.floor.budget.perDreamIndex ?? 1.5);
+    const extraPools = world.items.has('energia_pesadilla')
+      ? world.run.unlockedDreams().filter((d) => d.id !== dream.id).map((d) => d.enemyPool) : [];
+    node.encounter = buildEncounter(world.run.rng.fork(`enc:${node.key}`), dream, world.game.content.enemies, depth, { challenge, extraPools });
   }
   world.startEncounter(node.encounter);
 }
@@ -87,11 +91,12 @@ export const ROOM_TYPES = {
   },
 
   miniboss: {
-    label: 'Antesala', mapColor: '#ff6ad5',
+    label: 'Mini-jefe', mapColor: '#ff6ad5',
     onEnter(world, node) {
       if (node.state.cleared) return;
       const id = world.run.dream.miniboss;
-      world.bossIntro = { name: world.game.content.enemies[id].name, title: 'Antes del examen final', t: 0 };
+      const def = world.game.content.enemies[id];
+      world.bossIntro = { name: def.name, title: def.title ?? world.run.dream.text.minibossTitle ?? 'Un guardián del sueño', t: 0 };
       world.startEncounter({ waves: [[{ id, count: 1, at: [14, 4] }]], startDelay: 1.6, noBanner: true, noClock: true }, { music: 'combat' });
     },
     onClear(world) {

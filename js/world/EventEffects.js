@@ -1,9 +1,20 @@
+import { drawItem } from '../items/ItemPool.js';
+
 /** Efectos de las elecciones de eventos (data/events). Las elecciones los nombran con `effect`. */
 export const EVENT_EFFECTS = {
   /** La próxima sala de combate que limpies soltará un corazón seguro. */
   favor(world) { world.run.flags.favor = true; },
 
   healFull(world) { world.damage.healPlayer(99); },
+
+  healHalf(world) { world.damage.healPlayer(1); },
+
+  /** Objeto al azar de los pools indicados en la elección (choice.pools). */
+  randomItem(world, choice) {
+    const it = drawItem(world, choice.pools ?? ['general']);
+    if (it) world.takeItem(it.id);
+    else world.run.lucidity += 6;   // si no queda nada, te devuelven el dinero
+  },
 
   lucidity(world, choice) { world.run.lucidity += choice.amount ?? 5; },
 

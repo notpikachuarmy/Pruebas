@@ -109,7 +109,7 @@ export class EnemyManager {
     const sq = e.behavior.squash?.(e) ?? 1;
     const sc = e.def.scale ?? 1;
     g.save();
-    g.translate(Math.round(e.x + ox), Math.round(e.y));
+    g.translate(Math.round(e.x + ox), Math.round(e.y - (e.behavior.lift?.(e) ?? 0)));
     g.scale(sc / sq, sc * sq);
     const anim = e.behavior.anim?.(e) ?? 'idle';
     sprite.draw(g, anim, e.animTime, 0, 0, { flip: e.def.noFlip ? false : e.facing < 0, flash: e.flash > 0, alpha: e.behavior.alpha?.(e) ?? 1 });
@@ -119,6 +119,12 @@ export class EnemyManager {
       g.fillRect(Math.round(e.x) + 5, Math.round(e.y) - 16 + Math.round(Math.sin(e.animTime * 20)), 2, 2);
     }
     e.behavior.renderExtra?.(g, e, this.world);
+    // Guía de Pesadillas: barra de vida sobre cada enemigo (los jefes ya tienen la suya)
+    if (!e.def.boss && this.world.items.hasEffect('healthBars') && e.hp < e.maxHp + 0.01) {
+      const w = 12, top = Math.round(e.y) - Math.round(e.def.bodyHeight * 2 * (e.def.scale ?? 1)) - 6;
+      g.fillStyle = '#100c20'; g.fillRect(Math.round(e.x) - w / 2 - 1, top - 1, w + 2, 3);
+      g.fillStyle = '#7fd6a0'; g.fillRect(Math.round(e.x) - w / 2, top, Math.max(0, Math.round(w * e.hp / e.maxHp)), 1);
+    }
     if (e.marked > 0) { g.fillStyle = '#ffd65c'; g.fillRect(Math.round(e.x) - 2, Math.round(e.y) - (e.def.bodyHeight * 2 + 10), 4, 4); }
     if (this.world.freezeTime > 0) { g.fillStyle = '#8fd3ff'; g.fillRect(Math.round(e.x) - 3, Math.round(e.y) - 3, 2, 4); g.fillRect(Math.round(e.x) + 1, Math.round(e.y) - 3, 2, 4); }
     if (e.state === 'windup' && !e.def.boss) {

@@ -2,8 +2,8 @@ import { Random, randomSeed } from '../core/Random.js';
 import { generateFloor } from '../rooms/FloorGenerator.js';
 
 /**
- * Estado de una run completa = una noche. Una noche recorre varios sueños (uno por nivel, `tier`),
- * elegidos entre los desbloqueados. El jugador, sus objetos y su Lucidez pasan de un sueño a otro.
+ * Estado de una run completa = una noche. Una noche recorre todos los sueños desbloqueados
+ * en orden aleatorio. El jugador, sus objetos y su Lucidez pasan de un sueño a otro.
  */
 export class Run {
   constructor(game, { seed = randomSeed(), dreams = null } = {}) {
@@ -27,16 +27,13 @@ export class Run {
     this._loadDream(0);
   }
 
-  /** Un sueño por nivel (tier) entre los desbloqueados, en orden de nivel. */
+  /** Todos los sueños desbloqueados, en orden aleatorio. La dificultad sube con cada sueño de la noche. */
   static planNight(game, rng) {
     const unlocked = game.save.data.meta.unlocks.dreams;
-    const byTier = new Map();
-    for (const d of Object.values(game.content.dreams)) {
-      if (d.locked && !unlocked.includes(d.id)) continue;
-      if (!byTier.has(d.tier)) byTier.set(d.tier, []);
-      byTier.get(d.tier).push(d.id);
-    }
-    return [...byTier.keys()].sort((a, b) => a - b).map((t) => rng.pick(byTier.get(t)));
+    const ids = Object.values(game.content.dreams)
+      .filter((d) => !d.locked || unlocked.includes(d.id))
+      .map((d) => d.id);
+    return rng.shuffle(ids);
   }
 
   _loadDream(index) {
@@ -47,6 +44,11 @@ export class Run {
     const pool = this.dream.bosses ?? [this.dream.boss];
     this.bossId = this.rng.fork(`boss:${this.dream.id}`).pick(pool);
     this.flags.mapRevealed = false;
+  }
+
+  unlockedDreams() {
+    const unlocked = this.game.save.data.meta.unlocks.dreams;
+    return Object.values(this.game.content.dreams).filter((d) => !d.locked || unlocked.includes(d.id));
   }
 
   get isLastDream() { return this.dreamIndex >= this.night.length - 1; }

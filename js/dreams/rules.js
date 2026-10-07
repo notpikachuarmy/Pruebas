@@ -64,6 +64,27 @@ export const RULES = {
     },
   },
 
+  /** Sueño dulce: todo va acelerado por el azúcar (tú también). */
+  subidonAzucar: {
+    name: 'Subidón de azúcar',
+    apply(world) {
+      const cfg = world.run.dream.ruleConfig.subidonAzucar;
+      world.mods.enemySpeed = cfg.enemySpeed;
+      world.player.stats.addModifier({ stat: 'speed', mult: cfg.playerSpeed, source: 'rule:subidon' });
+      world.player.stats.addModifier({ stat: 'fireRate', mult: cfg.fireRate, source: 'rule:subidon' });
+    },
+    // El reloj del examen pone enemySpeed a 1 al terminar un combate; aquí lo mantenemos
+    onEncounterEnd(world) { world.mods.enemySpeed = world.run.dream.ruleConfig.subidonAzucar.enemySpeed; },
+  },
+
+  /** Todo es de golosina: los enemigos a veces sueltan un caramelo (Lucidez) extra. */
+  todoEsGolosina: {
+    name: 'Todo es golosina',
+    onEnemyKilled(world, enemy) {
+      if (world.rngLoot.chance(world.run.dream.ruleConfig.todoEsGolosina.chance)) world.pickups.spawn('lucidity', enemy.x, enemy.y - 2);
+    },
+  },
+
   /** La casa está a oscuras: solo ves alrededor tuyo, y las lámparas encendidas iluminan la sala. */
   penumbra: {
     name: 'Penumbra',

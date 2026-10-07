@@ -47,7 +47,7 @@ export class ItemsScene extends Scene {
     ctx.imageSmoothingEnabled = false;
     const start = m.scrollStart, end = start + m.maxVisible;
     this.entries.forEach((e, i) => {
-      if (e.kind === 'item' && i >= start && i < end) ctx.drawImage(itemIcon(e.it), 46, 52 + (i - start) * 12, 8, 8);
+      if (e.kind === 'item' && i >= start && i < end) ctx.drawImage(itemIcon(e.it), 44, 50 + (i - start) * 12, 11, 11);
     });
   }
 

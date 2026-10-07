@@ -36,16 +36,6 @@ export class HUD {
     g.fillStyle = '#ffffff'; g.fillRect(lx + 1, 6, 2, 2);
     this._lucidityX = lx + 8;
 
-    // Objetos conseguidos: columna en el margen izquierdo, fuera de la sala
-    const owned = world.items.owned;
-    owned.forEach((it, i) => {
-      const x = 4, y = 30 + i * 10;
-      if (y > 262) return;
-      g.drawImage(itemIcon(it), x, y, 8, 8);
-      if (it.id === 'despertador_repuesto' && world.items.state(it.id).used) {
-        g.globalAlpha = 0.7; g.fillStyle = '#100c20'; g.fillRect(x, y, 8, 8); g.globalAlpha = 1;
-      }
-    });
 
     // Barra de vida del jefe
     const boss = world.boss;
@@ -68,8 +58,23 @@ export class HUD {
     g.fillRect(x + 2, y + 6, 6, 1); g.fillRect(x + 3, y + 7, 4, 1); g.fillRect(x + 4, y + 8, 2, 1);
   }
 
+  /** Objetos conseguidos: columna en el margen izquierdo (capa UI, para que los 16×16 se vean nítidos). */
+  _renderItems(r, world) {
+    const ctx = r.ui;
+    ctx.imageSmoothingEnabled = false;
+    world.items.owned.forEach((it, i) => {
+      const x = 2, y = 28 + i * 11;
+      if (y > 258) return;
+      ctx.drawImage(itemIcon(it), x, y, 11, 11);
+      if (it.id === 'despertador_repuesto' && world.items.state(it.id).used) {
+        ctx.globalAlpha = 0.7; ctx.fillStyle = '#100c20'; ctx.fillRect(x, y, 11, 11); ctx.globalAlpha = 1;
+      }
+    });
+  }
+
   renderUI(r, world, scene) {
     if (this.showFullMap(world)) { this.map.renderFullUI(r, world); return; }
+    this._renderItems(r, world);
     const run = world.run, dream = run.dream;
     r.text(String(run.lucidity), this._lucidityX ?? 60, 11, { size: 9, color: '#e8e6dc' });
 

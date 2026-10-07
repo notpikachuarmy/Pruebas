@@ -54,9 +54,10 @@ export function validateContent(c) {
   }
   const STATS = ['maxHp', 'speed', 'damage', 'fireRate', 'shotSpeed', 'range', 'shotSize', 'knockback', 'dashSpeed', 'dashDuration', 'dashCooldown', 'dashCharges', 'hurtInvulnerability'];
   for (const it of Object.values(c.items ?? {})) {
-    for (const k of ['id', 'name', 'rarity', 'pools', 'description', 'icon']) if (it[k] === undefined) out.push(`Objeto "${it.id}": falta "${k}"`);
+    for (const k of ['id', 'name', 'rarity', 'pools', 'description']) if (it[k] === undefined) out.push(`Objeto "${it.id}": falta "${k}"`);
     if (!['común', 'rara', 'legendaria'].includes(it.rarity)) out.push(`Objeto "${it.id}": rareza "${it.rarity}" desconocida`);
-    if (it.icon?.length !== 8 || it.icon.some((row) => row.length !== 8)) out.push(`Objeto "${it.id}": el icono debe ser de 8×8`);
+    // El icono oficial es assets/items/<id>.png (16×16); `icon` (texto 8×8) es solo un respaldo opcional
+    if (it.icon && (it.icon.length !== 8 || it.icon.some((row) => row.length !== 8))) out.push(`Objeto "${it.id}": el icono de texto debe ser de 8×8`);
     for (const e of it.effects ?? []) if (!ITEM_EFFECTS[e.effect]) out.push(`Objeto "${it.id}": efecto "${e.effect}" no existe`);
     for (const m of it.modifiers ?? []) if (!STATS.includes(m.stat)) out.push(`Objeto "${it.id}": estadística "${m.stat}" no existe`);
   }

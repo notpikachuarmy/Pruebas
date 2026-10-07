@@ -17,6 +17,7 @@ export function drawItem(world, pools, { rng = world.rngLoot, boostRare = false 
   const candidates = Object.values(game.content.items).filter((it) =>
     it.pools.some((p) => pools.includes(p)) &&
     !run.offeredItems.has(it.id) &&
+    !world.items.has(it.id) &&
     (!it.locked || unlocked.includes(it.id)));
   if (!candidates.length) return null;
   const weighted = candidates.map((it) => ({

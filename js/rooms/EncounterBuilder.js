@@ -3,14 +3,16 @@
  * Cada enemigo declara `cost`, `role` y `minDepth`; el sueño define el presupuesto y los límites por rol.
  * Lógica pura (sin DOM).
  */
-export function buildEncounter(rng, dream, enemyDefs, depth, { challenge = false } = {}) {
+export function buildEncounter(rng, dream, enemyDefs, depth, { challenge = false, extraPools = [] } = {}) {
   const b = dream.floor.budget;
   const caps = dream.floor.roleCaps ?? {};
   let budget = b.base + depth * b.perDepth;
   let waves = Math.min(b.maxWaves, 1 + Math.floor(depth / b.wavesEvery));
   if (challenge) { budget *= 1.5; waves = Math.min(b.maxWaves + 1, waves + 1); }
 
-  const pool = dream.enemyPool
+  // extraPools: enemigos de otros sueños (Energía de Pesadilla), con menos peso
+  const merged = [...dream.enemyPool, ...extraPools.flat().map((e) => ({ ...e, weight: (e.weight ?? 1) * 0.6 }))];
+  const pool = merged
     .map((e) => ({ ...e, def: enemyDefs[e.id] }))
     .filter((e) => e.def && (e.def.minDepth ?? 0) <= depth);
   if (!pool.length) throw new Error(`El sueño "${dream.id}" no tiene enemigos válidos para profundidad ${depth}`);

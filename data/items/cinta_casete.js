@@ -3,7 +3,7 @@ export default {
   id: 'cinta_casete',
   name: 'Cinta de Casete',
   rarity: 'rara',          // común | rara | legendaria
-  pools: ['general', 'secret'],
+  pools: ['general', 'secret', 'boss'],
   locked: true,          // se desbloquea con un logro (data/progression/unlocks.js)
   tags: ['tiempo'],
   description: 'Cuando te golpean, todo se rebobina: los enemigos se quedan quietos un momento.',

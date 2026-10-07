@@ -11,6 +11,8 @@
  *   onDash(ctx, p)                    al usar el Silencio
  *   onRoomClear(ctx, p)               al limpiar una sala
  *   lightMult(ctx, p)                 multiplicador del radio de luz (sueños oscuros)
+ *   onKill(ctx, enemy, p)             al disipar un enemigo
+ *   onUpdate(ctx, dt, p)              cada paso (auras, temporizadores)
  * ctx = ItemManager (ctx.world, ctx.has(id), ctx.hasSynergy(id), ctx.state(itemId)).
  * Las sinergias se resuelven dentro del efecto al que afectan (ctx.hasSynergy).
  */
@@ -170,6 +172,61 @@ export const ITEM_EFFECTS = {
         w.game.audio.play('heal');
         w.effects.burst(w.player.x, w.player.y - 10, 8, '#eb2f2d', 50, 0.4);
       }
+    },
+  },
+
+  /** Anillo Rosa: constructo que cae sobre el enemigo golpeado; el tipo depende de la vida máxima. */
+  construct: {
+    onHitEnemy(ctx, enemy, proj, p) {
+      const st = ctx.state('anillo_rosa');
+      const w = ctx.world;
+      if (proj.isConstruct || proj.isAura || proj.isExplosion || w.time - (st.last ?? -99) < p.cooldown) return;
+      st.last = w.time;
+      const hearts = w.player.stats.get('maxHp') / 2;
+      const kind = hearts >= 6 ? 'estrella' : hearts >= 4 ? 'martillo' : 'corazon';
+      w.spawnConstruct(kind, enemy);
+    },
+  },
+
+  /** Guía de Pesadillas: barras de vida (las dibuja EnemyManager si el efecto está activo). */
+  healthBars: {},
+
+  /** Polvo Luminoso: daño periódico a los enemigos dentro del radio. */
+  aura: {
+    onUpdate(ctx, dt, p) {
+      const st = ctx.state('aura');
+      st.t = (st.t ?? 0) - dt;
+      if (st.t > 0) return;
+      st.t = p.tick;
+      const w = ctx.world, pl = w.player;
+      if (!pl.alive) return;
+      const r = ctx.auraRadius();
+      for (const e of w.enemies.query(pl.x, pl.y, r + 8)) {
+        if (!e.canBeHit()) continue;
+        if ((e.x - pl.x) ** 2 + (e.y - pl.y) ** 2 > r * r) continue;
+        w.damage.hitEnemy(e, p.damage, e.x - pl.x, e.y - pl.y, 10, { isAura: true });
+      }
+    },
+  },
+
+  /** Caramelo Explosivo: los enemigos disipados estallan. */
+  killExplosion: {
+    onKill(ctx, enemy, p) {
+      const w = ctx.world;
+      w.effects.burst(enemy.x, enemy.y - 6, 14, '#ff6aa0', 90, 0.4, 2);
+      for (const o of w.enemies.query(enemy.x, enemy.y, p.radius + 8)) {
+        if (o === enemy || !o.canBeHit()) continue;
+        if ((o.x - enemy.x) ** 2 + (o.y - enemy.y) ** 2 > p.radius * p.radius) continue;
+        w.damage.hitEnemy(o, p.damage, o.x - enemy.x, o.y - enemy.y, 60, { isExplosion: true });
+      }
+    },
+  },
+
+  /** Bolsa de Chuches: Lucidez extra al limpiar una sala. */
+  clearLucidity: {
+    onRoomClear(ctx, p) {
+      const w = ctx.world, n = ctx.rng.int(p.amount[0], p.amount[1]);
+      for (let i = 0; i < n; i++) w.pickups.spawn('lucidity', w.player.x, w.player.y - 6);
     },
   },
 

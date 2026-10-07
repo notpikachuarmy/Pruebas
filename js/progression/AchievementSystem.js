@@ -30,11 +30,23 @@ export class AchievementSystem {
     ev.on('item:taken', () => {
       const w = game.activeWorld;
       if (!w) return;
+      this._check((c) => c.type === 'runMaxHp' && w.player.stats.get('maxHp') >= c.gte);
       this.meta.stats.itemsTaken++;
       this._check((c) => c.type === 'runItems' && w.items.owned.length >= c.gte);
       this._check((c) => c.type === 'runSynergies' && w.items.synergies.length >= c.gte);
     });
-    ev.on('shop:buy', ({ price }) => { this.meta.stats.shopSpent += price; this._checkStats(); });
+    ev.on('shop:buy', ({ price }) => {
+      this.meta.stats.shopSpent += price;
+      this._checkStats();
+      // comprar un corazón extra también cuenta para "Corazón lleno" (se comprueba tras aplicarlo)
+      setTimeout(() => { const w = game.activeWorld; if (w) this._check((c) => c.type === 'runMaxHp' && w.player.stats.get('maxHp') >= c.gte); }, 0);
+    });
+    ev.on('pickup:lucidity', ({ amount }) => {
+      const run = game.activeRun;
+      if (!run) return;
+      run.counters.lucidityTotal = (run.counters.lucidityTotal ?? 0) + amount;
+      this._check((c) => c.type === 'runCounter' && (run.counters[c.counter] ?? 0) >= c.gte);
+    });
     ev.on('lamp:lit', () => {
       const run = game.activeRun;
       this.meta.stats.lampsLit++;

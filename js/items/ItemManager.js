@@ -61,6 +61,18 @@ export class ItemManager {
   onHitEnemy(enemy, proj) { for (const e of this._effects) e.fx.onHitEnemy?.(this, enemy, proj, e.params); }
   onHurt() { for (const e of this._effects) e.fx.onHurt?.(this, e.params); }
   onDash() { for (const e of this._effects) e.fx.onDash?.(this, e.params); }
+  onKill(enemy) { for (const e of this._effects) e.fx.onKill?.(this, enemy, e.params); }
+
+  /** ¿Tiene algún objeto este efecto? (p. ej. 'healthBars') */
+  hasEffect(name) { return this._effects.some((e) => e.params.effect === name); }
+
+  /** Radio del aura del Polvo Luminoso (0 si no hay aura). Sinergia Faro: ×1,6. */
+  auraRadius() {
+    const a = this._effects.find((e) => e.params.effect === 'aura');
+    if (!a) return 0;
+    return a.params.radius * (this.hasSynergy('faro') ? 1.6 : 1);
+  }
+
   onDreamStart() { for (const e of this._effects) e.fx.onDreamStart?.(this, e.params); }
   onRoomClear() { for (const e of this._effects) e.fx.onRoomClear?.(this, e.params); }
 
@@ -79,6 +91,7 @@ export class ItemManager {
   schedule(shot, delay) { this._scheduled.push({ shot, t: delay }); }
 
   update(dt, spawnShot) {
+    for (const e of this._effects) e.fx.onUpdate?.(this, dt, e.params);
     if (!this._scheduled.length) return;
     for (const s of this._scheduled) {
       s.t -= dt;

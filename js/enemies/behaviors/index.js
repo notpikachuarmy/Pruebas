@@ -16,8 +16,13 @@ import clockBoss from './clockBoss.js';
 import rival from './rival.js';
 import underBed from './underBed.js';
 import argument from './argument.js';
+import hopper from './hopper.js';
+import spinner from './spinner.js';
+import cloudDropper from './cloudDropper.js';
+import patternBoss from './patternBoss.js';
 
 export const BEHAVIORS = {
   scribbleChaser, shyShooter, eraser, fleeing, compass, wallClock, photocopier, mimic, professor,
   flutter, fadingVisitor, dinnerTable, staring, clockBoss, rival, underBed, argument,
+  hopper, spinner, cloudDropper, patternBoss,
 };

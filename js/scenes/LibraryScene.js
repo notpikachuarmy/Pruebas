@@ -97,8 +97,8 @@ export class LibraryScene extends Scene {
     this.entries.forEach((e, i) => {
       if (i < start || i >= start + m.maxVisible || e.kind !== 'item') return;
       const y = 58 + (i - start) * 12;
-      if (e.known) ctx.drawImage(itemIcon(e.def), 40, y, 8, 8);
-      else { ctx.fillStyle = '#2e2552'; ctx.fillRect(40, y, 8, 8); }
+      if (e.known) ctx.drawImage(itemIcon(e.def), 38, y - 1, 11, 11);
+      else { ctx.fillStyle = '#2e2552'; ctx.fillRect(38, y - 1, 11, 11); }
     });
   }
 

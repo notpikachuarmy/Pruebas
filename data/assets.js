@@ -27,6 +27,16 @@ export default {
     peluche: 'assets/enemies/peluche.png',
     cama: 'assets/bosses/cama.png',
     perfecto: 'assets/bosses/perfecto.png',
+    tiles_dulce: 'assets/rooms/tiles_dulce.png',
+    gominola: 'assets/enemies/gominola.png',
+    piruleta: 'assets/enemies/piruleta.png',
+    algodon: 'assets/enemies/algodon.png',
+    osito: 'assets/enemies/osito.png',
+    bombon: 'assets/enemies/bombon.png',
+    tarta: 'assets/bosses/tarta.png',
+    rey_caramelo: 'assets/bosses/rey_caramelo.png',
+    fuente_chocolate: 'assets/bosses/fuente_chocolate.png',
+    pinata: 'assets/bosses/pinata.png',
   },
 
   sprites: {
@@ -152,6 +162,51 @@ export default {
       animations: { idle: { frames: [0, 1], fps: 2 }, walk: { frames: [2, 3, 4, 5], fps: 9 } },
       placeholder: { color: '#e0c060', w: 12, h: 20 },
     },
+    enemy_gominola: {
+      image: 'gominola', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#78dc78', w: 12, h: 12 },
+    },
+    enemy_piruleta: {
+      image: 'piruleta', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#f0508c', w: 12, h: 12 },
+    },
+    enemy_algodon: {
+      image: 'algodon', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#ffbedc', w: 12, h: 12 },
+    },
+    enemy_osito: {
+      image: 'osito', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#ff5a5a', w: 12, h: 12 },
+    },
+    enemy_bombon: {
+      image: 'bombon', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#5c3422', w: 12, h: 12 },
+    },
+    boss_tarta: {
+      image: 'tarta', frameWidth: 32, frameHeight: 32, anchor: { x: 16, y: 31 },
+      animations: { idle: { frames: [0, 1], fps: 4 }, jam: { frames: [2], fps: 1 } },
+      placeholder: { color: '#ffd6e2', w: 26, h: 18 },
+    },
+    boss_rey: {
+      image: 'rey_caramelo', frameWidth: 32, frameHeight: 40, anchor: { x: 16, y: 39 },
+      animations: { idle: { frames: [0, 1], fps: 3 } },
+      placeholder: { color: '#eb5a8c', w: 18, h: 36 },
+    },
+    boss_fuente: {
+      image: 'fuente_chocolate', frameWidth: 40, frameHeight: 40, anchor: { x: 20, y: 38 },
+      animations: { idle: { frames: [0, 1], fps: 4 } },
+      placeholder: { color: '#6e3e28', w: 34, h: 36 },
+    },
+    boss_pinata: {
+      image: 'pinata', frameWidth: 32, frameHeight: 32, anchor: { x: 16, y: 31 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#ff5a8c', w: 24, h: 22 },
+    },
   },
 
   tilesets: {
@@ -172,6 +227,15 @@ export default {
       wall: 2,
       wallFace: 3,
       solids: { D: 4, T: 7, L: 6, M: 5 }, // sofá, cómoda, planta, mesa (mismos símbolos que el examen)
+    },
+    tiles_dulce: {
+      image: 'tiles_dulce',
+      size: 16,
+      floor: 0,
+      floorMargin: 1,
+      wall: 2,
+      wallFace: 3,         // pared de chocolate con nata
+      solids: { D: 4, M: 5, L: 6, T: 7 }, // magdalena, tableta, árbol-piruleta, gominola gigante
     },
   },
 };
