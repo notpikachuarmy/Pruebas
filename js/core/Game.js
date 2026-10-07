@@ -12,6 +12,7 @@ import { AchievementSystem } from '../progression/AchievementSystem.js';
 import { DreamerRegistry } from '../progression/DreamerRegistry.js';
 import { Bestiary } from '../progression/Bestiary.js';
 import { CONTENT } from '../../data/registry.js';
+import { loadItemImages } from '../items/ItemIcons.js';
 
 /**
  * Núcleo: bucle de paso fijo + pila de escenas + servicios compartidos.
@@ -60,6 +61,7 @@ export class Game {
       await Promise.race([document.fonts.load('10px "Pixelify Sans"'), new Promise((r) => setTimeout(r, 1500))]).catch(() => {});
     }
     await this.assets.load(CONTENT.assets);
+    await loadItemImages(Object.values(CONTENT.items));
     if (this.assets.missing.length) console.warn('[Game] Assets que faltan (se usan placeholders):', this.assets.missing);
   }
 

@@ -11,7 +11,7 @@ export const PRODUCTS = {
     label: (world, o) => world.game.content.items[o.itemId].name,
     canApply: () => true,
     apply: (world, o) => world.takeItem(o.itemId),
-    render: (g, x, y, t, world, o) => g.drawImage(itemIcon(world.game.content.items[o.itemId]), x - 4, y - 5),
+    render: (g, x, y, t, world, o) => g.drawImage(itemIcon(world.game.content.items[o.itemId]), x - 4, y - 5, 8, 8),
   },
   halfHeart: {
     name: 'Medio corazón',

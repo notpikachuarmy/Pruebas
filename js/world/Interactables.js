@@ -51,7 +51,7 @@ export const KINDS = {
       const by = y - 20 + Math.round(Math.sin(world.time * 3) * 1.5);
       g.globalAlpha = 0.35; g.fillStyle = RARITY_COLOR[it.rarity];
       g.fillRect(x - 6, by - 2, 12, 12); g.globalAlpha = 1;
-      g.drawImage(itemIcon(it), x - 4, by);
+      g.drawImage(itemIcon(it), x - 4, by, 8, 8);
     },
   },
 

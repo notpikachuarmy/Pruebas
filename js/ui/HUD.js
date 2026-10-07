@@ -41,7 +41,7 @@ export class HUD {
     owned.forEach((it, i) => {
       const x = 4, y = 30 + i * 10;
       if (y > 262) return;
-      g.drawImage(itemIcon(it), x, y);
+      g.drawImage(itemIcon(it), x, y, 8, 8);
       if (it.id === 'despertador_repuesto' && world.items.state(it.id).used) {
         g.globalAlpha = 0.7; g.fillStyle = '#100c20'; g.fillRect(x, y, 8, 8); g.globalAlpha = 1;
       }

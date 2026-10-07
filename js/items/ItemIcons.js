@@ -1,12 +1,32 @@
-/** Convierte los iconos de texto (8×8) de data/items en canvas reutilizables. */
+/**
+ * Iconos de objetos.
+ * 1) Si existe assets/items/<id>.png, se usa esa imagen (la carga Game al arrancar).
+ * 2) Si no, se genera a partir del icono de texto 8×8 del archivo de datos del objeto.
+ */
 const PALETTE = {
   k: '#191817', w: '#fff6d6', r: '#eb2f2d', y: '#ffd65c', b: '#4a749c', d: '#25307a', g: '#9aa3b5',
   c: '#8fd3ff', l: '#c9bde6', p: '#e896a0', n: '#8a5a34', o: '#ff9a3c', G: '#7fd6a0',
 };
 
 const cache = new Map();
+const images = new Map();
+
+/** Registra una imagen PNG para un objeto (sustituye al icono de texto). */
+export function setItemImage(id, img) { images.set(id, img); }
+
+/** Intenta cargar assets/items/<id>.png para cada objeto. Las que no existan se ignoran sin error. */
+export async function loadItemImages(items) {
+  await Promise.all(items.map((it) => new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => { setItemImage(it.id, img); resolve(); };
+    img.onerror = () => resolve();
+    img.src = `assets/items/${it.id}.png`;
+  })));
+}
 
 export function itemIcon(item) {
+  const png = images.get(item.id);
+  if (png) return png;
   let c = cache.get(item.id);
   if (c) return c;
   c = document.createElement('canvas');
