@@ -1,6 +1,6 @@
 import { toPlayer, shoot } from './helpers.js';
 
-const PHASES = ['No mires debajo', 'Se oyen pasos', 'Apagón'];
+const PHASES = ['No mires debajo', 'Se oyen pasos', 'Apagón'];   // por defecto; params.phaseNames los cambia
 
 /**
  * El Monstruo de Debajo de la Cama (jefe alternativo de la Casa).
@@ -17,7 +17,7 @@ export default {
     e.vx = 0; e.vy = 0;
     const ph = this.phaseOf(e);
     if (ph !== d.phase) {
-      d.phase = ph; world.bossBanner(PHASES[ph]); world.game.haptics.play('heavy');
+      d.phase = ph; world.bossBanner((p.phaseNames ?? PHASES)[ph]); world.game.haptics.play('heavy');
       if (ph === 2) world.mods.lightMult = 0.7;
     }
     if (!world.player.alive) return;
@@ -27,14 +27,14 @@ export default {
         d.grab = p.grabEvery[ph];
         const n = ph === 2 ? 2 : 1;
         for (let i = 0; i < n; i++) {
-          world.hazards.spawn('grab', world.player.x + world.rngSpawn.range(-16, 16) * i, world.player.y + world.rngSpawn.range(-10, 10) * i, 15, p.grabDelay, e.def.id);
+          world.hazards.spawn(p.grabHazard ?? 'grab', world.player.x + world.rngSpawn.range(-16, 16) * i, world.player.y + world.rngSpawn.range(-10, 10) * i, 15, p.grabDelay, e.def.id);
         }
       }
       if (e.stateTime > p.hideTime[ph]) {
         e.setState('peek');
         world.game.audio.play('hurt', { pitch: 0.5 });
         const t = toPlayer(e, world);
-        for (let i = -3; i <= 3; i++) shoot(world, e, t.angle + i * 0.22, { speed: 85, range: 280, radius: 4, z: 6, color: '#1a1428', trail: '#ffd65c' });
+        for (let i = -3; i <= 3; i++) shoot(world, e, t.angle + i * 0.22, { speed: 85, range: 280, radius: 4, z: 6, color: p.shotColor ?? '#1a1428', trail: '#ffd65c' });
       }
     } else if (e.state === 'peek') {
       if (e.stateTime > p.peekTime) {
@@ -43,7 +43,7 @@ export default {
         if (ph >= 1 && world.enemies.list.filter((o) => !o.dead && o !== e).length < 4) {
           for (let i = 0; i < 2; i++) {
             const pt = world.room.randomFloorPoint(world.rngSpawn, world.player.x, world.player.y, 80);
-            world.enemies.spawn('polilla', pt.x, pt.y);
+            world.enemies.spawn(p.summon ?? 'polilla', pt.x, pt.y);
           }
         }
       }
@@ -54,5 +54,5 @@ export default {
   damageMult() { return 1.3; },
   anim(e) { return e.state === 'peek' ? 'peek' : 'idle'; },
   light(e) { return e.state === 'peek' ? 60 : 22; },
-  onDeath(e, world) { world.mods.lightMult = 1; world.bossBanner('Debajo no hay nada'); },
+  onDeath(e, world) { world.mods.lightMult = 1; world.bossBanner(e.def.params.deathText ?? 'Debajo no hay nada'); },
 };

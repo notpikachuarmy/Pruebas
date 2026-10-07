@@ -9,12 +9,12 @@ import { Pool } from '../core/Pool.js';
 export const HAZARD_TYPES = {
   ink: {
     ink: true, color: '#25307a', edge: '#3d4ca8',
-    onPlayer(player) { player.slowFactor = Math.min(player.slowFactor, 0.55); },
+    onPlayer(player, h, world) { if (!world.items.hasEffect('noSlow')) player.slowFactor = Math.min(player.slowFactor, 0.55); },
   },
   redInk: {
     ink: true, color: '#b72025', edge: '#eb5a4a',
     onPlayer(player, h, world) {
-      player.slowFactor = Math.min(player.slowFactor, 0.75);
+      if (!world.items.hasEffect('noSlow')) player.slowFactor = Math.min(player.slowFactor, 0.75);
       world.damage.hurtPlayer(1, 0, 0, h.source);
     },
   },
@@ -33,10 +33,27 @@ export const HAZARD_TYPES = {
       }
     },
   },
+  // Saxofón: rastro de notas que daña a los enemigos que lo pisan
+  soundTrail: {
+    color: '#ffd65c', edge: '#fff6d6',
+    onUpdate(h, world, dt) {
+      const dmg = (world.items.hasSynergy('big_band') ? 3 : 1.5) * dt;
+      for (const e of world.enemies.query(h.x, h.y, 14)) {
+        if (!e.canBeHit() || (e.x - h.x) ** 2 + (e.y - h.y) ** 2 > 100) continue;
+        e.hp -= dmg; e.flash = 0.03;
+        if (e.hp <= 0) world.damage.killEnemy(e);
+      }
+    },
+  },
+  // Agua salada del sueño del mar: charcos de aguas oscuras (solo visual + frena un poco)
+  seaFoam: {
+    color: '#1d3a5a', edge: '#8fd3ff',
+    onPlayer(player, h, world) { if (!world.items.hasEffect('noSlow')) player.slowFactor = Math.min(player.slowFactor, 0.7); },
+  },
   // Sirope de los sueños dulces: frena pero no hace daño
   syrup: {
     color: '#ff8fc0', edge: '#ffd0e4',
-    onPlayer(player) { player.slowFactor = Math.min(player.slowFactor, 0.6); },
+    onPlayer(player, h, world) { if (!world.items.hasEffect('noSlow')) player.slowFactor = Math.min(player.slowFactor, 0.6); },
   },
   // Bomba de caramelo: aviso que cae y deja sirope
   caramelDrop: {
@@ -57,6 +74,28 @@ export const HAZARD_TYPES = {
       if (p.alive && dx * dx + dy * dy < h.r * h.r) world.damage.hurtPlayer(1, dx, dy, h.source);
       world.effects.burst(h.x, h.y - 2, 10, '#ff8fc0', 70, 0.35);
       world.hazards.spawn('syrup', h.x, h.y, h.r, 3, h.source);
+    },
+  },
+  // Rayo de la tormenta: zigzag de aviso y descarga
+  lightning: {
+    render(g, h) {
+      const k = 1 - h.life / h.max;
+      const x = Math.round(h.x), y = Math.round(h.y);
+      g.globalAlpha = 0.3 + 0.5 * k;
+      g.fillStyle = '#ffe680';
+      g.beginPath(); g.ellipse(x, y, h.r * k, h.r * 0.5 * k, 0, 0, Math.PI * 2); g.fill();
+      if (h.life < 0.2) {
+        g.globalAlpha = 1;
+        for (let i = 0; i < 6; i++) g.fillRect(x + (i % 2 ? 2 : -2), y - 60 + i * 10, 2, 10);
+      }
+      g.globalAlpha = 1;
+    },
+    onExpire(h, world) {
+      const p = world.player;
+      const dx = p.x - h.x, dy = (p.y - h.y) * 1.6;
+      if (p.alive && dx * dx + dy * dy < h.r * h.r) world.damage.hurtPlayer(1, dx, dy, h.source);
+      world.effects.burst(h.x, h.y - 4, 14, '#ffe680', 110, 0.3);
+      world.game.audio.play('wallHit', { pitch: 0.5 });
     },
   },
   // Mano de debajo de la cama: sombra en el suelo que agarra al terminar el aviso

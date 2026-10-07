@@ -23,6 +23,7 @@ export class Enemy {
     this.data = {};       // memoria privada del comportamiento
     this.haste = 0;       // tiempo restante de prisa (Reloj de Pared)
     this.marked = 0;      // tiempo restante de marca (Post-it)
+    this.stun = 0;        // aturdido (Triángulo): no actúa
     this.maxHp = def.hp;
     behavior.init?.(this);
   }

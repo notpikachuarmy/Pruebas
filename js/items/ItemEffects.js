@@ -21,6 +21,7 @@ export const ITEM_EFFECTS = {
     onShot(ctx, shot, p) {
       if (shot.isEcho) return;
       const echo = { ...shot, extras: null, isEcho: true };
+      if (ctx.hasSynergy('acorde')) echo.pierce = (shot.pierce ?? 0) + 1;
       const keepStrong = shot.strong && ctx.hasSynergy('polirritmia');
       echo.damage = keepStrong ? shot.damage : shot.damage * p.damage;
       echo.radius = Math.max(2, shot.radius - 1);
@@ -66,7 +67,7 @@ export const ITEM_EFFECTS = {
   },
 
   trail: {
-    onShot(ctx, shot, p) { shot.hazardTrail = p.hazard; },
+    onShot(ctx, shot, p) { shot.hazardTrail = [...(shot.hazardTrail ?? []), p.hazard]; },
   },
 
   revealMap: {
@@ -154,7 +155,8 @@ export const ITEM_EFFECTS = {
   },
 
   light: {
-    lightMult(ctx, p) { return p.mult; },
+    // Sinergia Faro del Puerto (Brújula + Linterna): todavía más luz
+    lightMult(ctx, p) { return p.mult * (ctx.hasSynergy('faro_puerto') ? 1.4 : 1); },
   },
 
   fullHpDamage: {
@@ -228,6 +230,138 @@ export const ITEM_EFFECTS = {
       const w = ctx.world, n = ctx.rng.int(p.amount[0], p.amount[1]);
       for (let i = 0; i < n; i++) w.pickups.spawn('lucidity', w.player.x, w.player.y - 6);
     },
+  },
+
+  // ---------- Objetos de la Fase 7c ----------
+
+  /** Púa de Guitarra: golpes críticos. Con Solo de Guitarra, el golpe del metrónomo siempre es crítico. */
+  crit: {
+    onShot(ctx, shot, p) {
+      if (shot.isRing) return;
+      const sure = shot.strong && ctx.hasSynergy('solo_guitarra');
+      if (sure || ctx.rng.chance(p.chance)) { shot.damage *= p.mult; shot.crit = true; shot.color = '#ff9a3c'; shot.radius += 1; }
+    },
+  },
+
+  /** Caracola: cada N disparos, una gran ola que lo atraviesa todo. Con Marejada, empuja muchísimo. */
+  bigWave: {
+    onShot(ctx, shot, p) {
+      if (shot.isEcho || shot.isRing) return;
+      const st = ctx.state('caracola');
+      st.count = (st.count ?? 0) + 1;
+      if (st.count % p.every) return;
+      shot.radius += 3; shot.pierce = 99; shot.damage *= p.mult; shot.range *= 1.4;
+      shot.knockback *= ctx.hasSynergy('marejada') ? 4 : 1.5;
+      shot.color = '#8fd3ff'; shot.trailColor = '#25307a';
+      ctx.world.game.audio.play('cleared', { pitch: 0.6, volume: 0.6 });
+    },
+  },
+
+  /** Pedal de Distorsión: las notas se rompen en fragmentos al apagarse. */
+  fragment: {
+    onShot(ctx, shot, p) { if (!shot.isRing) shot.splitOnExpire = p.count; },
+  },
+
+  /** Cascos Rotos: la desviación se aplica en PlayerCombat (ctx.spread). */
+  inaccuracy: {},
+
+  /** Bombona de Oxígeno: ignora todo lo que frena (tinta, sirope, corrientes). */
+  noSlow: {},
+
+  /** Brújula: marca en el mapa las salas importantes de cada sueño. */
+  compass: {
+    onAdd(ctx) { ctx.world.run.flags.compass = true; },
+    onDreamStart(ctx) { ctx.world.run.flags.compass = true; },
+  },
+
+  /** Triángulo: probabilidad de aturdir. Con Orquesta, más probable. */
+  stunOnHit: {
+    onHitEnemy(ctx, enemy, proj, p) {
+      if (proj.isAura || enemy.def.boss) return;
+      const chance = p.chance * (ctx.hasSynergy('orquesta') ? 2 : 1);
+      if (ctx.rng.chance(chance)) enemy.stun = Math.max(enemy.stun, p.time);
+    },
+  },
+
+  /** Gong: al recibir daño, onda expansiva que golpea a toda la sala. */
+  gongOnHurt: {
+    onHurt(ctx, p) {
+      const w = ctx.world, pl = w.player;
+      for (const e of w.enemies.list) {
+        if (!e.canBeHit()) continue;
+        w.damage.hitEnemy(e, p.damage, e.x - pl.x, e.y - pl.y, 160, { isAura: true });
+        if (ctx.hasSynergy('orquesta') && !e.def.boss) e.stun = Math.max(e.stun, 0.8);
+      }
+      w.effects.burst(pl.x, pl.y - 8, 40, '#ffd65c', 200, 0.6, 2);
+      w.shake(5, 0.3);
+      w.game.audio.play('killEnemy', { pitch: 0.4 });
+    },
+  },
+
+  /** Salvavidas: al bajar a un corazón o menos, una vez por sala, te protege y aparta a todos. */
+  lifebuoy: {
+    onHurt(ctx, p) {
+      const w = ctx.world, pl = w.player, st = ctx.state('salvavidas');
+      if (pl.hp > 2 || st.room === w.node) return;
+      st.room = w.node;
+      pl.invulnerable = Math.max(pl.invulnerable, p.time);
+      for (const e of w.enemies.list) {
+        const dx = e.x - pl.x, dy = e.y - pl.y, d = Math.hypot(dx, dy) || 1;
+        if (d < 70 && (e.def.mass ?? 1) < 50) { e.kx += (dx / d) * 260; e.ky += (dy / d) * 260; }
+      }
+      w.projectiles.eraseInRadius(pl.x, pl.y, 60, 'enemy');
+      w.effects.burst(pl.x, pl.y - 8, 24, '#eb2f2d', 120, 0.5, 2);
+      w.toast('¡Salvavidas!');
+    },
+  },
+
+  /** Vinilo de Oro: cada enemigo disipado suma daño hasta un máximo; recibir daño lo pierde todo. */
+  killStack: {
+    onKill(ctx, enemy, p) {
+      const st = ctx.state('vinilo_oro');
+      const max = ctx.hasSynergy('disco_platino') ? p.max * 2 : p.max;
+      st.n = Math.min(max, (st.n ?? 0) + 1);
+    },
+    onHurt(ctx) { ctx.state('vinilo_oro').n = 0; },
+    damageMult(ctx, enemy, proj, p) { return 1 + (ctx.state('vinilo_oro').n ?? 0) * p.per; },
+  },
+
+  /** Bis: al limpiar una sala, unos segundos de cadencia doble. */
+  encore: {
+    onRoomClear(ctx, p) { ctx.state('bis').t = p.time; },
+    onUpdate(ctx, dt, p) {
+      const st = ctx.state('bis'), stats = ctx.world.player.stats;
+      const active = (st.t ?? 0) > 0;
+      if (active) st.t -= dt;
+      const has = stats.modifiers.some((m) => m.source === 'bis');
+      if (active && !has) stats.addModifier({ stat: 'fireRate', mult: p.mult, source: 'bis' });
+      if (!active && has) stats.removeBySource('bis');
+    },
+  },
+
+  /** Batuta: quieto, disparas mucho más rápido. */
+  stillFire: {
+    onUpdate(ctx, dt, p) {
+      const pl = ctx.world.player, stats = pl.stats;
+      const still = pl.alive && !pl.moving && !pl.isDashing;
+      const has = stats.modifiers.some((m) => m.source === 'batuta');
+      if (still && !has) stats.addModifier({ stat: 'fireRate', mult: p.mult, source: 'batuta' });
+      if (!still && has) stats.removeBySource('batuta');
+    },
+  },
+
+  /** Marcapasos: cada X segundos sin recibir daño, recuperas medio corazón. */
+  regen: {
+    onUpdate(ctx, dt, p) {
+      const st = ctx.state('marcapasos');
+      const every = ctx.hasSynergy('ritmo_cardiaco') ? p.every * 0.66 : p.every;
+      st.t = (st.t ?? 0) + dt;
+      if (st.t >= every) {
+        st.t = 0;
+        if (ctx.world.damage.healPlayer(1)) { ctx.world.game.audio.play('heal'); ctx.world.floatText(ctx.world.player.x, ctx.world.player.y - 24, '♥'); }
+      }
+    },
+    onHurt(ctx) { ctx.state('marcapasos').t = 0; },
   },
 
   ring: {

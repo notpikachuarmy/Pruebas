@@ -32,9 +32,9 @@ export class ItemManager {
     // El onAdd va después de los modificadores (p. ej. curar tras subir la vida máxima)
     for (const e of this._effects) if (e.item === item) e.fx.onAdd?.(this, e.params);
 
+    const newSyn = this._checkSynergies();
     const p = this.world.player;
     p.hp = Math.min(p.hp, p.stats.get('maxHp'));
-    const newSyn = this._checkSynergies();
     this.world.game.events.emit('item:taken', { item, synergies: newSyn });
     return { item, synergies: newSyn };
   }
@@ -43,7 +43,11 @@ export class ItemManager {
     const found = [];
     for (const s of Object.values(this.world.game.content.synergies)) {
       if (this.hasSynergy(s.id)) continue;
-      if (s.requires.every((r) => this.has(r))) { this.synergies.push(s); found.push(s); }
+      if (s.requires.every((r) => this.has(r))) {
+        this.synergies.push(s); found.push(s);
+        // Una sinergia puede traer modificadores de estadísticas propios (sin programar nada)
+        for (const m of s.modifiers ?? []) this.world.player.stats.addModifier({ ...m, source: `syn:${s.id}` });
+      }
     }
     return found;
   }
@@ -62,6 +66,13 @@ export class ItemManager {
   onHurt() { for (const e of this._effects) e.fx.onHurt?.(this, e.params); }
   onDash() { for (const e of this._effects) e.fx.onDash?.(this, e.params); }
   onKill(enemy) { for (const e of this._effects) e.fx.onKill?.(this, enemy, e.params); }
+
+  /** Desviación aleatoria de los disparos (Cascos Rotos); la sinergia Sordina la anula. */
+  get spread() {
+    if (this.hasSynergy('sordina')) return 0;
+    const e = this._effects.find((x) => x.params.effect === 'inaccuracy');
+    return e ? e.params.spread : 0;
+  }
 
   /** ¿Tiene algún objeto este efecto? (p. ej. 'healthBars') */
   hasEffect(name) { return this._effects.some((e) => e.params.effect === name); }

@@ -13,6 +13,11 @@ export class MapView {
     const floor = world.run.floor;
     const shown = new Map(); // key → 'visited' | 'seen'
     // Plano revelado (evento): todo lo que no es secreto
+    // Brújula: las salas importantes se ven siempre (aunque haya Folio en blanco)
+    if (world.run.flags.compass && !world.run.flags.mapRevealed) {
+      const important = ['boss', 'miniboss', 'reward', 'shop', 'healing', 'event', 'challenge'];
+      for (const n of floor.nodes.values()) if (important.includes(n.type)) shown.set(n.key, n.state.visited ? 'visited' : 'seen');
+    }
     if (world.run.flags.mapRevealed) {
       for (const n of floor.nodes.values()) if (n.type !== 'secret' || n.state.discovered) shown.set(n.key, n.state.visited ? 'visited' : 'seen');
       return shown;

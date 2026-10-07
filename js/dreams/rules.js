@@ -85,6 +85,41 @@ export const RULES = {
     },
   },
 
+  /** Mar adentro: cuanto más lejos del inicio, más oscura está el agua. */
+  abismo: {
+    name: 'El abismo',
+    onRoomEnter(world, node) {
+      const cfg = world.run.dream.ruleConfig.abismo;
+      world.mods.light = Math.max(cfg.min, cfg.base - node.depth * cfg.perDepth);
+    },
+  },
+
+  /** Corrientes: en algunas salas el agua te arrastra en una dirección (la Bombona de Oxígeno las anula). */
+  corrientes: {
+    name: 'Corrientes',
+    onRoomEnter(world, node, first) {
+      const cfg = world.run.dream.ruleConfig.corrientes;
+      const st = node.state;
+      if (st.current === undefined) {
+        const rng = world.run.rng.fork(`corriente:${node.key}`);
+        st.current = node.type !== 'start' && node.type !== 'boss' && rng.chance(cfg.chance)
+          ? { a: rng.int(0, 7) * Math.PI / 4, s: rng.range(cfg.strength[0], cfg.strength[1]) } : null;
+      }
+      world.current = st.current;
+      if (st.current && world.items.hasEffect('noSlow')) world.game.events.emit('current:resisted');
+    },
+    update(world, dt) {
+      const c = world.current, p = world.player;
+      if (!c || !p.alive) return;
+      if (!world.items.hasEffect('noSlow')) world.room.move(p, Math.cos(c.a) * c.s * dt, Math.sin(c.a) * c.s * dt);
+      // burbujas que muestran hacia dónde va el agua
+      if (Math.random() < 0.5) {
+        const x = Math.random() * world.room.width, y = Math.random() * world.room.height;
+        world.effects.particle(x, y, Math.cos(c.a) * c.s * 2.5, Math.sin(c.a) * c.s * 2.5, 0.8, '#8fd3ff', 1, 0, 0);
+      }
+    },
+  },
+
   /** La casa está a oscuras: solo ves alrededor tuyo, y las lámparas encendidas iluminan la sala. */
   penumbra: {
     name: 'Penumbra',

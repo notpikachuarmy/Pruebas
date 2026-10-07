@@ -27,6 +27,7 @@ export class AchievementSystem {
       this.meta.stats.itemsTaken++;
       this._check((c) => c.type === 'runItems' && w.items.owned.length >= c.gte);
       this._check((c) => c.type === 'runSynergies' && w.items.synergies.length >= c.gte);
+      this._check((c) => c.type === 'discoveredItems' && this.meta.discovered.items.length >= c.gte);
     });
     ev.on('shop:buy', ({ price }) => {
       this.meta.stats.shopSpent += price;

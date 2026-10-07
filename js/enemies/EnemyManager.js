@@ -35,6 +35,12 @@ export class EnemyManager {
       e.flash = Math.max(0, e.flash - dt);
       e.marked = Math.max(0, e.marked - dt);
       if (frozen && !e.spawning) continue;   // Cinta de Casete: tiempo enemigo detenido
+      if (e.stun > 0 && !e.def.boss) {
+        e.stun -= dt;
+        e.kx = approach(e.kx, 0, 600 * dt); e.ky = approach(e.ky, 0, 600 * dt);
+        room.move(e, e.kx * dt, e.ky * dt);
+        continue;
+      }
       e.animTime += dt;
       e.haste = Math.max(0, e.haste - dt);
       if (e.spawning) { e.spawnTimer -= dt; continue; }
@@ -124,6 +130,11 @@ export class EnemyManager {
       const w = 12, top = Math.round(e.y) - Math.round(e.def.bodyHeight * 2 * (e.def.scale ?? 1)) - 6;
       g.fillStyle = '#100c20'; g.fillRect(Math.round(e.x) - w / 2 - 1, top - 1, w + 2, 3);
       g.fillStyle = '#7fd6a0'; g.fillRect(Math.round(e.x) - w / 2, top, Math.max(0, Math.round(w * e.hp / e.maxHp)), 1);
+    }
+    if (e.stun > 0 && !e.def.boss) {
+      const t = this.world.time * 8;
+      g.fillStyle = '#ffd65c';
+      for (let i = 0; i < 3; i++) g.fillRect(Math.round(e.x + Math.cos(t + i * 2.1) * 6), Math.round(e.y - e.def.bodyHeight * 2 - 4 + Math.sin(t + i * 2.1) * 2), 1, 1);
     }
     if (e.marked > 0) { g.fillStyle = '#ffd65c'; g.fillRect(Math.round(e.x) - 2, Math.round(e.y) - (e.def.bodyHeight * 2 + 10), 4, 4); }
     if (this.world.freezeTime > 0) { g.fillStyle = '#8fd3ff'; g.fillRect(Math.round(e.x) - 3, Math.round(e.y) - 3, 2, 4); g.fillRect(Math.round(e.x) + 1, Math.round(e.y) - 3, 2, 4); }

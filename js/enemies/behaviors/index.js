@@ -20,9 +20,12 @@ import hopper from './hopper.js';
 import spinner from './spinner.js';
 import cloudDropper from './cloudDropper.js';
 import patternBoss from './patternBoss.js';
+import pulser from './pulser.js';
+import tentacle from './tentacle.js';
+import mine from './mine.js';
 
 export const BEHAVIORS = {
   scribbleChaser, shyShooter, eraser, fleeing, compass, wallClock, photocopier, mimic, professor,
   flutter, fadingVisitor, dinnerTable, staring, clockBoss, rival, underBed, argument,
-  hopper, spinner, cloudDropper, patternBoss,
+  hopper, spinner, cloudDropper, patternBoss, pulser, tentacle, mine,
 };

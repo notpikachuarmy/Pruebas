@@ -247,6 +247,7 @@ export class World {
       const back = DIRS[fromDir].opposite;
       if (node.doors[back] === 'secret') (node.state.revealed ??= {})[back] = true;
     }
+    this.current = null;            // corriente de agua (regla Corrientes)
     this._configureDoors(node);
     ROOM_TYPES[node.type].onEnter(this, node, first);
     for (const r of this.rules) r.onRoomEnter?.(this, node, first);

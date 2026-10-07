@@ -39,7 +39,8 @@ export class PlayerCombat {
   fire(player) {
     const { game, effects, items } = this.world;
     const st = player.stats;
-    const angle = Math.atan2(player.aimY, player.aimX);
+    let angle = Math.atan2(player.aimY, player.aimX);
+    if (items.spread) angle += (Math.random() * 2 - 1) * items.spread;   // Cascos Rotos
     const shot = {
       x: player.x + player.aimX * 6, y: player.y - 1 + player.aimY * 4,
       angle,
@@ -74,7 +75,7 @@ export class PlayerCombat {
       bounces: shot.bounces, bounceShrink: shot.bounceShrink, splitOnBounce: shot.splitOnBounce,
       waveAmp: shot.waveAmp, waveFreq: shot.waveFreq, wavePhase: shot.wavePhase,
       homing: shot.homing, homingRange: shot.homingRange, boomerang: shot.boomerang,
-      hazardTrail: shot.hazardTrail, strong: shot.strong, isEcho: shot.isEcho,
+      hazardTrail: shot.hazardTrail, strong: shot.strong, isEcho: shot.isEcho, splitOnExpire: shot.splitOnExpire,
     });
     if (shot.isEcho) this.world.game.audio.play('shoot', { pitch: 1.3, volume: 0.5 });
   }

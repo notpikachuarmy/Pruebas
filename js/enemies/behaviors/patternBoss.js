@@ -11,6 +11,7 @@ import { toPlayer, shoot } from './helpers.js';
  *   { type: 'spiral', arms, speed, turn }            espiral que gira
  *   { type: 'marks',  count, hazard, delay, r }      peligros en el suelo cerca del jugador
  *   { type: 'summon', ids, max }                     invoca enemigos (hasta `max` vivos)
+ *   { type: 'flash', time }                          fogonazo de luz (relámpago) en sueños oscuros
  * Opcional por ataque: color, trail.
  */
 export default {
@@ -34,6 +35,7 @@ export default {
       world.bossBanner(p.phases[idx].name); world.shake(4, 0.4); world.game.haptics.play('heavy');
     }
     this._move(e, world, dt, p);
+    if (d.flash > 0) { d.flash -= dt; world.mods.lightMult = d.flash > 0 ? 4 : 1; }
     if (!world.player.alive) return;
     p.phases[idx].attacks.forEach((a, i) => {
       d.timers[i] = (d.timers[i] ?? a.every * 0.5) - dt;
@@ -78,6 +80,11 @@ export default {
       for (let i = 0; i < a.count; i++) {
         world.hazards.spawn(a.hazard, world.player.x + world.rngSpawn.range(-30, 30), world.player.y + world.rngSpawn.range(-18, 18), a.r ?? 12, a.delay ?? 1, e.def.id);
       }
+    } else if (a.type === 'flash') {
+      e.data.flash = a.time ?? 0.15;
+      world.game.audio.play('killEnemy', { pitch: 0.5, volume: 0.6 });
+      world.shake(2, 0.2);
+      return;
     } else if (a.type === 'summon') {
       const alive = world.enemies.list.filter((o) => !o.dead && o !== e).length;
       if (alive >= (a.max ?? 3)) return;
@@ -89,4 +96,5 @@ export default {
   },
 
   anim(e) { return 'idle'; },
+  onDeath(e, world) { world.mods.lightMult = 1; },
 };

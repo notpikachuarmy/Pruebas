@@ -11,6 +11,7 @@
  *   { type: 'runCounter', counter, gte }             contador de la run (p. ej. lámparas)
  *   { type: 'overtimeClear' }                        limpiar una sala en tiempo extra
  *   { type: 'runMaxHp', gte }                        vida máxima (medios corazones) en una run
+ *   { type: 'discoveredItems', gte }                 objetos distintos descubiertos en total
  * `reward` (opcional): { dream } o { item } que se desbloquea.
  */
 export default [
@@ -19,7 +20,17 @@ export default [
   { id: 'mesa_para_dos', name: 'Ya no estás sola', description: 'Vence al jefe de La Casa a Oscuras.',
     condition: { type: 'dreamBoss', dream: 'casa' }, reward: { item: 'foto_familia', dream: 'dulce' } },
   { id: 'diente_dulce', name: 'Diente dulce', description: 'Vence al jefe de El País de las Chuches.',
-    condition: { type: 'dreamBoss', dream: 'dulce' }, reward: { item: 'caramelo_explosivo' } },
+    condition: { type: 'dreamBoss', dream: 'dulce' }, reward: { item: 'caramelo_explosivo', dream: 'mar' } },
+  { id: 'marinero', name: 'Lobo de mar', description: 'Vence al jefe de Mar Adentro.',
+    condition: { type: 'dreamBoss', dream: 'mar' }, reward: { item: 'caracola' } },
+  { id: 'tierra_a_la_vista', name: 'Tierra a la vista', description: 'Vence a los tres jefes de Mar Adentro.',
+    condition: { type: 'allDreamBosses', dream: 'mar' }, reward: { item: 'gong' } },
+  { id: 'director_orquesta', name: 'Director de orquesta', description: 'Activa 5 sinergias en una misma noche.',
+    condition: { type: 'runSynergies', gte: 5 }, reward: { item: 'vinilo_oro' } },
+  { id: 'coleccionista_discos', name: 'Coleccionista de discos', description: 'Descubre 30 objetos distintos (en total).',
+    condition: { type: 'discoveredItems', gte: 30 } },
+  { id: 'brujula_interna', name: 'Brújula interna', description: 'Entra en una sala con corriente sin que te arrastre.',
+    condition: { type: 'event', event: 'current:resisted' } },
   { id: 'empacho', name: 'Empacho', description: 'Reúne 60 de Lucidez en una misma noche.',
     condition: { type: 'runCounter', counter: 'lucidityTotal', gte: 60 }, reward: { item: 'bolsa_chuches' } },
   { id: 'toda_la_bolsa', name: 'Toda la bolsa', description: 'Vence a los tres jefes de El País de las Chuches.',

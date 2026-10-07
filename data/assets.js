@@ -37,6 +37,17 @@ export default {
     rey_caramelo: 'assets/bosses/rey_caramelo.png',
     fuente_chocolate: 'assets/bosses/fuente_chocolate.png',
     pinata: 'assets/bosses/pinata.png',
+    tiles_mar: 'assets/rooms/tiles_mar.png',
+    medusa: 'assets/enemies/medusa.png',
+    pez_linterna: 'assets/enemies/pez_linterna.png',
+    anguila: 'assets/enemies/anguila.png',
+    pecesillo: 'assets/enemies/pecesillo.png',
+    tentaculo: 'assets/enemies/tentaculo.png',
+    mina: 'assets/enemies/mina.png',
+    pulpo: 'assets/bosses/pulpo.png',
+    tormenta: 'assets/bosses/tormenta.png',
+    leviatan: 'assets/bosses/leviatan.png',
+    barco: 'assets/bosses/barco.png',
   },
 
   sprites: {
@@ -207,6 +218,56 @@ export default {
       animations: { idle: { frames: [0, 1], fps: 5 } },
       placeholder: { color: '#ff5a8c', w: 24, h: 22 },
     },
+    enemy_medusa: {
+      image: 'medusa', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 3 } },
+      placeholder: { color: '#b48cff', w: 12, h: 12 },
+    },
+    enemy_pez_linterna: {
+      image: 'pez_linterna', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 5 } },
+      placeholder: { color: '#322e3c', w: 12, h: 12 },
+    },
+    enemy_anguila: {
+      image: 'anguila', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 8 } },
+      placeholder: { color: '#466e3c', w: 12, h: 12 },
+    },
+    enemy_pecesillo: {
+      image: 'pecesillo', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 8 } },
+      placeholder: { color: '#8cc8e6', w: 12, h: 12 },
+    },
+    enemy_tentaculo: {
+      image: 'tentaculo', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 4 } },
+      placeholder: { color: '#8c3c5a', w: 12, h: 12 },
+    },
+    enemy_mina: {
+      image: 'mina', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 2 } },
+      placeholder: { color: '#3c4048', w: 12, h: 12 },
+    },
+    boss_pulpo: {
+      image: 'pulpo', frameWidth: 32, frameHeight: 32, anchor: { x: 16, y: 31 },
+      animations: { idle: { frames: [0, 1], fps: 4 } },
+      placeholder: { color: '#aa4664', w: 24, h: 28 },
+    },
+    boss_tormenta: {
+      image: 'tormenta', frameWidth: 48, frameHeight: 40, anchor: { x: 24, y: 39 },
+      animations: { idle: { frames: [0, 0, 0, 1], fps: 4 } },
+      placeholder: { color: '#3c4054', w: 44, h: 30 },
+    },
+    boss_leviatan: {
+      image: 'leviatan', frameWidth: 48, frameHeight: 32, anchor: { x: 24, y: 31 },
+      animations: { idle: { frames: [0, 0, 0, 1], fps: 3 }, peek: { frames: [2], fps: 1 } },
+      placeholder: { color: '#0a1828', w: 44, h: 20 },
+    },
+    boss_barco: {
+      image: 'barco', frameWidth: 48, frameHeight: 40, anchor: { x: 24, y: 39 },
+      animations: { idle: { frames: [0, 1], fps: 2 } },
+      placeholder: { color: '#503a28', w: 44, h: 30 },
+    },
   },
 
   tilesets: {
@@ -236,6 +297,15 @@ export default {
       wall: 2,
       wallFace: 3,         // pared de chocolate con nata
       solids: { D: 4, M: 5, L: 6, T: 7 }, // magdalena, tableta, árbol-piruleta, gominola gigante
+    },
+    tiles_mar: {
+      image: 'tiles_mar',
+      size: 16,
+      floor: 0,
+      floorMargin: 1,
+      wall: 2,
+      wallFace: 3,         // roca con línea de agua
+      solids: { D: 4, M: 5, L: 6, T: 7 }, // roca, restos de barco, coral, ancla
     },
   },
 };

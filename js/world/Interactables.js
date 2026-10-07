@@ -128,6 +128,14 @@ export const KINDS = {
       } else if (def.prop === 'phone') {
         g.fillStyle = '#b04034'; g.fillRect(x - 5, y - 15, 10, 5);
         g.fillStyle = Math.floor(world.time * 2) % 2 ? '#eb2f2d' : '#5a1a14'; g.fillRect(x + 2, y - 14, 2, 2);
+      } else if (def.prop === 'radio') {
+        g.fillStyle = '#3c4048'; g.fillRect(x - 6, y - 17, 12, 7);
+        g.fillStyle = '#8fd3ff'; g.fillRect(x - 4, y - 15, 5, 3);
+        g.fillStyle = Math.floor(world.time * 3) % 2 ? '#eb2f2d' : '#5a1a14'; g.fillRect(x + 3, y - 15, 2, 2);
+        g.fillStyle = '#9aa3b5'; g.fillRect(x + 4, y - 23, 1, 6);
+      } else if (def.prop === 'bottle') {
+        g.fillStyle = '#5a9a6a'; g.fillRect(x - 2, y - 18, 5, 8); g.fillRect(x - 1, y - 21, 3, 3);
+        g.fillStyle = '#f0ecd6'; g.fillRect(x - 1, y - 16, 3, 4);
       } else if (def.prop === 'stall') {
         g.fillStyle = '#ff6aa0'; g.fillRect(x - 8, y - 22, 16, 3);
         g.fillStyle = '#fff6d6'; g.fillRect(x - 8, y - 19, 4, 2); g.fillRect(x, y - 19, 4, 2);

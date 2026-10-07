@@ -14,7 +14,7 @@ function makeProjectile() {
     waveAmp: 0, waveFreq: 0, wavePhase: 0, lateral: 0,
     homing: 0, homingRange: 0,
     boomerang: false, returned: false,
-    trail: null, trailTimer: 0,
+    trail: null, trailTimer: 0, splitOnExpire: 0, isFragment: false,
     strong: false, isEcho: false, source: null, variant: 0,
     hitIds: new Set(),            // evita golpear dos veces al mismo enemigo al perforar
   };
@@ -57,7 +57,10 @@ export class Projectiles {
     p.waveAmp = opts.waveAmp ?? 0; p.waveFreq = opts.waveFreq ?? 0; p.wavePhase = opts.wavePhase ?? 0; p.lateral = 0;
     p.homing = opts.homing ?? 0; p.homingRange = opts.homingRange ?? 0;
     p.boomerang = !!opts.boomerang; p.returned = false;
-    p.trail = opts.hazardTrail ?? null; p.trailTimer = 0;
+    // hazardTrail puede ser un tipo o una lista de tipos (Tipp-Ex + Saxofón)
+    const tr = opts.hazardTrail;
+    p.trail = tr ? (Array.isArray(tr) ? tr : [tr]) : null; p.trailTimer = 0;
+    p.splitOnExpire = opts.splitOnExpire ?? 0; p.isFragment = !!opts.isFragment;
     p.strong = !!opts.strong; p.isEcho = !!opts.isEcho;
     p.source = opts.source ?? null;
     p.variant = (Math.random() * 3) | 0;     // tipo de nota (♪, ♩ o ♫) solo visual
@@ -94,12 +97,13 @@ export class Projectiles {
       }
       if (p.trail) {
         p.trailTimer -= dt;
-        if (p.trailTimer <= 0) { p.trailTimer = 0.03; this.world.hazards.spawn(p.trail, p.x, p.y, 5, 0.6); }
+        if (p.trailTimer <= 0) { p.trailTimer = 0.03; for (const t of p.trail) this.world.hazards.spawn(t, p.x, p.y, 5, 0.6); }
       }
 
       // Al final del recorrido, el proyectil "cae" (como las ondas que se apagan)
       if (p.travelLeft <= 0) {
         if (p.expire) this.world.hazards.spawn(p.expire, p.x, p.y, 8, 2.5, p.source);
+        if (p.splitOnExpire && !p.isFragment) this._fragment(p);
         this._kill(p, false);
         continue;
       }
@@ -150,6 +154,20 @@ export class Projectiles {
     while (diff < -Math.PI) diff += Math.PI * 2;
     const a = cur + Math.max(-p.homing * dt, Math.min(p.homing * dt, diff));
     p.dirX = Math.cos(a); p.dirY = Math.sin(a);
+  }
+
+  /** Pedal de Distorsión: al apagarse, la nota se rompe en varias pequeñas. */
+  _fragment(p) {
+    const full = this.world.items.hasSynergy('feedback');
+    const base = Math.atan2(p.dirY, p.dirX);
+    for (let i = 0; i < p.splitOnExpire; i++) {
+      const a = base + (i - (p.splitOnExpire - 1) / 2) * 0.7;
+      this.spawn({
+        team: 'player', x: p.x, y: p.y, z: p.z, angle: a, speed: p.speed * 0.9,
+        radius: full ? p.radius : Math.max(1, p.radius - 1), damage: p.damage * (full ? 0.7 : 0.45),
+        knockback: p.knockback * 0.5, range: 70, color: p.color, trailColor: p.trailColor, isFragment: true,
+      });
+    }
   }
 
   /** Rebote en pared (Espejo Roto). Con Caleidoscopio se divide en dos. */
