@@ -14,14 +14,7 @@ export class AchievementSystem {
       const beaten = (this.meta.defeatedBosses ??= []);
       if (!beaten.includes(def.id)) beaten.push(def.id);
       this._check((c) => c.type === 'bossDefeated' && c.boss === def.id);
-      if (def.role === 'jefe') {
-        this._check((c) => c.type === 'dreamBoss' && c.dream === def.dream);
-        this._check((c) => {
-          if (c.type !== 'allDreamBosses' || c.dream !== def.dream) return false;
-          const d = game.content.dreams[c.dream];
-          return (d.bosses ?? [d.boss]).every((id) => beaten.includes(id));
-        });
-      }
+      if (def.role === 'jefe') this._checkBosses();
       if (def.role === 'jefe' && !this.bossHit) this._check((c) => c.type === 'noHitBoss');
     });
     ev.on('room:enter', ({ node }) => { if (node.type === 'boss' || node.type === 'miniboss') this.bossHit = false; });
@@ -62,9 +55,53 @@ export class AchievementSystem {
     for (const a of this.list) {
       if (a.condition.type === 'event') ev.on(a.condition.event, () => this._unlock(a));
     }
+    this.retroCheck();
   }
 
   get meta() { return this.game.save.data.meta; }
+
+  /** ¿Se ha vencido alguna vez a este jefe? (registro propio o, en partidas antiguas, el bestiario) */
+  bossBeaten(id) {
+    return (this.meta.defeatedBosses ?? []).includes(id) || (this.meta.bestiary?.[id]?.kills ?? 0) > 0;
+  }
+
+  /** Logros de jefes: se cuentan en total, a lo largo de todas las noches (no hace falta en la misma run). */
+  _checkBosses() {
+    const dreams = this.game.content.dreams;
+    const bossesOf = (d) => d.bosses ?? [d.boss];
+    this._check((c) => c.type === 'dreamBoss' && bossesOf(dreams[c.dream]).some((id) => this.bossBeaten(id)));
+    this._check((c) => c.type === 'allDreamBosses' && bossesOf(dreams[c.dream]).every((id) => this.bossBeaten(id)));
+  }
+
+  /**
+   * Al arrancar: recupera logros y recompensas que deberían tenerse (partidas guardadas con versiones
+   * anteriores, logros cuya recompensa se añadió después, jefes vencidos antes de existir el registro).
+   */
+  retroCheck() {
+    const beaten = (this.meta.defeatedBosses ??= []);
+    for (const def of Object.values(this.game.content.enemies)) {
+      if (def.boss && (this.meta.bestiary?.[def.id]?.kills ?? 0) > 0 && !beaten.includes(def.id)) beaten.push(def.id);
+    }
+    this._checkBosses();
+    this._checkStats();
+    for (const a of this.list) if (this.isUnlocked(a.id)) this._applyReward(a);
+    this.game.save.persist();
+  }
+
+  /** Aplica la recompensa de un logro si aún no se tenía. Devuelve los textos de lo nuevo. */
+  _applyReward(a) {
+    const lines = [], r = a.reward;
+    if (r?.dream && !this.meta.unlocks.dreams.includes(r.dream)) {
+      this.meta.unlocks.dreams.push(r.dream);
+      lines.push(`Nuevo sueño: ${this.game.content.dreams[r.dream].name}`);
+    }
+    if (r?.item && !this.meta.unlocks.items.includes(r.item)) {
+      this.meta.unlocks.items.push(r.item);
+      lines.push(`Nuevo objeto: ${this.game.content.items[r.item].name}`);
+    }
+    for (const l of lines) this.game.toasts.show(l, 5);
+    return lines;
+  }
 
   isUnlocked(id) { return !!this.meta.achievements[id]; }
 
@@ -80,17 +117,8 @@ export class AchievementSystem {
   _unlock(a) {
     if (this.isUnlocked(a.id)) return;
     this.meta.achievements[a.id] = Date.now();
-    const lines = [`Logro: ${a.name}`];
-    const r = a.reward;
-    if (r?.dream && !this.meta.unlocks.dreams.includes(r.dream)) {
-      this.meta.unlocks.dreams.push(r.dream);
-      lines.push(`Nuevo sueño: ${this.game.content.dreams[r.dream].name}`);
-    }
-    if (r?.item && !this.meta.unlocks.items.includes(r.item)) {
-      this.meta.unlocks.items.push(r.item);
-      lines.push(`Nuevo objeto: ${this.game.content.items[r.item].name}`);
-    }
-    for (const l of lines) this.game.toasts.show(l, 4);
+    this.game.toasts.show(`Logro: ${a.name}`, 4);
+    const lines = [`Logro: ${a.name}`, ...this._applyReward(a)];
     this.game.activeRun?.unlockedThisRun.push(...lines);
     this.game.audio.play('cleared', { pitch: 1.6 });
     this.game.save.persist();

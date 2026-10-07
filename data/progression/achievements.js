@@ -2,7 +2,7 @@
  * Logros. `condition` es declarativa; la interpreta js/progression/AchievementSystem.js:
  *   { type: 'bossDefeated', boss }                  vencer a un jefe concreto
  *   { type: 'dreamBoss', dream }                     vencer al jefe (cualquiera) de un sueño
- *   { type: 'allDreamBosses', dream }                haber vencido alguna vez a todos los jefes de un sueño
+ *   { type: 'allDreamBosses', dream }                haber vencido a todos los jefes de un sueño, sumando todas las noches
  *   { type: 'noHitBoss' }                            vencer a un jefe sin recibir daño en su sala
  *   { type: 'nightComplete' }                        terminar una noche entera
  *   { type: 'event', event }                         que ocurra un evento del juego
