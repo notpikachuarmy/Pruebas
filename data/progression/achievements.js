@@ -12,6 +12,7 @@
  *   { type: 'overtimeClear' }                        limpiar una sala en tiempo extra
  *   { type: 'runMaxHp', gte }                        vida máxima (medios corazones) en una run
  *   { type: 'discoveredItems', gte }                 objetos distintos descubiertos en total
+ *   { type: 'everyDreamBoss' }                       haber vencido a algún jefe de cada sueño (no final)
  * `reward` (opcional): { dream } o { item } que se desbloquea.
  */
 export default [
@@ -21,6 +22,12 @@ export default [
     condition: { type: 'dreamBoss', dream: 'casa' }, reward: { item: 'foto_familia', dream: 'dulce' } },
   { id: 'diente_dulce', name: 'Diente dulce', description: 'Vence al jefe de El País de las Chuches.',
     condition: { type: 'dreamBoss', dream: 'dulce' }, reward: { item: 'caramelo_explosivo', dream: 'mar' } },
+  { id: 'ocaso', name: 'El ocaso se acerca', description: 'Vence a un jefe de cada uno de los cuatro sueños.',
+    condition: { type: 'everyDreamBoss' }, reward: { dream: 'ragnarok' } },
+  { id: 'ragnarok_evitado', name: 'Ragnarök evitado', description: 'Vence a Surtur y termina la noche.',
+    condition: { type: 'dreamBoss', dream: 'ragnarok' }, reward: { item: 'llama_muspel' } },
+  { id: 'sin_quemaduras', name: 'Sin una quemadura', description: 'Vence a Surtur sin recibir daño en su sala.',
+    condition: { type: 'noHitSurtur' }, reward: { item: 'gjallarhorn' } },
   { id: 'marinero', name: 'Lobo de mar', description: 'Vence al jefe de Mar Adentro.',
     condition: { type: 'dreamBoss', dream: 'mar' }, reward: { item: 'caracola' } },
   { id: 'tierra_a_la_vista', name: 'Tierra a la vista', description: 'Vence a los tres jefes de Mar Adentro.',

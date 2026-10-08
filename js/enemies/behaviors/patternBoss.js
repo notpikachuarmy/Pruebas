@@ -12,6 +12,10 @@ import { toPlayer, shoot } from './helpers.js';
  *   { type: 'marks',  count, hazard, delay, r }      peligros en el suelo cerca del jugador
  *   { type: 'summon', ids, max }                     invoca enemigos (hasta `max` vivos)
  *   { type: 'flash', time }                          fogonazo de luz (relámpago) en sueños oscuros
+ *   { type: 'line', orient: 'h'|'v'|'both', gap, hazard, delay, r }
+ *                                                    fila/columna de peligros que cruza al jugador, con un hueco
+ *   { type: 'arena', margin }                        la plataforma se encoge (los bordes queman)
+ *   { type: 'sprite', anim, time }                   cambia la animación un momento (p. ej. espada en alto)
  * Opcional por ataque: color, trail.
  */
 export default {
@@ -38,10 +42,12 @@ export default {
     if (d.flash > 0) { d.flash -= dt; world.mods.lightMult = d.flash > 0 ? 4 : 1; }
     if (!world.player.alive) return;
     p.phases[idx].attacks.forEach((a, i) => {
-      d.timers[i] = (d.timers[i] ?? a.every * 0.5) - dt;
+      // La plataforma que se encoge actúa en cuanto empieza la fase; el resto, a mitad de su ritmo
+      d.timers[i] = (d.timers[i] ?? (a.type === 'arena' ? 0 : a.every * 0.5)) - dt;
       if (d.timers[i] <= 0) { d.timers[i] = a.every; this._attack(e, world, a); }
     });
     d.spin += dt;
+    if (d.animT > 0) d.animT -= dt;
   },
 
   _move(e, world, dt, p) {
@@ -80,6 +86,15 @@ export default {
       for (let i = 0; i < a.count; i++) {
         world.hazards.spawn(a.hazard, world.player.x + world.rngSpawn.range(-30, 30), world.player.y + world.rngSpawn.range(-18, 18), a.r ?? 12, a.delay ?? 1, e.def.id);
       }
+    } else if (a.type === 'line') {
+      this._line(e, world, a);
+      return;
+    } else if (a.type === 'arena') {
+      world.setArena(a.margin);
+      return;
+    } else if (a.type === 'sprite') {
+      e.data.anim = a.anim; e.data.animT = a.time ?? 1;
+      return;
     } else if (a.type === 'flash') {
       e.data.flash = a.time ?? 0.15;
       world.game.audio.play('killEnemy', { pitch: 0.5, volume: 0.6 });
@@ -95,6 +110,32 @@ export default {
     if (a.type !== 'summon' && a.type !== 'marks') world.game.audio.play('shoot', { pitch: 0.6, volume: 0.7 });
   },
 
-  anim(e) { return 'idle'; },
-  onDeath(e, world) { world.mods.lightMult = 1; },
+  /** Tajo de espada: una fila (o columna) de avisos que cruza la sala por donde está el jugador. */
+  _line(e, world, a) {
+    const room = world.room, pl = world.player, step = (a.r ?? 12) * 1.4;
+    const orients = a.orient === 'both' ? ['h', 'v'] : [a.orient === 'random' ? world.rngSpawn.pick(['h', 'v']) : a.orient ?? 'h'];
+    for (const o of orients) {
+      const len = o === 'h' ? room.width : room.height;
+      const n = Math.floor(len / step);
+      const playerIdx = Math.floor((o === 'h' ? pl.x : pl.y) / step);
+      // El hueco nunca cae justo donde estás: hay que moverse
+      let gapAt = world.rngSpawn.int(1, n - (a.gap ?? 2) - 1);
+      if (Math.abs(gapAt - playerIdx) < 2) gapAt = (gapAt + Math.floor(n / 2)) % Math.max(1, n - (a.gap ?? 2));
+      for (let i = 0; i < n; i++) {
+        if (i >= gapAt && i < gapAt + (a.gap ?? 2)) continue;
+        const x = o === 'h' ? i * step + step / 2 : pl.x;
+        const y = o === 'h' ? pl.y : i * step + step / 2;
+        if (room.isBlockedCell(Math.floor(x / 16), Math.floor(y / 16))) continue;
+        world.hazards.spawn(a.hazard ?? 'fireMark', x, y, a.r ?? 12, a.delay ?? 1, e.def.id);
+      }
+    }
+    world.game.audio.play('windup', { pitch: 0.5 });
+  },
+
+  anim(e) {
+    if (e.data.animT > 0) return e.data.anim;
+    return 'idle';
+  },
+
+  onDeath(e, world) { world.mods.lightMult = 1; world.setArena(0); },
 };

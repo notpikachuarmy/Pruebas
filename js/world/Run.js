@@ -27,13 +27,14 @@ export class Run {
     this._loadDream(0);
   }
 
-  /** Todos los sueños desbloqueados, en orden aleatorio. La dificultad sube con cada sueño de la noche. */
+  /** Todos los sueños desbloqueados, en orden aleatorio; el sueño final (Ragnarök) siempre el último. La dificultad sube con cada sueño de la noche. */
   static planNight(game, rng) {
     const unlocked = game.save.data.meta.unlocks.dreams;
-    const ids = Object.values(game.content.dreams)
-      .filter((d) => !d.locked || unlocked.includes(d.id))
-      .map((d) => d.id);
-    return rng.shuffle(ids);
+    const open = Object.values(game.content.dreams).filter((d) => !d.locked || unlocked.includes(d.id));
+    // Los sueños normales van en orden aleatorio; los finales (final: true) siempre cierran la noche
+    const normal = rng.shuffle(open.filter((d) => !d.final).map((d) => d.id));
+    const finals = open.filter((d) => d.final).map((d) => d.id);
+    return [...normal, ...finals];
   }
 
   _loadDream(index) {
@@ -48,7 +49,7 @@ export class Run {
 
   unlockedDreams() {
     const unlocked = this.game.save.data.meta.unlocks.dreams;
-    return Object.values(this.game.content.dreams).filter((d) => !d.locked || unlocked.includes(d.id));
+    return Object.values(this.game.content.dreams).filter((d) => !d.final && (!d.locked || unlocked.includes(d.id)));
   }
 
   get isLastDream() { return this.dreamIndex >= this.night.length - 1; }

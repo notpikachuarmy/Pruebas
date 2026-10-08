@@ -38,7 +38,7 @@ export class DreamTransitionScene extends Scene {
     r.text(this.from.text.transition ?? `${this.from.owner.name} duerme tranquilo.`, 240, 96, { size: 12, color: '#c9bde6', align: 'center', alpha: a1 });
     r.text('Sintonizando otro sueño…', 240, 116, { size: 9, color: '#9b8fc7', align: 'center', alpha: Math.min(a1 + a2, 1) * 0.8 });
     r.text(this.to.name, 240, 96, { size: 20, weight: 700, color: '#fff6d6', align: 'center', alpha: a2 });
-    r.text(`${this.to.owner.name}, ${this.to.owner.age} años`, 240, 132, { size: 10, color: '#c9bde6', align: 'center', alpha: a2 });
+    r.text(this.to.owner.age ? `${this.to.owner.name}, ${this.to.owner.age} años` : this.to.owner.name, 240, 132, { size: 10, color: '#c9bde6', align: 'center', alpha: a2 });
     r.text(this.to.owner.summary, 240, 148, { size: 8, color: '#9b8fc7', align: 'center', alpha: a2 });
   }
 }

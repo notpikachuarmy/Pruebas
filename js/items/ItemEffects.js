@@ -207,6 +207,7 @@ export const ITEM_EFFECTS = {
         if (!e.canBeHit()) continue;
         if ((e.x - pl.x) ** 2 + (e.y - pl.y) ** 2 > r * r) continue;
         w.damage.hitEnemy(e, p.damage, e.x - pl.x, e.y - pl.y, 10, { isAura: true });
+        if (ctx.hasSynergy('sol_medianoche')) { e.burn = Math.max(e.burn ?? 0, 2); e.burnDps = 1; }
       }
     },
   },
@@ -362,6 +363,33 @@ export const ITEM_EFFECTS = {
       }
     },
     onHurt(ctx) { ctx.state('marcapasos').t = 0; },
+  },
+
+  /** Llama de Muspel: los enemigos golpeados arden. */
+  burn: {
+    onHitEnemy(ctx, enemy, proj, p) {
+      if (proj.isBurn) return;
+      enemy.burn = Math.max(enemy.burn ?? 0, p.time);
+      enemy.burnDps = p.dps;
+    },
+  },
+
+  /** Gjallarhorn: al empezar cada oleada, aturde y marca a los enemigos nuevos. */
+  horn: {
+    onUpdate(ctx, dt, p) {
+      const w = ctx.world, enc = w.encounter, st = ctx.state('gjallarhorn');
+      if (!enc || enc.finished) { st.wave = -1; st.enc = enc; return; }
+      if (st.enc !== enc) { st.enc = enc; st.wave = -1; }
+      if (enc.waveIndex === st.wave || enc.waveIndex < 0) return;
+      st.wave = enc.waveIndex;
+      for (const e of w.enemies.list) {
+        if (!e.def.boss) e.stun = Math.max(e.stun, p.stun + 0.7);
+        e.marked = Math.max(e.marked, p.mark);
+      }
+      w.floatText(w.player.x, w.player.y - 30, '¡Gjallarhorn!');
+      w.game.audio.play('waveStart', { pitch: 0.5 });
+      w.shake(2, 0.2);
+    },
   },
 
   ring: {

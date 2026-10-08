@@ -16,6 +16,7 @@ export class AchievementSystem {
       this._check((c) => c.type === 'bossDefeated' && c.boss === def.id);
       if (def.role === 'jefe') this._checkBosses();
       if (def.role === 'jefe' && !this.bossHit) this._check((c) => c.type === 'noHitBoss');
+      if (def.id === 'surtur' && !this.bossHit) this._check((c) => c.type === 'noHitSurtur');
     });
     ev.on('room:enter', ({ node }) => { if (node.type === 'boss' || node.type === 'miniboss') this.bossHit = false; });
     ev.on('player:damaged', () => { this.bossHit = true; });
@@ -72,6 +73,9 @@ export class AchievementSystem {
     const bossesOf = (d) => d.bosses ?? [d.boss];
     this._check((c) => c.type === 'dreamBoss' && bossesOf(dreams[c.dream]).some((id) => this.bossBeaten(id)));
     this._check((c) => c.type === 'allDreamBosses' && bossesOf(dreams[c.dream]).every((id) => this.bossBeaten(id)));
+    // Haber vencido algún jefe de cada sueño normal (no final), sumando todas las noches
+    this._check((c) => c.type === 'everyDreamBoss' && Object.values(dreams).filter((d) => !d.final)
+      .every((d) => bossesOf(d).some((id) => this.bossBeaten(id))));
   }
 
   /**

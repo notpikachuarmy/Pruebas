@@ -48,6 +48,10 @@ export default {
     tormenta: 'assets/bosses/tormenta.png',
     leviatan: 'assets/bosses/leviatan.png',
     barco: 'assets/bosses/barco.png',
+    tiles_ragnarok: 'assets/rooms/tiles_ragnarok.png',
+    chispa: 'assets/enemies/chispa.png',
+    brasa: 'assets/enemies/brasa.png',
+    surtur: 'assets/bosses/surtur.png',
   },
 
   sprites: {
@@ -268,6 +272,21 @@ export default {
       animations: { idle: { frames: [0, 1], fps: 2 } },
       placeholder: { color: '#503a28', w: 44, h: 30 },
     },
+    enemy_chispa: {
+      image: 'chispa', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 8 } },
+      placeholder: { color: '#ff6a1e', w: 12, h: 12 },
+    },
+    enemy_brasa: {
+      image: 'brasa', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 4 } },
+      placeholder: { color: '#3c2828', w: 12, h: 12 },
+    },
+    boss_surtur: {
+      image: 'surtur', frameWidth: 72, frameHeight: 72, anchor: { x: 36, y: 71 },
+      animations: { idle: { frames: [0, 1], fps: 3 }, raise: { frames: [2], fps: 1 } },
+      placeholder: { color: '#46201a', w: 60, h: 70 },
+    },
   },
 
   tilesets: {
@@ -306,6 +325,17 @@ export default {
       wall: 2,
       wallFace: 3,         // roca con línea de agua
       solids: { D: 4, M: 5, L: 6, T: 7 }, // roca, restos de barco, coral, ancla
+    },
+    tiles_ragnarok: {
+      image: 'tiles_ragnarok',
+      size: 16,
+      floor: 0,
+      floorMargin: 1,
+      wall: 2,
+      wallFace: 2,
+      liquids: { V: 2 },   // lava: no se pisa, los proyectiles pasan por encima
+      liquidEdge: 3,       // canto de la plataforma sobre la lava
+      solids: { L: 4, T: 5, R: 6, B: 7 }, // roca, pilar roto, runa, brasero
     },
   },
 };

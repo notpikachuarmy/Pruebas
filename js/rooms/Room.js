@@ -33,6 +33,8 @@ export class Room {
     this.tilesetImage = tilesetImage;
 
     this.solid = new Uint8Array(this.cols * this.rows);
+    // Líquidos (lava): no se pueden pisar, pero los proyectiles pasan por encima
+    this.blocked = new Uint8Array(this.cols * this.rows);
     this.symbols = [];
     this.playerSpawn = { x: this.width / 2, y: this.height / 2 };
     this.enemySpawns = [];
@@ -47,7 +49,9 @@ export class Room {
         const ch = line[c] ?? '#';
         this.symbols.push(ch);
         const isSolid = ch === '#' || tileset.solids?.[ch] !== undefined;
+        const isLiquid = tileset.liquids?.[ch] !== undefined;
         if (isSolid) this.solid[r * this.cols + c] = SOLID;
+        else if (isLiquid) this.blocked[r * this.cols + c] = SOLID;
         else this.floorCells.push(r * this.cols + c);
         const cx = c * TILE + TILE / 2, cy = r * TILE + TILE / 2 + 4;
         if (ch === 'P') this.playerSpawn = { x: cx, y: cy };
@@ -106,13 +110,19 @@ export class Room {
     return this.solid[r * this.cols + c] === SOLID;
   }
 
+  /** Sólido o líquido: lo que no se puede pisar. */
+  isBlockedCell(c, r) {
+    if (this.isSolidCell(c, r)) return true;
+    return this.blocked[r * this.cols + c] === SOLID;
+  }
+
   isSolidAt(x, y) { return this.isSolidCell(Math.floor(x / TILE), Math.floor(y / TILE)); }
 
   /** ¿La caja de pies de la entidad toca algo sólido? Caja: ancho 2r, alto r, base en (x, y). */
   boxHitsSolid(x, y, r) {
     const c0 = Math.floor((x - r) / TILE), c1 = Math.floor((x + r - 0.01) / TILE);
     const r0 = Math.floor((y - r) / TILE), r1 = Math.floor((y - 0.01) / TILE);
-    for (let rr = r0; rr <= r1; rr++) for (let cc = c0; cc <= c1; cc++) if (this.isSolidCell(cc, rr)) return true;
+    for (let rr = r0; rr <= r1; rr++) for (let cc = c0; cc <= c1; cc++) if (this.isBlockedCell(cc, rr)) return true;
     return false;
   }
 
@@ -156,7 +166,7 @@ export class Room {
     for (let tries = 0; tries < 60; tries++) {
       const idx = rng.pick(this.floorCells);
       const c = idx % this.cols, r = Math.floor(idx / this.cols);
-      if (this.isSolidCell(c - 1, r) || this.isSolidCell(c + 1, r) || this.isSolidCell(c, r - 1)) continue;
+      if (this.isBlockedCell(c - 1, r) || this.isBlockedCell(c + 1, r) || this.isBlockedCell(c, r - 1)) continue;
       const x = c * TILE + TILE / 2, y = r * TILE + TILE - 2;
       if (Math.hypot(x - ax, y - ay) >= minDist) return { x, y };
     }
@@ -177,7 +187,13 @@ export class Room {
     for (let r = 0; r < this.rows; r++) {
       for (let col = 0; col < this.cols; col++) {
         const ch = this.symbols[r * this.cols + col];
-        if (ch === '#') {
+        const liquid = ts.liquids?.[ch];
+        if (liquid !== undefined) {
+          // Borde: líquido con suelo encima (el canto de la plataforma)
+          const above = r > 0 ? this.symbols[(r - 1) * this.cols + col] : '#';
+          const edge = above !== '#' && ts.liquids[above] === undefined && ts.liquidEdge !== undefined;
+          draw(edge ? ts.liquidEdge : liquid, col, r);
+        } else if (ch === '#') {
           draw(this.isSolidCell(col, r + 1) ? ts.wall : ts.wallFace, col, r);
         } else {
           draw(col === 2 ? ts.floorMargin : ts.floor, col, r);

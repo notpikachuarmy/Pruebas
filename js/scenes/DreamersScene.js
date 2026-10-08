@@ -34,7 +34,7 @@ export class DreamersScene extends Scene {
       return;
     }
     const found = this.game.dreamers.found(d.id);
-    r.text(`${d.owner.name}, ${d.owner.age} años`, 170, 72, { size: 12, weight: 700, color: '#fff6d6' });
+    r.text(d.owner.age ? `${d.owner.name}, ${d.owner.age} años` : d.owner.name, 170, 72, { size: 12, weight: 700, color: '#fff6d6' });
     r.text(d.name, 170, 86, { size: 9, color: '#c9bde6' });
     this._wrap(r, d.owner.summary, 170, 102, 280, 8, '#9b8fc7');
     r.text(`Recuerdos: ${found.length} / ${d.fragments?.length ?? 0}`, 170, 134, { size: 8, color: '#ffd65c' });

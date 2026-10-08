@@ -33,6 +33,6 @@ export class TitleScene extends Scene {
       const device = this.game.input.hasGamepad() ? 'Pulsa cualquier botón' : 'Pulsa cualquier tecla o haz clic';
       r.text(device, 42, 170, { size: 10, color: '#fff6d6' });
     }
-    r.text('v0.10 · Fase 7: Mar Adentro', 8, 264, { size: 7, color: '#5d5480' });
+    r.text('v0.11 · Fase 7: Ragnarök', 8, 264, { size: 7, color: '#5d5480' });
   }
 }

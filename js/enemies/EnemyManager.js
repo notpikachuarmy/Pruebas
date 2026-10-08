@@ -34,6 +34,13 @@ export class EnemyManager {
     for (const e of this.list) {
       e.flash = Math.max(0, e.flash - dt);
       e.marked = Math.max(0, e.marked - dt);
+      // Quemadura (Llama de Muspel): daño continuo
+      if (e.burn > 0 && !e.spawning && !e.dead) {
+        e.burn -= dt;
+        e.hp -= (e.burnDps ?? 1) * dt;
+        if (Math.random() < 0.3) this.world.effects.particle(e.x + (Math.random() - 0.5) * 8, e.y - 6, 0, -30, 0.4, '#ff9a3c', 1, 1, 0);
+        if (e.hp <= 0) { damage.killEnemy(e); continue; }
+      }
       if (frozen && !e.spawning) continue;   // Cinta de Casete: tiempo enemigo detenido
       if (e.stun > 0 && !e.def.boss) {
         e.stun -= dt;

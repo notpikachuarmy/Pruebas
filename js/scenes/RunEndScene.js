@@ -34,9 +34,10 @@ export class RunEndScene extends Scene {
   renderUI(r) {
     dim(r, Math.min(0.85, this.time * 2));
     const win = this.run.result === 'win';
-    const title = win ? 'Te despiertas tranquilo' : 'El sueño te expulsa';
+    const end = this.run.dream.ending;   // sueños finales: texto propio
+    const title = win ? (end?.title ?? 'Te despiertas tranquilo') : 'El sueño te expulsa';
     const by = this.run.expelledBy && this.game.content.enemies[this.run.expelledBy];
-    const sub = !win && by ? `Te ha expulsado: ${by.name}` : win ? `${this.run.dream.owner.name} sigue durmiendo. Esta vez, mejor.` : `${this.run.dream.owner.name} se revuelve en la cama.`;
+    const sub = !win && by ? `Te ha expulsado: ${by.name}` : win ? (end?.text ?? `${this.run.dream.owner.name} sigue durmiendo. Esta vez, mejor.`) : `${this.run.dream.owner.name} se revuelve en la cama.`;
     r.text(title, 240, 62, { size: 20, weight: 700, color: win ? '#ffd65c' : '#eb2f2d', align: 'center' });
     r.text(sub, 240, 78, { size: 9, color: '#c9bde6', align: 'center' });
     const rows = [

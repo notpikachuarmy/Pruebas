@@ -28,7 +28,7 @@ export function validateContent(c) {
     if (!c.assets.tilesets[d.tileset]) out.push(`Sueño "${d.id}": tileset "${d.tileset}" no existe`);
     for (const p of d.enemyPool) if (!c.enemies[p.id]) out.push(`Sueño "${d.id}": enemyPool usa "${p.id}", que no existe`);
     for (const r of d.roomPool) if (!c.rooms[r]) out.push(`Sueño "${d.id}": roomPool usa "${r}", que no existe`);
-    const types = new Set(['start', 'combat', 'boss', ...(d.floor?.specials ?? []).map((s) => s.type)]);
+    const types = d.floor?.arena ? new Set(['boss']) : new Set(['start', 'combat', 'boss', ...(d.floor?.specials ?? []).map((s) => s.type)]);
     if (d.floor?.challengeChance) types.add('challenge');
     if (d.floor?.secret) types.add('secret');
     if (d.floor?.miniboss) types.add('miniboss');
@@ -88,7 +88,7 @@ export function validateContent(c) {
     const w = r.layout[0].length;
     r.layout.forEach((row, i) => { if (row.length !== w) out.push(`Sala "${r.id}": la fila ${i} mide ${row.length} (esperado ${w})`); });
     if (r.layout.length !== ROOM_ROWS || w !== ROOM_COLS) out.push(`Sala "${r.id}": mide ${w}×${r.layout.length}, debe medir ${ROOM_COLS}×${ROOM_ROWS}`);
-    for (const [row, col] of DOOR_CLEARANCE) {
+    for (const [row, col] of r.noDoors ? [] : DOOR_CLEARANCE) {
       const ch = r.layout[row]?.[col];
       if (ch && ch !== '.' && ch !== 'P' && ch !== 'S') out.push(`Sala "${r.id}": la celda (${row},${col}) bloquea una puerta`);
     }

@@ -103,6 +103,15 @@ function placeSecret(rng, nodes) {
  */
 export function generateFloor(rng, dream, rooms) {
   const cfg = dream.floor;
+  // Sueño-arena (Ragnarök): una única sala, que es a la vez inicio y jefe
+  if (cfg.arena) {
+    const c = Math.floor(GRID / 2);
+    const n = makeNode(c, c);
+    n.type = 'boss';
+    n.templateId = rng.pick(dream.roomPool);
+    const nodes = new Map([[n.key, n]]);
+    return { nodes, start: n, boss: n, secret: null, width: GRID, height: GRID };
+  }
   const specials = cfg.specials;            // tipos que van en callejones sin salida
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const count = rng.int(cfg.rooms[0], cfg.rooms[1]);

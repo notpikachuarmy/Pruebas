@@ -98,6 +98,54 @@ export const HAZARD_TYPES = {
       world.game.audio.play('wallHit', { pitch: 0.5 });
     },
   },
+  // Ragnarök: aviso de fuego (círculo que se llena) que estalla y deja fuego en el suelo
+  fireMark: {
+    render(g, h) {
+      const k = 1 - h.life / h.max;
+      const x = Math.round(h.x), y = Math.round(h.y);
+      g.globalAlpha = 0.25 + 0.35 * k;
+      g.fillStyle = '#ff6a1e';
+      g.beginPath(); g.ellipse(x, y, h.r * k, h.r * 0.6 * k, 0, 0, Math.PI * 2); g.fill();
+      g.globalAlpha = 0.9; g.strokeStyle = h.life < 0.25 ? '#fff0a0' : '#ff9a3c';
+      g.beginPath(); g.ellipse(x, y, h.r, h.r * 0.6, 0, 0, Math.PI * 2); g.stroke();
+      g.globalAlpha = 1;
+    },
+    onExpire(h, world) {
+      const p = world.player;
+      const dx = p.x - h.x, dy = (p.y - h.y) * 1.6;
+      if (p.alive && dx * dx + dy * dy < h.r * h.r) world.damage.hurtPlayer(1, dx, dy, h.source);
+      world.effects.burst(h.x, h.y - 4, 8, '#ff9a3c', 80, 0.35);
+      world.hazards.spawn('embers', h.x, h.y, h.r * 0.7, 1.2, h.source);
+    },
+  },
+  // Meteoro de Muspelheim: cae del cielo (más grande, más lento)
+  meteor: {
+    render(g, h) {
+      const k = 1 - h.life / h.max;
+      const x = Math.round(h.x), y = Math.round(h.y);
+      g.globalAlpha = 0.25 + 0.4 * k; g.fillStyle = '#1a0a08';
+      g.beginPath(); g.ellipse(x, y, h.r * k, h.r * 0.6 * k, 0, 0, Math.PI * 2); g.fill();
+      g.globalAlpha = 1;
+      const my = Math.round(y - (1 - k) * 90), mx = Math.round(x + (1 - k) * 40);
+      g.fillStyle = '#ff6a1e'; g.fillRect(mx - 4, my - 4, 8, 8);
+      g.fillStyle = '#fff0a0'; g.fillRect(mx - 2, my - 2, 4, 4);
+      g.fillStyle = '#ff9a3c'; g.fillRect(mx + 4, my - 6, 3, 3); g.fillRect(mx + 7, my - 9, 2, 2);
+    },
+    onExpire(h, world) {
+      const p = world.player;
+      const dx = p.x - h.x, dy = (p.y - h.y) * 1.6;
+      if (p.alive && dx * dx + dy * dy < h.r * h.r) world.damage.hurtPlayer(1, dx, dy, h.source);
+      world.effects.burst(h.x, h.y - 4, 20, '#ff6a1e', 120, 0.5, 2);
+      world.shake(2, 0.12);
+      world.hazards.spawn('embers', h.x, h.y, h.r * 0.8, 2.5, h.source);
+      world.game.audio.play('killEnemy', { pitch: 0.6, volume: 0.6 });
+    },
+  },
+  // Brasas en el suelo: queman (no frenan)
+  embers: {
+    color: '#c43a12', edge: '#ffb347',
+    onPlayer(player, h, world) { world.damage.hurtPlayer(1, 0, 0, h.source); },
+  },
   // Mano de debajo de la cama: sombra en el suelo que agarra al terminar el aviso
   grab: {
     render(g, h) {

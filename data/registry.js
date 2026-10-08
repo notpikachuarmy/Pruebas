@@ -182,32 +182,44 @@ import mar_corales from './rooms/mar/corales.js';
 import mar_bodega from './rooms/mar/bodega.js';
 import mar_marAbierto from './rooms/mar/mar_abierto.js';
 
+import ragnarokMusic from './audio/ragnarok_music.js';
+import ragnarok from './dreams/ragnarok.js';
+import chispa from './enemies/ragnarok/chispa.js';
+import brasa from './enemies/ragnarok/brasa.js';
+import surtur from './bosses/surtur.js';
+import ragnarokPlataforma from './rooms/ragnarok/plataforma.js';
+import item_llamaMuspel from './items/llama_muspel.js';
+import item_gjallarhorn from './items/gjallarhorn.js';
+import syn_solMedianoche from './synergies/sol_medianoche.js';
+import syn_finDelMundo from './synergies/fin_del_mundo.js';
+
 const byId = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
 
 export const CONTENT = {
   assets,
-  audio: { sfx, music: { ...music, ...casaMusic, ...dulceMusic, ...marMusic } },
-  dreams: byId([examen, casa, dulce, mar]),
+  audio: { sfx, music: { ...music, ...casaMusic, ...dulceMusic, ...marMusic, ...ragnarokMusic } },
+  dreams: byId([examen, casa, dulce, mar, ragnarok]),
   // Jefes y mini-jefes son enemigos con `boss: true` (comparten motor)
   enemies: byId([tachon, tachonRojo, interrogante, goma, chuleta, compas, reloj, copia, fotocopiadora, profesora,
     polilla, sombra, telefono, mecedora, polvo, polvoMini, armario, mesaPuesta,
     regla, borron, interroganteDoble, peluche, polillaGigante, relojGigante, companeroPerfecto, monstruoCama, vocesPasillo,
     gominola, gominolaMini, piruleta, algodon, osito, bombon, tarta, reyCaramelo, fuenteChocolate, pinata,
-    medusa, medusaGigante, pezLinterna, anguila, pecesillo, tentaculo, mina, pulpo, tormenta, leviatan, barcoHundido]),
+    medusa, medusaGigante, pezLinterna, anguila, pecesillo, tentaculo, mina, pulpo, tormenta, leviatan, barcoHundido,
+    chispa, brasa, surtur]),
   rooms: byId([aulaInicio, aulaFilas, aulaVacia, aulaCirculo, pasilloTaquillas, aulaTrincheras, despacho, examenFinal,
     casaRecibidor, casaSalon, casaComedor, casaPasillo, casaDormitorio, casaCocina, casaTrastero, casaComedorGrande,
     dulceEntrada, dulcePasteleria, dulceTabletas, dulceBosque, dulceGominolas, dulceFabrica, dulceTienda, dulceSalon,
-    mar_cubierta, mar_arrecife, mar_rocas, mar_pecio, mar_fosa, mar_corales, mar_bodega, mar_marAbierto]),
+    mar_cubierta, mar_arrecife, mar_rocas, mar_pecio, mar_fosa, mar_corales, mar_bodega, mar_marAbierto, ragnarokPlataforma]),
   events: byId([companeroSinGoma, pupitreGrabado, revisionExamen, llamadaPerdida, albumFotos, puestoChuches, casitaChocolate, radioSos, botellaMensaje]),
   items: byId([
     item_eco, item_metronomo, item_cableEnredado, item_tippEx, item_chuletaArrugada, item_calculadora, item_boligrafoPapa, item_despertadorRepuesto, item_espejoRoto, item_altavoz, item_subwoofer, item_silbato, item_cancelacionRuido, item_discoRayado, item_diapason, item_cintaCasete, item_estuche, item_cafe, item_postIt, item_megafono,
     item_linterna, item_fotoFamilia, item_galletas, item_mantita, item_dobleBombo,
     item_anilloRosa, item_energiaPesadilla, item_guiaPesadillas, item_polvoLuminoso, item_carameloExplosivo, item_pompasChicle, item_bolsaChuches,
-    item_salvavidas, item_ancla, item_brujula, item_bombonaOxigeno, item_caracola, item_partitura, item_bis, item_pua, item_batuta, item_pedalDistorsion, item_viniloOro, item_cascosRotos, item_marcapasos, item_saxofon, item_triangulo, item_gong,
+    item_salvavidas, item_ancla, item_brujula, item_bombonaOxigeno, item_caracola, item_partitura, item_bis, item_pua, item_batuta, item_pedalDistorsion, item_viniloOro, item_cascosRotos, item_marcapasos, item_saxofon, item_triangulo, item_gong, item_llamaMuspel, item_gjallarhorn,
   ]),
   synergies: byId([
     syn_polirritmia, syn_acople, syn_caleidoscopio, syn_corrector, syn_zigzagDoble, syn_notaPerfecta, syn_bajoYBateria, syn_sintoniaFina, syn_silencioAbsoluto, syn_hogar, syn_faro,
-    syn_marejada, syn_faroPuerto, syn_buzo, syn_soloGuitarra, syn_acorde, syn_feedback, syn_granFinal, syn_discoPlatino, syn_sordina, syn_ritmoCardiaco, syn_orquesta, syn_bigBand, syn_jamSession, syn_lastre, syn_director, syn_rosaVientos,
+    syn_marejada, syn_faroPuerto, syn_buzo, syn_soloGuitarra, syn_acorde, syn_feedback, syn_granFinal, syn_discoPlatino, syn_sordina, syn_ritmoCardiaco, syn_orquesta, syn_bigBand, syn_jamSession, syn_lastre, syn_director, syn_rosaVientos, syn_solMedianoche, syn_finDelMundo,
   ]),
   achievements,
 };

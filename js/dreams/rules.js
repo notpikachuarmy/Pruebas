@@ -120,6 +120,17 @@ export const RULES = {
     },
   },
 
+  /** Ragnarök: ceniza y chispas suben desde la lava (ambiente; el peligro lo pone Surtur). */
+  cenizas: {
+    name: 'Cenizas',
+    update(world) {
+      if (Math.random() > 0.6) return;
+      const x = Math.random() * world.room.width, y = world.room.height * (0.2 + Math.random() * 0.8);
+      const c = Math.random() < 0.3 ? '#fff0a0' : Math.random() < 0.5 ? '#ff6a1e' : '#6a5a5a';
+      world.effects.particle(x, y, (Math.random() - 0.5) * 10, -20 - Math.random() * 25, 1.4, c, 1, 0.3, 0);
+    },
+  },
+
   /** La casa está a oscuras: solo ves alrededor tuyo, y las lámparas encendidas iluminan la sala. */
   penumbra: {
     name: 'Penumbra',
