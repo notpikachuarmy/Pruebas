@@ -74,7 +74,7 @@ export class AchievementSystem {
     this._check((c) => c.type === 'dreamBoss' && bossesOf(dreams[c.dream]).some((id) => this.bossBeaten(id)));
     this._check((c) => c.type === 'allDreamBosses' && bossesOf(dreams[c.dream]).every((id) => this.bossBeaten(id)));
     // Haber vencido algún jefe de cada sueño normal (no final), sumando todas las noches
-    this._check((c) => c.type === 'everyDreamBoss' && Object.values(dreams).filter((d) => !d.final)
+    this._check((c) => c.type === 'everyDreamBoss' && (c.dreams ? c.dreams.map((id) => dreams[id]).filter(Boolean) : Object.values(dreams).filter((d) => !d.final))
       .every((d) => bossesOf(d).some((id) => this.bossBeaten(id))));
   }
 

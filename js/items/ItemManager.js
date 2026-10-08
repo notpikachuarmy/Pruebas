@@ -84,6 +84,19 @@ export class ItemManager {
     return a.params.radius * (this.hasSynergy('faro') ? 1.6 : 1);
   }
 
+  onRoomEnter(node, first) { for (const e of this._effects) e.fx.onRoomEnter?.(this, node, first, e.params); }
+
+  /** ¿Algún objeto anula este golpe? (Rocío) */
+  blockHit() {
+    for (const e of this._effects) if (e.fx.blockHit?.(this, e.params)) return true;
+    return false;
+  }
+
+  onDashing() { for (const e of this._effects) e.fx.onDashing?.(this, e.params); }
+
+  /** Dibujo propio de los objetos (compañeros que vuelan junto al jugador). */
+  render(g) { for (const e of this._effects) e.fx.render?.(this, g, e.params); }
+
   onDreamStart() { for (const e of this._effects) e.fx.onDreamStart?.(this, e.params); }
   onRoomClear() { for (const e of this._effects) e.fx.onRoomClear?.(this, e.params); }
 

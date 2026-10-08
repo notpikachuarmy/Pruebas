@@ -392,6 +392,184 @@ export const ITEM_EFFECTS = {
     },
   },
 
+  // ---------- Objetos del Bosque ----------
+
+  /** Asta: el Silencio embiste y daña a los enemigos que atraviesas. */
+  dashStrike: {
+    onDash(ctx) { ctx.state('asta').hit = new Set(); },
+    onDashing(ctx, p) {
+      const w = ctx.world, pl = w.player, st = ctx.state('asta');
+      for (const e of w.enemies.query(pl.x, pl.y, 20)) {
+        if (!e.canBeHit() || st.hit?.has(e.uid) || (e.x - pl.x) ** 2 + (e.y - pl.y) ** 2 > 16 * 16) continue;
+        st.hit?.add(e.uid);
+        const dmg = p.damage * (ctx.hasSynergy('rey_bosque') ? 1.5 : 1);
+        w.damage.hitEnemy(e, dmg, pl.dashX, pl.dashY, 200, { isAura: true });
+        w.effects.burst(e.x, e.y - 6, 8, '#c88a3c', 70, 0.3);
+      }
+    },
+  },
+
+  /** Piel de Lobo: al recibir daño, los enemigos cercanos se llevan un zarpazo. */
+  thorns: {
+    onHurt(ctx, p) {
+      const w = ctx.world, pl = w.player;
+      for (const e of w.enemies.query(pl.x, pl.y, p.radius + 10)) {
+        if (!e.canBeHit() || (e.x - pl.x) ** 2 + (e.y - pl.y) ** 2 > p.radius * p.radius) continue;
+        w.damage.hitEnemy(e, p.damage, e.x - pl.x, e.y - pl.y, 160, { isAura: true });
+      }
+      w.effects.burst(pl.x, pl.y - 8, 16, '#9a8a7a', 100, 0.35);
+    },
+  },
+
+  /** Trampa Rota: el Silencio deja un cepo que atrapa al primer enemigo que lo pisa. */
+  dashTrap: {
+    onDash(ctx, p) {
+      const w = ctx.world, pl = w.player, st = ctx.state('trampa_rota');
+      if (w.time - (st.last ?? -99) < p.cooldown) return;
+      st.last = w.time;
+      w.hazards.spawn('playerTrap', pl.x, pl.y, 10, p.life);
+    },
+  },
+
+  /** Compañeros (Luciérnaga, Petirrojo): vuelan a tu alrededor y disparan al enemigo más cercano. */
+  familiar: {
+    onUpdate(ctx, dt, p) {
+      const w = ctx.world, pl = w.player, st = ctx.state(`fam:${p.kind}`);
+      st.a = (st.a ?? (p.kind === 'petirrojo' ? Math.PI : 0)) + dt * 2;
+      st.x = pl.x + Math.cos(st.a) * 18; st.y = pl.y - 14 + Math.sin(st.a) * 8;
+      if (!pl.alive) return;
+      const every = p.every * (ctx.hasSynergy('manada') ? 0.6 : 1);
+      st.t = (st.t ?? every) - dt;
+      if (st.t > 0) return;
+      let best = null, bd = 150 * 150;
+      for (const e of w.enemies.list) {
+        if (!e.canBeHit()) continue;
+        const d = (e.x - st.x) ** 2 + (e.y - 6 - st.y) ** 2;
+        if (d < bd) { bd = d; best = e; }
+      }
+      if (!best) return;
+      st.t = every;
+      const ang = Math.atan2(best.y - 6 - (st.y + 8), best.x - st.x);
+      w.projectiles.spawn({ team: 'player', x: st.x, y: st.y + 8, z: 8, angle: ang, speed: 170, radius: 2, damage: p.damage * pl.stats.get('damage'), knockback: 20, range: 170, color: p.color, trailColor: p.trail });
+    },
+    render(ctx, g, p) {
+      const st = ctx.state(`fam:${p.kind}`);
+      if (st.x === undefined || !ctx.world.player.alive) return;
+      const x = Math.round(st.x), y = Math.round(st.y);
+      if (p.kind === 'luciernaga') {
+        g.globalAlpha = 0.35 + 0.25 * Math.sin(ctx.world.time * 8);
+        g.fillStyle = '#fff38a'; g.fillRect(x - 3, y - 3, 6, 6);
+        g.globalAlpha = 1; g.fillStyle = '#ffd65c'; g.fillRect(x - 1, y - 1, 2, 2);
+        g.fillStyle = '#3a2a1c'; g.fillRect(x - 1, y - 3, 2, 2);
+      } else {
+        const f = Math.floor(ctx.world.time * 10) % 2;
+        g.fillStyle = '#6b4428'; g.fillRect(x - 3, y - 2, 6, 4);
+        g.fillStyle = '#eb5a3a'; g.fillRect(x - 2, y, 3, 2);
+        g.fillStyle = '#8a5a34'; g.fillRect(x - 5, y - 2 - f, 2, 2); g.fillRect(x + 3, y - 2 - f, 2, 2);
+        g.fillStyle = '#191817'; g.fillRect(x + 1, y - 1, 1, 1);
+      }
+    },
+  },
+
+  /** Ceniza: los enemigos disipados dejan fuego que quema a otros enemigos. */
+  killFire: {
+    onKill(ctx, enemy, p) {
+      const big = ctx.hasSynergy('incendio_controlado');
+      ctx.world.hazards.spawn('playerFire', enemy.x, enemy.y, big ? p.radius * 1.6 : p.radius, p.life);
+    },
+  },
+
+  /** Rocío: el primer golpe que recibes en cada sala no te hace daño. */
+  roomShield: {
+    onRoomEnter(ctx) { ctx.state('rocio').ready = true; },
+    blockHit(ctx) {
+      const st = ctx.state('rocio');
+      if (!st.ready) return false;
+      st.ready = false;
+      ctx.world.floatText(ctx.world.player.x, ctx.world.player.y - 26, 'Rocío');
+      return true;
+    },
+    onAdd(ctx) { ctx.state('rocio').ready = true; },
+  },
+
+  /** Semilla: cada sala limpia suma un poco de daño para el resto de la noche. */
+  growth: {
+    onRoomClear(ctx, p) {
+      const st = ctx.state('semilla');
+      const cap = p.max * (ctx.hasSynergy('bosque_vivo') ? 2 : 1);
+      if ((st.n ?? 0) >= cap) return;
+      st.n = (st.n ?? 0) + 1;
+      ctx.world.player.stats.addModifier({ stat: 'damage', add: p.per, source: 'semilla' });
+      ctx.world.floatText(ctx.world.player.x, ctx.world.player.y - 26, 'Crece');
+    },
+  },
+
+  /** Musgo: al entrar por primera vez en una sala, a veces recuperas medio corazón. */
+  newRoomHeal: {
+    onRoomEnter(ctx, node, first, p) {
+      if (!first || !ctx.rng.chance(p.chance)) return;
+      if (ctx.world.damage.healPlayer(1)) ctx.world.game.audio.play('heal');
+    },
+  },
+
+  /** Panal: los enemigos golpeados se quedan pegados y van a mitad de velocidad. */
+  slowOnHit: {
+    onHitEnemy(ctx, enemy, proj, p) { if (!enemy.def.boss) enemy.slow = Math.max(enemy.slow ?? 0, p.time); },
+  },
+
+  /** Huida: tras recibir daño, corres mucho más durante unos segundos. */
+  fleeBoost: {
+    onHurt(ctx, p) { ctx.state('huida').t = p.time; },
+    onUpdate(ctx, dt, p) {
+      const st = ctx.state('huida'), stats = ctx.world.player.stats;
+      const active = (st.t ?? 0) > 0;
+      if (active) st.t -= dt;
+      const has = stats.modifiers.some((m) => m.source === 'huida');
+      if (active && !has) stats.addModifier({ stat: 'speed', mult: p.mult, source: 'huida' });
+      if (!active && has) stats.removeBySource('huida');
+    },
+  },
+
+  /** Instinto: cada Silencio lanza un anillo de notas a tu alrededor. */
+  dashRing: {
+    onDash(ctx, p) {
+      const w = ctx.world, pl = w.player;
+      const n = ctx.hasSynergy('estampida') ? p.count + 4 : p.count;
+      for (let i = 0; i < n; i++) {
+        w.projectiles.spawn({ team: 'player', x: pl.x, y: pl.y - 1, z: 9, angle: (i / n) * Math.PI * 2, speed: 160, radius: 2, damage: pl.stats.get('damage') * p.damage, knockback: 40, range: 90, color: '#fff6d6', trailColor: '#c88a3c' });
+      }
+    },
+  },
+
+  /** Piña: cada N notas, una que estalla al impactar. */
+  explosiveShot: {
+    onShot(ctx, shot, p) {
+      if (shot.isEcho || shot.isRing) return;
+      const st = ctx.state('pina');
+      st.n = (st.n ?? 0) + 1;
+      if (st.n % p.every) return;
+      shot.explode = p.radius; shot.radius += 1; shot.color = '#c88a3c';
+    },
+  },
+
+  /** Corazón Salvaje: con media vida o menos, más daño y cadencia. */
+  lowHpFury: {
+    damageMult(ctx, enemy, proj, p) {
+      const pl = ctx.world.player;
+      return pl.hp <= pl.stats.get('maxHp') / 2 ? p.mult : 1;
+    },
+    onUpdate(ctx, dt, p) {
+      const pl = ctx.world.player, stats = pl.stats;
+      const active = pl.alive && pl.hp <= stats.get('maxHp') / 2;
+      const has = stats.modifiers.some((m) => m.source === 'furia');
+      if (active && !has) stats.addModifier({ stat: 'fireRate', mult: p.fireRate, source: 'furia' });
+      if (!active && has) stats.removeBySource('furia');
+    },
+  },
+
+  /** Trébol: más objetos raros y más botín de los enemigos (lo aplican ItemPool y Pickups). */
+  luck: {},
+
   ring: {
     onShot(ctx, shot, p) {
       if (shot.isEcho || shot.isRing) return;

@@ -21,10 +21,16 @@ export class PlayerController {
       if (player.dashRecharge >= st.get('dashCooldown')) { player.dashRecharge = 0; player.dashCharges++; }
     } else if (player.dashCharges >= maxCharges) player.dashRecharge = 0;
 
-    const move = input.getAxis('MOVE');
+    let move = input.getAxis('MOVE');
+    // Atrapado en un cepo: no te puedes mover ni esquivar hasta soltarte
+    if (player.rooted > 0) {
+      player.rooted -= dt;
+      move = { x: 0, y: 0, mag: 0 };
+      player.vx = 0; player.vy = 0;
+    }
 
     // --- Silencio: esquiva corta con invulnerabilidad ---
-    if (input.isPressed('DASH') && player.dashCharges >= 1 && !player.isDashing) {
+    if (input.isPressed('DASH') && player.dashCharges >= 1 && !player.isDashing && !(player.rooted > 0)) {
       player.dashCharges--;
       let dx = move.x, dy = move.y;
       if (move.mag === 0) { dx = player.aimX; dy = player.aimY; }
@@ -37,6 +43,7 @@ export class PlayerController {
       effects.burst(player.x, player.y - 2, 6, '#c9bde6', 40, 0.3);
       this.world.items.onDash();
     }
+    if (player.isDashing) this.world.items.onDashing?.();
 
     if (player.isDashing) {
       player.dashTime -= dt;

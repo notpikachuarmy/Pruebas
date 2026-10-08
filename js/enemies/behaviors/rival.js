@@ -14,7 +14,7 @@ export default {
     const p = e.def.params, d = e.data;
     const t = toPlayer(e, world);
     const ph = this.phaseOf(e);
-    if (ph !== d.phase) { d.phase = ph; world.bossBanner(PHASES[ph]); world.game.haptics.play('heavy'); }
+    if (ph !== d.phase) { d.phase = ph; world.bossBanner((p.phaseNames ?? PHASES)[ph]); world.game.haptics.play('heavy'); }
     d.dodge -= dt;
     // Tras cada ráfaga se queda quieto un momento: es la ventana para acertarle
     if (e.state === 'pose') {
@@ -47,7 +47,7 @@ export default {
       d.fire = p.fireEvery[ph];
       const n = p.burst[ph];
       for (let i = 0; i < n; i++) {
-        shoot(world, e, t.angle + (i - (n - 1) / 2) * 0.16, { speed: 125, range: 240, radius: 3, z: 9, color: '#ffd65c', trail: '#191817' });
+        shoot(world, e, t.angle + (i - (n - 1) / 2) * 0.16, { speed: 125, range: 240, radius: 3, z: 9, color: p.shotColor ?? '#ffd65c', trail: p.shotTrail ?? '#191817' });
       }
       world.game.audio.play('shoot', { pitch: 0.75 });
       e.setState('pose');
@@ -56,8 +56,9 @@ export default {
       d.copies -= dt;
       if (d.copies <= 0) {
         d.copies = p.copyEvery;
-        if (world.enemies.list.filter((o) => o.def.id === 'copia' && !o.dead).length < 2) {
-          world.enemies.spawn('copia', e.x + world.rngSpawn.range(-20, 20), e.y + 10);
+        const sid = p.summon ?? 'copia';
+        if (world.enemies.list.filter((o) => o.def.id === sid && !o.dead).length < (p.maxSummons ?? 2)) {
+          world.enemies.spawn(sid, e.x + world.rngSpawn.range(-20, 20), e.y + 10);
         }
       }
     }

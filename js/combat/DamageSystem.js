@@ -69,6 +69,12 @@ export class DamageSystem {
   hurtPlayer(amount, dirX = 0, dirY = 0, source = null) {
     const { player, game, effects } = this.world;
     if (!player.alive || player.invulnerable > 0 || player.isDashing) return false;
+    if (this.world.items.blockHit()) {
+      player.invulnerable = 0.8;
+      effects.burst(player.x, player.y - 10, 14, '#8fd3ff', 80, 0.4);
+      game.audio.play('wallHit', { pitch: 1.6 });
+      return true;
+    }
     this.world.lastHurtBy = source;
     this.world.hurtFlash = 0.35;
     player.hp = Math.max(0, player.hp - amount);

@@ -147,6 +147,16 @@ export const KINDS = {
       } else if (def.prop === 'album') {
         g.fillStyle = '#4a749c'; g.fillRect(x - 6, y - 14, 12, 4);
         g.fillStyle = '#f0ecd6'; g.fillRect(x - 5, y - 15, 4, 3); g.fillRect(x + 1, y - 15, 4, 3);
+      } else if (def.prop === 'stream') {
+        // Arroyo: piedras y agua que corre
+        g.fillStyle = '#3d6e8c'; g.fillRect(x - 8, y - 10, 16, 3);
+        g.fillStyle = '#8fd3ff'; g.fillRect(x - 6 + (Math.floor(world.time * 6) % 4), y - 10, 3, 1);
+        g.fillStyle = '#7a7a72'; g.fillRect(x - 7, y - 13, 4, 3); g.fillRect(x + 3, y - 12, 4, 2);
+      } else if (def.prop === 'tracks') {
+        // Huellas de botas y de perro en el barro
+        g.fillStyle = '#3a2a1c';
+        g.fillRect(x - 6, y - 10, 3, 2); g.fillRect(x - 1, y - 9, 3, 2); g.fillRect(x + 4, y - 10, 3, 2);
+        g.fillStyle = '#5a4030'; g.fillRect(x - 4, y - 7, 1, 1); g.fillRect(x + 1, y - 7, 1, 1); g.fillRect(x + 5, y - 7, 1, 1);
       } else if (def.prop === 'papers') {
         g.fillStyle = '#f0ecd6'; g.fillRect(x - 6, y - 13, 9, 4); g.fillRect(x - 4, y - 15, 9, 3);
         g.fillStyle = '#d6403a'; g.fillRect(x - 2, y - 14, 3, 1);

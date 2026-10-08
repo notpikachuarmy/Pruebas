@@ -75,7 +75,7 @@ export class PlayerCombat {
       bounces: shot.bounces, bounceShrink: shot.bounceShrink, splitOnBounce: shot.splitOnBounce,
       waveAmp: shot.waveAmp, waveFreq: shot.waveFreq, wavePhase: shot.wavePhase,
       homing: shot.homing, homingRange: shot.homingRange, boomerang: shot.boomerang,
-      hazardTrail: shot.hazardTrail, strong: shot.strong, isEcho: shot.isEcho, splitOnExpire: shot.splitOnExpire,
+      hazardTrail: shot.hazardTrail, strong: shot.strong, isEcho: shot.isEcho, splitOnExpire: shot.splitOnExpire, explode: shot.explode,
     });
     if (shot.isEcho) this.world.game.audio.play('shoot', { pitch: 1.3, volume: 0.5 });
   }

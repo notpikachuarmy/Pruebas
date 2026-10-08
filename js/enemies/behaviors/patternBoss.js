@@ -9,7 +9,8 @@ import { toPlayer, shoot } from './helpers.js';
  *   { type: 'ring',   count, speed, gap }           anillo con hueco
  *   { type: 'aimed',  count, spread, speed }         ráfaga hacia el jugador
  *   { type: 'spiral', arms, speed, turn }            espiral que gira
- *   { type: 'marks',  count, hazard, delay, r }      peligros en el suelo cerca del jugador
+ *   { type: 'marks',  count, hazard, delay, r, spread, aim }
+ *                                                    peligros en el suelo cerca del jugador (aim: la primera, justo encima)
  *   { type: 'summon', ids, max }                     invoca enemigos (hasta `max` vivos)
  *   { type: 'flash', time }                          fogonazo de luz (relámpago) en sueños oscuros
  *   { type: 'line', orient: 'h'|'v'|'both', gap, hazard, delay, r }
@@ -84,7 +85,11 @@ export default {
       for (let i = 0; i < a.arms; i++) shoot(world, e, ang + (i / a.arms) * Math.PI * 2, { ...base, speed: a.speed });
     } else if (a.type === 'marks') {
       for (let i = 0; i < a.count; i++) {
-        world.hazards.spawn(a.hazard, world.player.x + world.rngSpawn.range(-30, 30), world.player.y + world.rngSpawn.range(-18, 18), a.r ?? 12, a.delay ?? 1, e.def.id);
+        // `spread`: lo lejos del jugador que puede caer cada marca (0 = justo encima, como un punto de mira)
+        const sx = (a.spread ?? 30) * (i === 0 && a.aim ? 0 : 1), sy = sx * 0.6;
+        let x = world.player.x + world.rngSpawn.range(-sx, sx), y = world.player.y + world.rngSpawn.range(-sy, sy);
+        if (world.room.isBlockedCell(Math.floor(x / 16), Math.floor(y / 16))) { x = world.player.x; y = world.player.y; }
+        world.hazards.spawn(a.hazard, x, y, a.r ?? 12, a.delay ?? 1, e.def.id);
       }
     } else if (a.type === 'line') {
       this._line(e, world, a);

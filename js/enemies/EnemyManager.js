@@ -41,6 +41,8 @@ export class EnemyManager {
         if (Math.random() < 0.3) this.world.effects.particle(e.x + (Math.random() - 0.5) * 8, e.y - 6, 0, -30, 0.4, '#ff9a3c', 1, 1, 0);
         if (e.hp <= 0) { damage.killEnemy(e); continue; }
       }
+      // Red de seguridad: cualquier daño que deje la vida a 0 (o inválida) sin pasar por killEnemy
+      if (!e.spawning && !e.dead && !(e.hp > 0)) { damage.killEnemy(e); continue; }
       if (frozen && !e.spawning) continue;   // Cinta de Casete: tiempo enemigo detenido
       if (e.stun > 0 && !e.def.boss) {
         e.stun -= dt;
@@ -56,7 +58,8 @@ export class EnemyManager {
 
       e.kx = approach(e.kx, 0, 600 * dt);
       e.ky = approach(e.ky, 0, 600 * dt);
-      const sm = (e.haste > 0 ? 1.5 : 1) * this.world.mods.enemySpeed;
+      if (e.slow > 0) e.slow -= dt;
+      const sm = (e.haste > 0 ? 1.5 : 1) * (e.slow > 0 ? 0.5 : 1) * this.world.mods.enemySpeed;
       const hit = room.move(e, (e.vx * sm + e.kx) * dt, (e.vy * sm + e.ky) * dt);
       if (hit) e.behavior.onWall?.(e, hit);
       if (Math.abs(e.vx) > 3) e.facing = Math.sign(e.vx);

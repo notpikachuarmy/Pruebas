@@ -34,7 +34,7 @@ export default {
           const n = p.shots ?? 1;
           for (let i = 0; i < n; i++) {
             const a = t.angle + (i - (n - 1) / 2) * (p.spread ?? 0.3);
-            shoot(world, e, a, { speed: p.shotSpeed, range: Math.min(t.dist + 10, 220), radius: 4, glyph: '?', expire: p.expire ?? 'ink' });
+            shoot(world, e, a, { speed: p.shotSpeed, range: Math.min(t.dist + 10, 220), radius: p.shotRadius ?? 4, glyph: p.glyph ?? '?', expire: p.expire ?? 'ink', ...(p.shotColor ? { color: p.shotColor, trail: p.shotTrail } : {}) });
           }
           world.game.audio.play('windup', { pitch: 2 });
           e.data.cool = p.cooldown;

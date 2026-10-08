@@ -56,7 +56,8 @@ export class Pickups {
   dropFrom(enemy) {
     const rng = this.world.rngLoot;
     for (const d of enemy.def.drops ?? []) {
-      if (!rng.chance(d.chance)) continue;
+      const luck = this.world.items.hasEffect('luck') ? 1.35 : 1;
+      if (!rng.chance(Math.min(1, d.chance * luck))) continue;
       const n = d.amount ? rng.int(d.amount[0], d.amount[1]) : 1;
       for (let i = 0; i < n; i++) this.spawn(d.type, enemy.x, enemy.y - 2);
     }

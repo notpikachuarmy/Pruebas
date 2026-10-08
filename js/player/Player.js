@@ -29,6 +29,7 @@ export class Player {
     this.dashX = 0; this.dashY = 0;
     this.ghostTimer = 0;
 
+    this.rooted = 0;                 // atrapado en un cepo (s)
     this.slowFactor = 1;             // lo reducen los charcos de tinta
     this.moving = false;
     this.animTime = 0;

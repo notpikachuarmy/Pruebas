@@ -12,7 +12,7 @@
  *   { type: 'overtimeClear' }                        limpiar una sala en tiempo extra
  *   { type: 'runMaxHp', gte }                        vida máxima (medios corazones) en una run
  *   { type: 'discoveredItems', gte }                 objetos distintos descubiertos en total
- *   { type: 'everyDreamBoss' }                       haber vencido a algún jefe de cada sueño (no final)
+ *   { type: 'everyDreamBoss', dreams? }              haber vencido a algún jefe de cada sueño (de la lista `dreams`, o de todos los no finales)
  * `reward` (opcional): { dream } o { item } que se desbloquea.
  */
 export default [
@@ -23,9 +23,17 @@ export default [
   { id: 'diente_dulce', name: 'Diente dulce', description: 'Vence al jefe de El País de las Chuches.',
     condition: { type: 'dreamBoss', dream: 'dulce' }, reward: { item: 'caramelo_explosivo', dream: 'mar' } },
   { id: 'ocaso', name: 'El ocaso se acerca', description: 'Vence a un jefe de cada uno de los cuatro sueños.',
-    condition: { type: 'everyDreamBoss' }, reward: { dream: 'ragnarok' } },
+    condition: { type: 'everyDreamBoss', dreams: ['examen', 'casa', 'dulce', 'mar'] }, reward: { dream: 'ragnarok' } },
   { id: 'ragnarok_evitado', name: 'Ragnarök evitado', description: 'Vence a Surtur y termina la noche.',
-    condition: { type: 'dreamBoss', dream: 'ragnarok' }, reward: { item: 'llama_muspel' } },
+    condition: { type: 'dreamBoss', dream: 'ragnarok' }, reward: { item: 'llama_muspel', dream: 'bosque' } },
+  { id: 'superviviente', name: 'Superviviente', description: 'Vence a un jefe de El Bosque en Llamas.',
+    condition: { type: 'dreamBoss', dream: 'bosque' }, reward: { item: 'trebol' } },
+  { id: 'rey_del_bosque', name: 'Rey del bosque', description: 'Vence a los tres jefes de El Bosque en Llamas.',
+    condition: { type: 'allDreamBosses', dream: 'bosque' }, reward: { item: 'corazon_salvaje' } },
+  { id: 'cazador_cazado', name: 'El cazador cazado', description: 'Atrapa a un enemigo en uno de tus propios cepos.',
+    condition: { type: 'event', event: 'trap:caught' } },
+  { id: 'pies_ligeros', name: 'Pies ligeros', description: 'Salta por encima de un cepo con el Silencio.',
+    condition: { type: 'event', event: 'trap:dodged' } },
   { id: 'sin_quemaduras', name: 'Sin una quemadura', description: 'Vence a Surtur sin recibir daño en su sala.',
     condition: { type: 'noHitSurtur' }, reward: { item: 'gjallarhorn' } },
   { id: 'marinero', name: 'Lobo de mar', description: 'Vence al jefe de Mar Adentro.',

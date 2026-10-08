@@ -15,7 +15,7 @@ export default {
       if ((t.dist < 10 || e.stateTime > p.underTime) && world.player.alive) { e.setState('rise'); world.game.audio.play('windup', { pitch: 0.6 }); }
     } else if (e.state === 'rise') {
       e.vx = 0; e.vy = 0;
-      if (e.stateTime > p.rise) { e.setState('up'); world.effects.burst(e.x, e.y, 12, '#8fd3ff', 60, 0.4); world.shake(1.5, 0.1); }
+      if (e.stateTime > p.rise) { e.setState('up'); world.effects.burst(e.x, e.y, 12, e.def.params.burstColor ?? '#8fd3ff', 60, 0.4); world.shake(1.5, 0.1); }
     } else if (e.state === 'up') {
       e.vx = 0; e.vy = 0;
       if (e.stateTime > p.upTime) e.setState('under');
@@ -29,6 +29,16 @@ export default {
   renderExtra(g, e) {
     if (e.state === 'up') return;
     const k = e.state === 'rise' ? 1 + e.stateTime * 2 : 1;
+    if (e.def.params.shadow) {
+      // Sombra de algo que vuela por encima (Águila): crece y se oscurece antes de caer en picado
+      g.fillStyle = '#08060e';
+      g.globalAlpha = e.state === 'rise' ? 0.55 : 0.3;
+      const r = 7 * k;
+      g.beginPath(); g.ellipse(Math.round(e.x), Math.round(e.y), r, r * 0.45, 0, 0, Math.PI * 2); g.fill();
+      if (e.state === 'rise') { g.strokeStyle = '#eb2f2d'; g.globalAlpha = 0.7; g.stroke(); }
+      g.globalAlpha = 1;
+      return;
+    }
     g.strokeStyle = e.state === 'rise' ? '#eb2f2d' : '#8fd3ff';
     g.globalAlpha = 0.6;
     const r = 5 + Math.sin(e.animTime * 8) * 1.5;

@@ -52,6 +52,18 @@ export default {
     chispa: 'assets/enemies/chispa.png',
     brasa: 'assets/enemies/brasa.png',
     surtur: 'assets/bosses/surtur.png',
+    tiles_bosque: 'assets/rooms/tiles_bosque.png',
+    lobo: 'assets/enemies/lobo.png',
+    perro: 'assets/enemies/perro.png',
+    cazador: 'assets/enemies/cazador.png',
+    cepo: 'assets/enemies/cepo.png',
+    pavesa: 'assets/enemies/pavesa.png',
+    oso: 'assets/enemies/oso.png',
+    aguila: 'assets/enemies/aguila.png',
+    trampero: 'assets/bosses/trampero.png',
+    boss_cazador_img: 'assets/bosses/cazador.png',
+    incendio: 'assets/bosses/incendio.png',
+    lobo_gris: 'assets/bosses/lobo_gris.png',
   },
 
   sprites: {
@@ -287,6 +299,61 @@ export default {
       animations: { idle: { frames: [0, 1], fps: 3 }, raise: { frames: [2], fps: 1 } },
       placeholder: { color: '#46201a', w: 60, h: 70 },
     },
+    enemy_lobo: {
+      image: 'lobo', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 6 } },
+      placeholder: { color: '#6e6e72', w: 12, h: 12 },
+    },
+    enemy_perro: {
+      image: 'perro', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 8 } },
+      placeholder: { color: '#a07040', w: 12, h: 12 },
+    },
+    enemy_cazador: {
+      image: 'cazador', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 3 } },
+      placeholder: { color: '#4a5a2a', w: 12, h: 12 },
+    },
+    enemy_cepo: {
+      image: 'cepo', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 2 } },
+      placeholder: { color: '#5a5a62', w: 12, h: 12 },
+    },
+    enemy_pavesa: {
+      image: 'pavesa', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 8 } },
+      placeholder: { color: '#e05a1a', w: 12, h: 12 },
+    },
+    enemy_oso: {
+      image: 'oso', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 3 } },
+      placeholder: { color: '#5a3c26', w: 12, h: 12 },
+    },
+    enemy_aguila: {
+      image: 'aguila', frameWidth: 16, frameHeight: 16, anchor: { x: 8, y: 15 },
+      animations: { idle: { frames: [0, 1], fps: 6 } },
+      placeholder: { color: '#5a3c26', w: 12, h: 12 },
+    },
+    boss_trampero: {
+      image: 'trampero', frameWidth: 32, frameHeight: 32, anchor: { x: 16, y: 31 },
+      animations: { idle: { frames: [0, 1], fps: 3 } },
+      placeholder: { color: '#5a4a30', w: 14, h: 28 },
+    },
+    boss_cazador: {
+      image: 'boss_cazador_img', frameWidth: 32, frameHeight: 40, anchor: { x: 16, y: 39 },
+      animations: { idle: { frames: [0, 1], fps: 2 } },
+      placeholder: { color: '#4a5a2a', w: 14, h: 36 },
+    },
+    boss_incendio: {
+      image: 'incendio', frameWidth: 48, frameHeight: 40, anchor: { x: 24, y: 39 },
+      animations: { idle: { frames: [0, 1], fps: 6 } },
+      placeholder: { color: '#c43a12', w: 40, h: 34 },
+    },
+    boss_lobo_gris: {
+      image: 'lobo_gris', frameWidth: 32, frameHeight: 32, anchor: { x: 16, y: 31 },
+      animations: { idle: { frames: [0, 1], fps: 2 }, walk: { frames: [2, 3, 4, 5], fps: 10 } },
+      placeholder: { color: '#8a8a90', w: 26, h: 18 },
+    },
   },
 
   tilesets: {
@@ -336,6 +403,17 @@ export default {
       liquids: { V: 2 },   // lava: no se pisa, los proyectiles pasan por encima
       liquidEdge: 3,       // canto de la plataforma sobre la lava
       solids: { L: 4, T: 5, R: 6, B: 7 }, // roca, pilar roto, runa, brasero
+    },
+    tiles_bosque: {
+      image: 'tiles_bosque',
+      size: 16,
+      floor: 0,
+      floorMargin: 0,      // (el tile 1 es una variante con hojas caídas, libre para usar)
+      wall: 2,
+      wallFace: 3,         // espesura con tierra
+      liquids: { W: 8 },   // agua del arroyo: no se pisa, las notas pasan por encima
+      liquidEdge: 9,       // orilla
+      solids: { D: 4, M: 5, L: 6, T: 7 }, // árbol, roca, zarzas, tronco caído
     },
   },
 };

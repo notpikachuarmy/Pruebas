@@ -4,6 +4,7 @@ import { Pool } from '../core/Pool.js';
  * Zonas en el suelo que afectan al jugador. Cada tipo define:
  *  onPlayer(player, h, world)  mientras el jugador está dentro
  *  onExpire(h, world)          al terminar (opcional)
+ *  onDashOver(player, h, world) si el jugador lo cruza con el Silencio (opcional)
  *  ink: true                   su duración se multiplica por world.mods.inkLife (regla "La tinta no se seca")
  */
 export const HAZARD_TYPES = {
@@ -146,6 +147,84 @@ export const HAZARD_TYPES = {
     color: '#c43a12', edge: '#ffb347',
     onPlayer(player, h, world) { world.damage.hurtPlayer(1, 0, 0, h.source); },
   },
+  // Cepo escondido (bosque): casi invisible hasta que estás cerca. Si lo pisas, daño y te atrapa.
+  trap: {
+    render(g, h, world) {
+      const p = world.player;
+      const d = Math.hypot(p.x - h.x, p.y - h.y);
+      const a = h.sprung ? 1 : Math.max(0.08, Math.min(1, (70 - d) / 40));
+      const x = Math.round(h.x), y = Math.round(h.y);
+      g.globalAlpha = a;
+      g.fillStyle = '#5a5a62';
+      g.fillRect(x - 6, y - 1, 12, 2);
+      for (let i = -5; i <= 5; i += 2) g.fillRect(x + i, h.sprung ? y - 4 : y - 3, 1, h.sprung ? 3 : 2);
+      g.fillStyle = '#9aa3b5'; g.fillRect(x - 1, y - 1, 2, 2);
+      if (!h.sprung && Math.floor(world.time * 3) % 3 === 0) { g.fillStyle = '#fff6d6'; g.fillRect(x + 3, y - 3, 1, 1); }
+      g.globalAlpha = 1;
+    },
+    onPlayer(player, h, world) {
+      if (h.sprung) return;
+      h.sprung = true; h.life = 1.5;
+      if (h.ref) h.ref.sprung = true;
+      world.damage.hurtPlayer(1, 0, 0, 'cepo');
+      player.rooted = world.items.hasEffect('noSlow') ? 0.3 : 1.1;
+      world.game.audio.play('wallHit', { pitch: 0.4 });
+      world.shake(2, 0.15);
+      world.floatText(player.x, player.y - 26, '¡Cepo!');
+      world.game.events.emit('trap:sprung');
+    },
+    onDashOver(player, h, world) {
+      if (h.sprung || h.dodged) return;
+      h.dodged = true;
+      world.game.events.emit('trap:dodged');
+    },
+  },
+  // Punto de mira del cazador: aviso que termina en un disparo
+  crosshair: {
+    render(g, h) {
+      const k = 1 - h.life / h.max;
+      const x = Math.round(h.x), y = Math.round(h.y), r = Math.round(h.r * (1.6 - k * 0.6));
+      g.strokeStyle = h.life < 0.2 ? '#fff6d6' : '#eb2f2d';
+      g.globalAlpha = 0.5 + 0.5 * k;
+      g.beginPath(); g.ellipse(x, y, r, r * 0.7, 0, 0, Math.PI * 2); g.stroke();
+      g.fillStyle = g.strokeStyle;
+      g.fillRect(x - r - 3, y, 6, 1); g.fillRect(x + r - 3, y, 6, 1); g.fillRect(x, y - r - 2, 1, 5); g.fillRect(x, y + r - 2, 1, 5);
+      g.globalAlpha = 1;
+    },
+    onExpire(h, world) {
+      const p = world.player;
+      const dx = p.x - h.x, dy = (p.y - h.y) * 1.6;
+      if (p.alive && dx * dx + dy * dy < h.r * h.r) world.damage.hurtPlayer(1, dx, dy, h.source);
+      world.effects.burst(h.x, h.y - 2, 8, '#fff6d6', 90, 0.25);
+      world.game.audio.play('hurt', { pitch: 1.8, volume: 0.6 });
+    },
+  },
+  // Trampa Rota (objeto): las trampas del jugador atrapan enemigos
+  playerTrap: {
+    color: '#5a5a62', edge: '#c9bde6',
+    onUpdate(h, world) {
+      for (const e of world.enemies.query(h.x, h.y, 14)) {
+        if (!e.canBeHit() || e.def.boss || (e.x - h.x) ** 2 + (e.y - h.y) ** 2 > h.r * h.r) continue;
+        e.stun = Math.max(e.stun, world.items.hasSynergy('cazador_cazado') ? 2.5 : 1.5);
+        if (world.items.hasSynergy('cazador_cazado')) e.marked = Math.max(e.marked, 3);
+        world.damage.hitEnemy(e, 2, 0, 0, 0, { isAura: true });
+        world.game.events.emit('trap:caught');
+        h.life = 0.01;
+        break;
+      }
+    },
+  },
+  // Ceniza (objeto): fuego del jugador que quema enemigos
+  playerFire: {
+    color: '#c43a12', edge: '#ffb347',
+    onUpdate(h, world, dt) {
+      for (const e of world.enemies.query(h.x, h.y, h.r + 6)) {
+        if (!e.canBeHit() || (e.x - h.x) ** 2 + (e.y - h.y) ** 2 > h.r * h.r) continue;
+        e.hp -= 2 * dt; e.flash = 0.03;
+        if (e.hp <= 0) world.damage.killEnemy(e);
+      }
+    },
+  },
   // Mano de debajo de la cama: sombra en el suelo que agarra al terminar el aviso
   grab: {
     render(g, h) {
@@ -190,7 +269,7 @@ export const HAZARD_TYPES = {
 export class Hazards {
   constructor(world, capacity = 160) {
     this.world = world;
-    this.pool = new Pool(() => ({ active: false, type: 'ink', x: 0, y: 0, r: 6, life: 0, max: 1, seed: 0, source: null }), capacity);
+    this.pool = new Pool(() => ({ active: false, type: 'ink', x: 0, y: 0, r: 6, life: 0, max: 1, seed: 0, source: null, sprung: false }), capacity);
   }
 
   spawn(type, x, y, r, life, source = null) {
@@ -202,6 +281,8 @@ export class Hazards {
     if (HAZARD_TYPES[type].ink) life *= this.world.mods.inkLife;
     h.type = type; h.x = x; h.y = y; h.r = r; h.life = life; h.max = life; h.seed = Math.random() * 10;
     h.source = source;
+    h.sprung = false; h.dodged = false;
+    h.ref = null;          // datos persistentes (cepos de una sala)
     return h;
   }
 
@@ -213,9 +294,12 @@ export class Hazards {
       h.life -= dt;
       if (h.life <= 0) { h.active = false; t.onExpire?.(h, world); continue; }
       t.onUpdate?.(h, world, dt);
-      if (t.onPlayer && player.alive && !player.isDashing) {
+      if ((t.onPlayer || t.onDashOver) && player.alive) {
         const dx = player.x - h.x, dy = (player.y - h.y) * 1.6; // elipse
-        if (dx * dx + dy * dy < h.r * h.r) t.onPlayer(player, h, world);
+        if (dx * dx + dy * dy < h.r * h.r) {
+          if (!player.isDashing) t.onPlayer?.(player, h, world);
+          else t.onDashOver?.(player, h, world);
+        }
       }
     }
     this.pool.sweep();
@@ -224,7 +308,7 @@ export class Hazards {
   render(g) {
     for (const h of this.pool.active) {
       const t = HAZARD_TYPES[h.type];
-      if (t.render) { t.render(g, h); continue; }
+      if (t.render) { t.render(g, h, this.world); continue; }
       const a = Math.min(1, h.life / 0.6, (h.max - h.life) / 0.1);
       const r = h.r * (0.7 + 0.3 * Math.min(1, (h.max - h.life) / 0.25));
       g.globalAlpha = a * 0.85;

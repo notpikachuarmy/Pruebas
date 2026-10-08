@@ -21,7 +21,7 @@ export function drawItem(world, pools, { rng = world.rngLoot, boostRare = false 
     (!it.locked || unlocked.includes(it.id)));
   if (!candidates.length) return null;
   const weighted = candidates.map((it) => ({
-    it, weight: RARITY_WEIGHT[it.rarity] * (boostRare && it.rarity !== 'común' ? 2.5 : 1),
+    it, weight: RARITY_WEIGHT[it.rarity] * ((boostRare || world.items.hasEffect('luck')) && it.rarity !== 'común' ? 2.5 : 1),
   }));
   const pick = rng.weighted(weighted).it;
   run.offeredItems.add(pick.id);

@@ -251,6 +251,7 @@ export class World {
     this._configureDoors(node);
     ROOM_TYPES[node.type].onEnter(this, node, first);
     for (const r of this.rules) r.onRoomEnter?.(this, node, first);
+    this.items.onRoomEnter(node, first);
     this.room.setAllDoors(!this.encounter);
     if (!this.encounter) this._music('explore');
     this.game.events.emit('room:enter', { node, first });
@@ -485,7 +486,7 @@ export class World {
     const playerSprite = this.game.assets.sprite('player');
     this.effects.renderGhosts(g, playerSprite);
     for (const obj of list) {
-      if (obj === this.player) this._renderPlayer(g, playerSprite);
+      if (obj === this.player) { this._renderPlayer(g, playerSprite); this.items.render(g); }
       else if (obj.kind) this.interactables.draw(g, obj);
       else this.enemies.draw(g, obj);
     }
@@ -494,8 +495,24 @@ export class World {
     this._renderConstructs(g);
     this.effects.render(g);
     this.lighting.render(g, this);
+    if (this.encounter?.showHints) this._renderEnemyHints(g);
     if (this.game.debug) this._renderDebug(g);
     g.restore();
+  }
+
+  /** Sala parada: anillos que señalan a los enemigos que quedan (se ven incluso en la oscuridad). */
+  _renderEnemyHints(g) {
+    const k = 0.5 + 0.5 * Math.sin(this.time * 6);
+    for (const e of this.enemies.list) {
+      if (e.spawning || e.def.boss) continue;
+      const x = Math.round(e.x), y = Math.round(e.y - (e.def.bodyHeight ?? 6));
+      g.globalAlpha = 0.5 + 0.4 * k;
+      g.strokeStyle = '#ffd65c';
+      g.beginPath(); g.arc(x, y, 9 + k * 3, 0, Math.PI * 2); g.stroke();
+      g.fillStyle = '#ffd65c';
+      g.fillRect(x - 1, y - 22 - Math.round(k * 2), 2, 6); g.fillRect(x - 1, y - 14 - Math.round(k * 2), 2, 2);
+      g.globalAlpha = 1;
+    }
   }
 
   _renderArena(g) {

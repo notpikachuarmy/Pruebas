@@ -15,7 +15,7 @@ function makeProjectile() {
     homing: 0, homingRange: 0,
     boomerang: false, returned: false,
     trail: null, trailTimer: 0, splitOnExpire: 0, isFragment: false,
-    strong: false, isEcho: false, source: null, variant: 0,
+    strong: false, isEcho: false, source: null, variant: 0, explode: 0,
     hitIds: new Set(),            // evita golpear dos veces al mismo enemigo al perforar
   };
 }
@@ -63,6 +63,7 @@ export class Projectiles {
     p.splitOnExpire = opts.splitOnExpire ?? 0; p.isFragment = !!opts.isFragment;
     p.strong = !!opts.strong; p.isEcho = !!opts.isEcho;
     p.source = opts.source ?? null;
+    p.explode = opts.explode ?? 0;
     p.variant = (Math.random() * 3) | 0;     // tipo de nota (♪, ♩ o ♫) solo visual
     p.age = 0;
     p.hitIds.clear();
@@ -124,6 +125,7 @@ export class Projectiles {
           if ((ex - p.x) ** 2 + (ey - p.y) ** 2 > rr * rr) continue;
           p.hitIds.add(e.uid);
           damage.hitEnemy(e, p.damage, p.dirX, p.dirY, p.knockback, p);
+          if (p.explode) this._explode(p, e);
           effects.burst(p.x, p.y, 4, p.trailColor, 50, 0.25);
           if (p.pierce-- <= 0) { p.active = false; break; }
         }
@@ -154,6 +156,17 @@ export class Projectiles {
     while (diff < -Math.PI) diff += Math.PI * 2;
     const a = cur + Math.max(-p.homing * dt, Math.min(p.homing * dt, diff));
     p.dirX = Math.cos(a); p.dirY = Math.sin(a);
+  }
+
+  /** Piña: la nota estalla y daña a los enemigos cercanos al impacto. */
+  _explode(p, hit) {
+    const w = this.world, r = p.explode;
+    for (const e of w.enemies.query(p.x, p.y, r + 10)) {
+      if (e === hit || !e.canBeHit() || (e.x - p.x) ** 2 + (e.y - p.y) ** 2 > r * r) continue;
+      w.damage.hitEnemy(e, p.damage * 0.6, e.x - p.x, e.y - p.y, 80, { isExplosion: true });
+    }
+    w.effects.burst(p.x, p.y, 14, '#c88a3c', 90, 0.35, 2);
+    w.shake(1, 0.06);
   }
 
   /** Pedal de Distorsión: al apagarse, la nota se rompe en varias pequeñas. */

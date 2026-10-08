@@ -193,33 +193,91 @@ import item_gjallarhorn from './items/gjallarhorn.js';
 import syn_solMedianoche from './synergies/sol_medianoche.js';
 import syn_finDelMundo from './synergies/fin_del_mundo.js';
 
+import bosqueMusic from './audio/bosque_music.js';
+import bosque from './dreams/bosque.js';
+import b_lobo from './enemies/bosque/lobo.js';
+import b_perro from './enemies/bosque/perro.js';
+import b_cazador from './enemies/bosque/cazador.js';
+import b_cepo from './enemies/bosque/cepo.js';
+import b_pavesa from './enemies/bosque/pavesa.js';
+import b_oso from './enemies/bosque/oso.js';
+import b_aguila from './enemies/bosque/aguila.js';
+import b_trampero from './bosses/trampero.js';
+import b_elCazador from './bosses/el_cazador.js';
+import b_elIncendio from './bosses/el_incendio.js';
+import b_loboGris from './bosses/lobo_gris.js';
+import ev_arroyo from './events/bosque/arroyo.js';
+import ev_huellas from './events/bosque/huellas.js';
+import room_claroInicio from './rooms/bosque/claro_inicio.js';
+import room_espesura from './rooms/bosque/espesura.js';
+import room_arroyo from './rooms/bosque/arroyo.js';
+import room_zarzas from './rooms/bosque/zarzas.js';
+import room_rocas from './rooms/bosque/rocas.js';
+import room_campamento from './rooms/bosque/campamento.js';
+import room_madriguera from './rooms/bosque/madriguera.js';
+import room_granClaro from './rooms/bosque/gran_claro.js';
+import item_asta from './items/asta.js';
+import item_pezuna from './items/pezuna.js';
+import item_musgo from './items/musgo.js';
+import item_bellota from './items/bellota.js';
+import item_pielLobo from './items/piel_lobo.js';
+import item_ojoBuho from './items/ojo_buho.js';
+import item_colmillo from './items/colmillo.js';
+import item_trampaRota from './items/trampa_rota.js';
+import item_luciernaga from './items/luciernaga.js';
+import item_petirrojo from './items/petirrojo.js';
+import item_cuernoCaza from './items/cuerno_caza.js';
+import item_ceniza from './items/ceniza.js';
+import item_rocio from './items/rocio.js';
+import item_semilla from './items/semilla.js';
+import item_panal from './items/panal.js';
+import item_huida from './items/huida.js';
+import item_instinto from './items/instinto.js';
+import item_pina from './items/pina.js';
+import item_trebol from './items/trebol.js';
+import item_corazonSalvaje from './items/corazon_salvaje.js';
+import syn_manada from './synergies/manada.js';
+import syn_reyBosque from './synergies/rey_bosque.js';
+import syn_dobleColmillo from './synergies/doble_colmillo.js';
+import syn_incendioControlado from './synergies/incendio_controlado.js';
+import syn_despensa from './synergies/despensa.js';
+import syn_presaEsquiva from './synergies/presa_esquiva.js';
+import syn_cazadorCazado from './synergies/cazador_cazado.js';
+import syn_bosqueVivo from './synergies/bosque_vivo.js';
+import syn_luzDeLuna from './synergies/luz_de_luna.js';
+import syn_estampida from './synergies/estampida.js';
+
 const byId = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
 
 export const CONTENT = {
   assets,
-  audio: { sfx, music: { ...music, ...casaMusic, ...dulceMusic, ...marMusic, ...ragnarokMusic } },
-  dreams: byId([examen, casa, dulce, mar, ragnarok]),
+  audio: { sfx, music: { ...music, ...casaMusic, ...dulceMusic, ...marMusic, ...ragnarokMusic, ...bosqueMusic } },
+  dreams: byId([examen, casa, dulce, mar, ragnarok, bosque]),
   // Jefes y mini-jefes son enemigos con `boss: true` (comparten motor)
   enemies: byId([tachon, tachonRojo, interrogante, goma, chuleta, compas, reloj, copia, fotocopiadora, profesora,
     polilla, sombra, telefono, mecedora, polvo, polvoMini, armario, mesaPuesta,
     regla, borron, interroganteDoble, peluche, polillaGigante, relojGigante, companeroPerfecto, monstruoCama, vocesPasillo,
     gominola, gominolaMini, piruleta, algodon, osito, bombon, tarta, reyCaramelo, fuenteChocolate, pinata,
     medusa, medusaGigante, pezLinterna, anguila, pecesillo, tentaculo, mina, pulpo, tormenta, leviatan, barcoHundido,
-    chispa, brasa, surtur]),
+    chispa, brasa, surtur,
+    b_lobo, b_perro, b_cazador, b_cepo, b_pavesa, b_oso, b_aguila, b_trampero, b_elCazador, b_elIncendio, b_loboGris]),
   rooms: byId([aulaInicio, aulaFilas, aulaVacia, aulaCirculo, pasilloTaquillas, aulaTrincheras, despacho, examenFinal,
     casaRecibidor, casaSalon, casaComedor, casaPasillo, casaDormitorio, casaCocina, casaTrastero, casaComedorGrande,
     dulceEntrada, dulcePasteleria, dulceTabletas, dulceBosque, dulceGominolas, dulceFabrica, dulceTienda, dulceSalon,
-    mar_cubierta, mar_arrecife, mar_rocas, mar_pecio, mar_fosa, mar_corales, mar_bodega, mar_marAbierto, ragnarokPlataforma]),
-  events: byId([companeroSinGoma, pupitreGrabado, revisionExamen, llamadaPerdida, albumFotos, puestoChuches, casitaChocolate, radioSos, botellaMensaje]),
+    mar_cubierta, mar_arrecife, mar_rocas, mar_pecio, mar_fosa, mar_corales, mar_bodega, mar_marAbierto, ragnarokPlataforma,
+    room_claroInicio, room_espesura, room_arroyo, room_zarzas, room_rocas, room_campamento, room_madriguera, room_granClaro]),
+  events: byId([companeroSinGoma, pupitreGrabado, revisionExamen, llamadaPerdida, albumFotos, puestoChuches, casitaChocolate, radioSos, botellaMensaje, ev_arroyo, ev_huellas]),
   items: byId([
     item_eco, item_metronomo, item_cableEnredado, item_tippEx, item_chuletaArrugada, item_calculadora, item_boligrafoPapa, item_despertadorRepuesto, item_espejoRoto, item_altavoz, item_subwoofer, item_silbato, item_cancelacionRuido, item_discoRayado, item_diapason, item_cintaCasete, item_estuche, item_cafe, item_postIt, item_megafono,
     item_linterna, item_fotoFamilia, item_galletas, item_mantita, item_dobleBombo,
     item_anilloRosa, item_energiaPesadilla, item_guiaPesadillas, item_polvoLuminoso, item_carameloExplosivo, item_pompasChicle, item_bolsaChuches,
     item_salvavidas, item_ancla, item_brujula, item_bombonaOxigeno, item_caracola, item_partitura, item_bis, item_pua, item_batuta, item_pedalDistorsion, item_viniloOro, item_cascosRotos, item_marcapasos, item_saxofon, item_triangulo, item_gong, item_llamaMuspel, item_gjallarhorn,
+    item_asta, item_pezuna, item_musgo, item_bellota, item_pielLobo, item_ojoBuho, item_colmillo, item_trampaRota, item_luciernaga, item_petirrojo, item_cuernoCaza, item_ceniza, item_rocio, item_semilla, item_panal, item_huida, item_instinto, item_pina, item_trebol, item_corazonSalvaje,
   ]),
   synergies: byId([
     syn_polirritmia, syn_acople, syn_caleidoscopio, syn_corrector, syn_zigzagDoble, syn_notaPerfecta, syn_bajoYBateria, syn_sintoniaFina, syn_silencioAbsoluto, syn_hogar, syn_faro,
     syn_marejada, syn_faroPuerto, syn_buzo, syn_soloGuitarra, syn_acorde, syn_feedback, syn_granFinal, syn_discoPlatino, syn_sordina, syn_ritmoCardiaco, syn_orquesta, syn_bigBand, syn_jamSession, syn_lastre, syn_director, syn_rosaVientos, syn_solMedianoche, syn_finDelMundo,
+    syn_manada, syn_reyBosque, syn_dobleColmillo, syn_incendioControlado, syn_despensa, syn_presaEsquiva, syn_cazadorCazado, syn_bosqueVivo, syn_luzDeLuna, syn_estampida,
   ]),
   achievements,
 };

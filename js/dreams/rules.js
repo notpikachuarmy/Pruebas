@@ -131,6 +131,55 @@ export const RULES = {
     },
   },
 
+  /** Bosque: cepos escondidos en el suelo. Se ven al acercarte; el Silencio pasa por encima. */
+  trampas: {
+    name: 'Trampas',
+    onRoomEnter(world, node) {
+      const cfg = world.run.dream.ruleConfig.trampas;
+      if (!['combat', 'challenge', 'miniboss', 'reward', 'event'].includes(node.type)) return;
+      const st = node.state;
+      if (!st.traps) {
+        const rng = world.run.rng.fork(`cepos:${node.key}`);
+        const n = rng.int(cfg.count[0], cfg.count[1]) + (node.depth >= 3 ? 1 : 0);
+        st.traps = [];
+        for (let i = 0; i < n; i++) {
+          const pt = world.room.randomFloorPoint(rng, world.player.x, world.player.y, 60);
+          st.traps.push({ x: pt.x, y: pt.y - 2, sprung: false });
+        }
+      }
+      for (const t of st.traps) {
+        if (t.sprung) continue;
+        const h = world.hazards.spawn('trap', t.x, t.y, 7, 99999);
+        h.ref = t;
+      }
+    },
+  },
+
+  /** Bosque: el incendio. Durante los combates caen ramas ardiendo (con aviso). */
+  incendio: {
+    name: 'Incendio',
+    onEncounterStart(world) { world.fireTimer = 3; },
+    update(world, dt) {
+      const cfg = world.run.dream.ruleConfig.incendio;
+      if (!world.encounter || world.encounter.finished || world.node.depth < cfg.minDepth || world.node.type === 'boss') return;
+      world.fireTimer = (world.fireTimer ?? cfg.every) - dt;
+      if (world.fireTimer > 0) return;
+      world.fireTimer = cfg.every;
+      const p = world.player;
+      world.hazards.spawn('fireMark', p.x + world.rngSpawn.range(-30, 30), p.y + world.rngSpawn.range(-18, 18), 11, 1.2, 'incendio');
+    },
+  },
+
+  /** Bosque: instinto de presa. Eres más rápido y esquivas antes: huir es lo que mejor sabe hacer. */
+  instintoPresa: {
+    name: 'Instinto de presa',
+    apply(world) {
+      const st = world.player.stats;
+      st.addModifier({ stat: 'speed', mult: 1.1, source: 'rule:presa' });
+      st.addModifier({ stat: 'dashCooldown', mult: 0.85, source: 'rule:presa' });
+    },
+  },
+
   /** La casa está a oscuras: solo ves alrededor tuyo, y las lámparas encendidas iluminan la sala. */
   penumbra: {
     name: 'Penumbra',
